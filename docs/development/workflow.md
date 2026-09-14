@@ -10,14 +10,13 @@ in the public organization GitHub Project **Parametron Engineering**.
 
 ## Where Information Lives
 
-- **Stable engineering knowledge** belongs in documentation and
-  repository-local specifications.
+- **Stable/current engineering knowledge** belongs in documentation.
 - **Live work** belongs in GitHub Issues.
-- **Organization-wide coordination** belongs in the public GitHub Project
-  **Parametron Engineering**.
+- **Organization-wide coordination and workflow state** belong in the public
+  GitHub Project **Parametron Engineering**.
 
-Documentation and specs describe how the system works and how work is done.
-Issues and the Project describe what is currently being done.
+Documentation describes how the system works and how work is done. Issues and
+the Project describe what is currently being done.
 
 ---
 
@@ -52,9 +51,9 @@ GitHub Project status is the single source of truth for live workflow state:
 - **Blocked**
 - **Done**
 
-Repository-local technical `Roadmap.md` files may describe technical phase
-sequence or history where useful, but must not be treated as the live
-project-management source of truth.
+GitHub Issues are the source of truth for live engineering work. The
+**Parametron Engineering** Project coordinates that work and records its
+workflow state.
 
 ---
 

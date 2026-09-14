@@ -23,7 +23,7 @@ The phase system exists to:
 
 ## Phase Definition
 
-A phase must include:
+A Phase is a GitHub Issue whose issue type is `Phase`. A Phase must include:
 
 - **Goal** — what the phase achieves
 
@@ -68,42 +68,35 @@ Examples:
 
 Rules:
 
-- A phase is always defined by its owning repository
+- The owning repository owns the Phase issue
 
 - Other repositories may depend on it but do not redefine it
 
-- Phase identifiers must remain stable
+- GitHub supplies the Phase identity through the issue number
 
 
 ---
 
 ## Phase Naming
 
-Phases follow this format:
+A Phase title describes its bounded engineering objective. It should be concise,
+explicit, and outcome-oriented.
+
+Inside the owning repository, reference a Phase by its GitHub issue number:
 
 ```
-Phase <number> — <Title>
+#45
 ```
 
-Examples:
+Across repositories, use GitHub's owner/repository-qualified form:
 
-- `Phase 7.30B — CAD Observation Layer`
+```
+parametron-io/parametron-engine#45
+```
 
-- `Phase 7.30C — Execution Verification Layer`
-
-- `Phase 4 — Engine Integration Gate Alignment`
-
-
-Rules:
-
-- Numbers are identifiers, not ordering guarantees across repositories
-
-- Titles describe outcomes, not actions
-
-- Avoid vague names such as "Improvements" or "Cleanup"
-
-
-For naming format details across all identifiers, see [Naming Conventions](naming.md).
+There is no separately maintained Parametron Phase-number system, and a Phase
+title must not encode one. For naming details, see
+[Naming Conventions](naming.md).
 
 ---
 
@@ -111,6 +104,9 @@ For naming format details across all identifiers, see [Naming Conventions](namin
 
 Phases and their child work items move through the GitHub Project status
 columns from Backlog to Done.
+
+A Phase is not a GitHub Milestone. Milestones are reserved for real
+release/version grouping.
 
 For live workflow state, status semantics, and the one-active-Phase-per-repository
 expectation, see [Workflow](../development/workflow.md).

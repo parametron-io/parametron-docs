@@ -86,15 +86,15 @@ This ensures that failure behavior is:
 
 Verification is incomplete without documentation alignment.
 
-When behavior changes, the following must be reviewed and updated:
+When behavior, interfaces, contracts, commands, examples, or guarantees change,
+identify the documentation they affect and review and update the relevant
+repository-local documentation.
 
-- `Specs.md`
+Repository-local verification documentation or structured expectation data
+must also be updated when those artifacts exist and the change affects them.
 
-- `To-Do.md`
-
-- `test-matrix.md`
-
-- relevant documentation under `Docs/`
+Before closure, the implementation, tests, verification expectations, and
+documentation must describe the same behavior.
 
 
 ---
@@ -111,14 +111,12 @@ A phase or issue is not complete until:
 
 - documentation is aligned
 
-- a final closing commit is prepared
+- applicable exit criteria are satisfied
 
 
-The closing commit must use:
-
-```
-closes #<issue-id>
-```
+An appropriate GitHub closing reference may be used on the final change when
+automatic issue closure is intended and all applicable completion conditions
+are satisfied.
 
 ---
 
