@@ -123,16 +123,16 @@ This is especially useful for docs-only or test-only commits.
 
 ## Issue Referencing
 
-Commits are linked to issues using their numeric identifiers.
-
-If a phase heading in To-Do.md does not include an explicit issue reference such as #3, treat the phase as having no associated tracker issue and omit issue references and closing keywords from its commits.
+Commits are linked directly to GitHub Issues. These rules apply to Phase, Task,
+Bug, and Feature issues.
 
 ### 1. Referencing an issue
 
-To associate a commit with an issue without closing it:
+To associate an intermediate commit with its owning issue in the same
+repository without closing it:
 
 ```text
-#<issue-id>
+#<issue-number>
 ```
 
 Example:
@@ -148,13 +148,27 @@ test(cli): extend execution rehearsal coverage
 
 This links the commit to the issue for traceability.
 
+For an issue in another repository, use GitHub's owner/repository-qualified
+form:
+
+```text
+parametron-io/<repository>#<issue-number>
+```
+
+Example:
+
+```text
+parametron-io/parametron-engine#45
+```
+
 ---
 ### 2. Closing an issue
 
-To close an issue automatically, use a closing keyword:
+On the final change intended to close the owning issue, use a closing keyword
+when automatic closure is appropriate:
 
 ```text
-closes #<issue-id>
+closes #<issue-number>
 ```
 
 Example:
@@ -174,12 +188,12 @@ The issue will be closed automatically when the commit is merged.
 ---
 
 ### 3. Usage rules
-- Use `#<id>` in intermediate commits
-- Use `closes #<id>` only in the final commit of a phase
-- Do not close an issue before all:
-	- tests pass
-	- documentation is synchronized
-	- phase exit criteria are satisfied
+
+- Intermediate commits may use `#<issue-number>` to reference the owning issue.
+- Use `closes #<issue-number>` only on the final change intended to close the
+  owning issue, when automatic closure is appropriate.
+- Do not use a closing keyword before all applicable tests, documentation,
+  verification, and exit criteria are complete.
 
 ---
 

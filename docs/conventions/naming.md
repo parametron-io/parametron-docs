@@ -44,23 +44,28 @@ Rules:
 
 ## Phase Naming
 
-Phases are defined per repository and follow this format:
+A Phase is a GitHub Issue whose issue type is `Phase`. GitHub supplies the
+Phase identity through the issue number in the owning repository.
 
 ```text
-Phase <number> — <Title>
+#45
 ```
 
-Examples:
+Across repositories, use GitHub's owner/repository-qualified form:
 
-- `Phase 1 — Stabilize Headless Runtime Result and Reference Traversal Contracts`
-- `Phase 4 — Produce Normalized Reference Records from FreeCAD Runtime Results`
+```text
+parametron-io/parametron-engine#45
+```
 
 Rules:
 
-- Phase numbers are stable identifiers inside the owning repository
-- Titles must describe the outcome, not the action
-- Avoid vague names like "Improvements" or "Refactor"
-- Do not use phase numbers as ordering guarantees across repositories
+- Use `#<number>` to reference a Phase inside its owning repository.
+- Use `parametron-io/<repository>#<number>` when referencing a Phase across
+  repositories.
+- Titles must describe the bounded engineering outcome or objective.
+- Keep titles concise and explicit; avoid vague names such as "Improvements"
+  or "Refactor".
+- Do not create or maintain a separate Phase-number system.
 
 ---
 
