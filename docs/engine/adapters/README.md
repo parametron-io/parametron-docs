@@ -54,3 +54,13 @@ implementation does not give it ownership of Engine planning, orchestration
 policy, evidence verification, or normalized records. Source code, schemas,
 tests, package layout, and repository-local build instructions remain
 authoritative in the repository that owns each implementation.
+
+## FreeCAD Adapter
+
+FreeCAD is the currently implemented Engine CAD adapter. See [FreeCAD Adapter
+Architecture](freecad/architecture.md) for its role, ownership boundary, and
+capability areas, and [FreeCAD Runtime](freecad/runtime.md) for its headless
+invocation and execution lifecycle. Manifest, observation, reference-
+traversal, artifact, result/failure, target-mutation, and in-process
+invocation contracts are documented under
+[freecad/contracts/](freecad/contracts/).
