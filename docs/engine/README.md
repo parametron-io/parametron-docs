@@ -15,6 +15,12 @@ The cross-repository architecture remains canonical in the
 [Repository Boundaries](../architecture/repo-boundaries.md). This area links to
 those documents instead of repeating the full system architecture.
 
+## Architecture
+
+See the [Engine system overview](architecture/system-overview.md) for the
+authoring-to-runtime pipeline and the [execution model](architecture/execution-model.md)
+for jobs, handoff packages, scheduling, attempts, and failure behavior.
+
 ## Authoring
 
 Start with the [DSL overview](authoring/dsl-overview.md), then use the
@@ -30,6 +36,19 @@ See [CLI command families](cli/command-families.md) for command selection and
 output rules. Command references cover [validate](cli/validate.md),
 [simulate](cli/simulate.md), [sweep](cli/sweep.md),
 [snapshot](cli/snapshot.md), and [diff](cli/diff.md).
+
+## Runtime
+
+The [API overview](runtime/api-overview.md) links the HTTP surface. The runtime
+section also covers [execution](runtime/execution-runtime.md),
+[job lifecycle](runtime/job-lifecycle.md), [artifacts](runtime/job-artifacts.md),
+and [reporting](runtime/reporting.md).
+
+## Reference
+
+Current contracts cover [JSON table resources](reference/json-table-resources.md),
+[normalized records](reference/record-contracts.md), and
+[target actions](reference/target-action-contract.md).
 
 ## Adapters
 

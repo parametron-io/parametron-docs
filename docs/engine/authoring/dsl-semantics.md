@@ -99,7 +99,7 @@ string, number, or boolean type must match the receiving expression context.
 The table-aware entry points are `dsl.ValidateWithTables`,
 `planner.CreatePlanWithTables`, and `ir.CreatePlanFromIRWithTables`.
 Non-table-aware entry points have no tables to resolve. See
-[JSON table resources](https://github.com/parametron-io/parametron-engine/blob/main/docs/engine/json-table-resources.md) for table schema rules.
+[JSON table resources](../reference/json-table-resources.md) for table schema rules.
 
 ## Profiles and product execution intent
 
@@ -148,7 +148,7 @@ accepting mutation intent. Model-free planning does not fabricate target lookup
 or capability checks. `keep` requires an existing target when semantic resolution
 is available and contributes no mutation intent.
 
-The [target-action contract](https://github.com/parametron-io/parametron-engine/blob/main/docs/reference/target-action-contract.md) is the
+The [target-action contract](../reference/target-action-contract.md) is the
 complete specification for resolution, capability rules, lowering, routing,
 identity, and runtime handoff. Those details are not redefined here.
 
@@ -158,4 +158,4 @@ Validated expressions describe engineering intent. The
 [IR and planning](ir-and-planning.md) layer resolves that intent into an ordered
 execution plan. Capture schema fields are defined in the
 [CAD capture contract](cad-contract.md); execution begins at the
-[execution model](https://github.com/parametron-io/parametron-engine/blob/main/docs/architecture/execution-model.md).
+[execution model](../architecture/execution-model.md).

@@ -16,6 +16,8 @@ This is a structural index. For conceptual guidance and reading order, see
 | [docs/architecture/repo-boundaries.md](docs/architecture/repo-boundaries.md) | Current public engineering ownership rules |
 | [docs/engine/README.md](docs/engine/README.md) | Canonical current Engine engineering documentation |
 | [docs/engine/adapters/README.md](docs/engine/adapters/README.md) | Current Engine adapter-domain contracts and ownership |
+| [docs/engine/architecture/system-overview.md](docs/engine/architecture/system-overview.md) | Current Engine pipeline and architecture |
+| [docs/engine/architecture/execution-model.md](docs/engine/architecture/execution-model.md) | Jobs, handoff, scheduling, attempts, and execution semantics |
 | [docs/engine/authoring/cad-contract.md](docs/engine/authoring/cad-contract.md) | CAD capture schema and validation contract |
 | [docs/engine/authoring/dsl-grammar.md](docs/engine/authoring/dsl-grammar.md) | Parametron DSL syntax reference |
 | [docs/engine/authoring/dsl-overview.md](docs/engine/authoring/dsl-overview.md) | Parametron DSL structure and authoring overview |
@@ -29,6 +31,16 @@ This is a structural index. For conceptual guidance and reading order, see
 | [docs/engine/cli/snapshot.md](docs/engine/cli/snapshot.md) | Snapshot package command reference |
 | [docs/engine/cli/sweep.md](docs/engine/cli/sweep.md) | Parameter sweep command reference |
 | [docs/engine/cli/validate.md](docs/engine/cli/validate.md) | DSL and project validation command reference |
+| [docs/engine/runtime/api-overview.md](docs/engine/runtime/api-overview.md) | Engine HTTP API overview |
+| [docs/engine/runtime/artifact-serving.md](docs/engine/runtime/artifact-serving.md) | Artifact listing and byte-serving behavior |
+| [docs/engine/runtime/execution-runtime.md](docs/engine/runtime/execution-runtime.md) | CAD runtime processing, verification, and cache behavior |
+| [docs/engine/runtime/job-artifacts.md](docs/engine/runtime/job-artifacts.md) | Job-scoped artifact listing contract |
+| [docs/engine/runtime/job-lifecycle.md](docs/engine/runtime/job-lifecycle.md) | API job states, transitions, and failure details |
+| [docs/engine/runtime/job-submission.md](docs/engine/runtime/job-submission.md) | Job submission payload and validation contract |
+| [docs/engine/runtime/reporting.md](docs/engine/runtime/reporting.md) | Execution report schema and deterministic behavior |
+| [docs/engine/reference/json-table-resources.md](docs/engine/reference/json-table-resources.md) | JSON table format, validation, fingerprinting, and lookup |
+| [docs/engine/reference/record-contracts.md](docs/engine/reference/record-contracts.md) | Normalized Engine record and package contracts |
+| [docs/engine/reference/target-action-contract.md](docs/engine/reference/target-action-contract.md) | Semantic target-action validation and runtime projection |
 | [docs/development/workflow.md](docs/development/workflow.md) | GitHub-native engineering workflow and coordination rules |
 | [docs/development/verification-standard.md](docs/development/verification-standard.md) | Canonical definition of done for all phases and issues |
 | [docs/conventions/phases.md](docs/conventions/phases.md) | What a phase is: definition, characteristics, ownership, naming |
@@ -54,6 +66,9 @@ This is a structural index. For conceptual guidance and reading order, see
 │   └── engine
 │       ├── adapters
 │       │   └── README.md
+│       ├── architecture
+│       │   ├── execution-model.md
+│       │   └── system-overview.md
 │       ├── authoring
 │       │   ├── cad-contract.md
 │       │   ├── dsl-grammar.md
@@ -69,11 +84,23 @@ This is a structural index. For conceptual guidance and reading order, see
 │       │   ├── snapshot.md
 │       │   ├── sweep.md
 │       │   └── validate.md
+│       ├── reference
+│       │   ├── json-table-resources.md
+│       │   ├── record-contracts.md
+│       │   └── target-action-contract.md
+│       ├── runtime
+│       │   ├── api-overview.md
+│       │   ├── artifact-serving.md
+│       │   ├── execution-runtime.md
+│       │   ├── job-artifacts.md
+│       │   ├── job-lifecycle.md
+│       │   ├── job-submission.md
+│       │   └── reporting.md
 │       └── README.md
 ├── CONTRIBUTING.md
 ├── LICENSE
 ├── project-structure.md
 └── README.md
 
-9 directories, 27 files
+12 directories, 39 files
 ```

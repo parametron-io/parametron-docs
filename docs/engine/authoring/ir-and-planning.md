@@ -40,7 +40,7 @@ IR coverage is explicit: `IRProduct` has no product adapter, source-model,
 output-declaration, or target-action fields. Conversion is therefore not a
 lossless round trip for every AST construct. Capture-backed target-action
 planning uses the AST/semantic-model entry point. The complete action contract
-is defined in [target-action contract](https://github.com/parametron-io/parametron-engine/blob/main/docs/reference/target-action-contract.md).
+is defined in [target-action contract](../reference/target-action-contract.md).
 
 ## Planning inputs
 
@@ -99,9 +99,9 @@ cover the defined ordering and identity surfaces.
 ## Execution boundary
 
 Authoring decides what accepted work should happen. The
-[execution model](https://github.com/parametron-io/parametron-engine/blob/main/docs/architecture/execution-model.md) owns product jobs, handoff,
+[execution model](../architecture/execution-model.md) owns product jobs, handoff,
 scheduling, and attempts. [Adapter architecture](../adapters/README.md)
 owns logical-to-operational contract adaptation and working copies. The
-[execution runtime](https://github.com/parametron-io/parametron-engine/blob/main/docs/engine/execution-runtime.md) owns the detailed external
+[execution runtime](../runtime/execution-runtime.md) owns the detailed external
 invocation and evidence-processing lifecycle. CAD-native execution belongs to
 the external runtime.

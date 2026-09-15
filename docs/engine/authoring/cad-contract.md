@@ -6,7 +6,7 @@ ownership, hierarchy, values, and capabilities available to authoring. Capture
 production and CAD-native operations belong to the CAD integration.
 
 This page is the schema reference. The
-[target-action contract](https://github.com/parametron-io/parametron-engine/blob/main/docs/reference/target-action-contract.md) owns the complete
+[target-action contract](../reference/target-action-contract.md) owns the complete
 action, mutation, and runtime-handoff specification.
 
 ## Top-level object
@@ -150,7 +150,7 @@ entity kind a supported DSL action target.
 Engine semantic validation consumes captured capability information for accepted
 target actions. Full target resolution, capability gating, mutation mapping, and
 handoff rules belong to the
-[target-action contract](https://github.com/parametron-io/parametron-engine/blob/main/docs/reference/target-action-contract.md).
+[target-action contract](../reference/target-action-contract.md).
 
 ## Product structure
 
