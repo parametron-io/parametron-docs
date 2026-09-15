@@ -113,20 +113,21 @@ target Pocket:
 target Chamfer: action = table_cell("variants", variant, "chamferAction")
 ```
 
-Target-action declarations express intent for named CAD targets. `hide != suppress` and `unhide != unsuppress`: suppression is lifecycle intent, visibility is presentation intent, and deletion is structural intent. Engine does not prove native execution or GUI-rendered visibility.
+Target-action declarations express lifecycle, presentation, or structural intent for named CAD targets:
 
-Prefix-shaped ordinary parameter names create no target actions and trigger no target resolution. Only `target X: action = Y` authors target actions. Action-valued `let` is outside V1.
+- `suppress` / `unsuppress`: lifecycle intent
+- `hide` / `unhide`: presentation intent
+- `delete`: structural intent
+- `keep`: no mutation intent (retains target existence)
 
-The current contract is:
+Syntax and authoring rules:
 
-- **Target Identifier & Semantic Resolution**: The `<semantic-target>` is the exact name of the targeted entity. Target kind (`feature`, `component`) is deliberately omitted from authoring syntax (e.g. `target Pad: action = suppress`, not `target feature Pad`). When semantic-model planning is active, the authored target name is resolved against the semantic model's combined `Feature` and `Component` exact `Name` fields using exact, case-sensitive matching with no kind precedence and no `DisplayName`, alias, or case-folding fallback. Zero candidates or multiple candidates (same-kind or cross-kind) fail deterministically.
-- **Action Expression, Capability Gating, Semantic Mutation Lowering, Destination Routing, Family Projection & Aligned Manifest Projection**: The `action` expression RHS is validated against the strict canonical action domain (`keep`, `suppress`, `unsuppress`, `hide`, `unhide`, `delete`). Bare canonical action literals, typed ternary expressions (with boolean conditions and action branches), and ordinary string-backed table lookups (`table_cell`) are supported. After target resolution, the evaluated canonical action is validated against the resolved target's captured `Targetability` capabilities (`keep` requires existence only; `suppress`, `unsuppress`, `hide`, `unhide`, `delete` map to independent captured capability bits). Capability-approved actions lower into canonical semantic `MutationIntent` records (`keep` emits no intent; `suppress`, `unsuppress`, `hide`, `unhide`, `delete` emit exact `OperationKind` records with provenance-only `target_action` value sources), are deterministically routed into part/assembly buckets using CAD-native `Object` names resolved through established semantic/capture identity linkage, project into canonical Engine mutation families (`Suppression`, `Visibility`, `Deletion`), and emit aligned FreeCAD runtime manifests with schema `2.0` when actual target mutations exist (while mutation-less and keep-only manifests retain schema `1.0` compatibility, and executable scalar writes remain isolated to top-level `parameterAssignments`).
-- **Table-Backed Actions**: A `table_cell` call may evaluate to an action when backed by an ordinary string table column (e.g. `chamferAction: string`). Table schema remains domain-neutral and generic. The selected string cell value must belong to the canonical six-action domain. Parameter overrides (e.g. `--set variant=B`) participate in row selection (e.g. `variant = "A"` -> `suppress`, `variant = "B"` -> `hide`). Unused rows in the same column are not validated against the action domain.
-- **Type Strictness**: Action validation is case-sensitive and does not allow implicit coercion from direct strings, string bindings, enums, numbers, booleans, or constants.
-- **Parser / Validator Split**: The parser accepts structurally valid expressions; DSL validation enforces the strict canonical action domain. Unsupported identifiers (e.g. `explode`) parse structurally but fail validation deterministically.
-- **Product-Local Scope**: Target actions are product-local. Duplicate exact target declarations within the same product are rejected deterministically by the parser.
-- **Declaration Order & Canonical Identity**: Authored declaration order is preserved in the AST. However, the authored order of equivalent target-action declarations is not part of the final Engine mutation identity. After semantic processing and routing, final planner mutation families are canonicalized before plan hashing, job derivation, and runtime manifest emission, ensuring declaration-order permutations converge. `keep` actions produce no runtime mutation and are identity-equivalent to declaration omission when all other execution inputs match.
-- **Planner Handoff**: Root `--json-plan` uses the same canonical planner result consumed by normal execution.
+- **Product-local scope**: Target actions are declared inside `product` blocks. Duplicate exact target declarations within the same product are rejected deterministically by the parser.
+- **Allowed action expressions**: The `action` expression accepts canonical action literals (`keep`, `suppress`, `unsuppress`, `hide`, `unhide`, `delete`), typed ternary expressions (`<bool-cond> ? <action> : <action>`), or ordinary string-backed table lookups via `table_cell(...)`.
+- **Strict typing**: Action validation enforces the exact canonical action domain. No implicit coercion is allowed from numbers, booleans, direct strings, constants, or parameter bindings.
+- **Ordinary parameters**: Prefix-shaped parameter names (such as `suppress_Pad`) remain ordinary parameters; only `target <name>: action = <expr>` authors target actions. Action-valued `let` bindings and `param ...: action` parameter types are unsupported.
+
+For the authoritative specification of semantic target resolution, targetability capability gating, mutation lowering, destination routing, canonical ordering, and manifest projection, see the [Target-Action Contract](../reference/target-action-contract.md).
 
 ## Supported Parameter Types
 
@@ -149,4 +150,5 @@ The current contract is:
 - [DSL grammar](dsl-grammar.md) — full syntax: operators, types, expressions, built-in functions
 - [DSL semantics](dsl-semantics.md) — evaluation model, type rules, identifier resolution
 - [IR and planning](ir-and-planning.md) — what happens after parsing: IR and execution plan
+- [Target-action contract](../reference/target-action-contract.md) — semantic target resolution, capability gating, mutation lowering, and execution contract
 - [Validate](../cli/validate.md) — how to validate a DSL file without executing it

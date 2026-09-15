@@ -64,22 +64,19 @@ so Engine runs every FreeCAD invocation against an isolated attempt working
 copy rather than the source document directly. Engine computes a deterministic
 attempt identity from contract version, job, product, step, adapter, plan
 hash, source path, declared output filenames, and a 1-based attempt index, and
-prepares an isolated workspace at that identity before invoking FreeCAD:
+prepares an isolated workspace at `<product-dir>/_working/<attempt-id>/` before
+invoking FreeCAD.
 
-```text
-<product-dir>/_working/<attempt-id>/
-├── source/                    prepared copy of the source document
-├── outputs/                   declared export destination
-├── export_manifest_v1.json    materialized native manifest
-├── parametron.verification.json
-└── result.json                 written by FreeCAD
-```
+The complete working-copy directory layout, request materialization files, and
+runtime output paths are canonically defined and owned by [Execution Runtime —
+Attempt Identity and Layout](../../runtime/execution-runtime.md#attempt-identity-and-layout).
+Individual contract file semantics, including traversal request and output files,
+are owned by their respective contract documents (such as
+[contracts/reference-traversal.md](contracts/reference-traversal.md)).
 
 This preparation and identity computation is Engine-owned, adapter-specific
-work (see [Execution Runtime — Attempt Identity and
-Layout](../../runtime/execution-runtime.md#attempt-identity-and-layout)).
-FreeCAD's side of this boundary is validation, not construction: it treats the
-supplied `--working-copy` directory as the sole authoritative,
+work. FreeCAD's side of this boundary is validation, not construction: it
+treats the supplied `--working-copy` directory as the sole authoritative,
 exactly-contained execution-instance root for one invocation, and rejects
 paths that resolve outside it, including sibling attempt directories under a
 shared parent. See [runtime.md — Working-copy / execution-root
