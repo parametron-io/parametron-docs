@@ -117,7 +117,9 @@ GET /job/291a134a65b3dd43644f08e49339e31d8717d3d2c88f1dc21b34e55e88863aa9
 ## Timeout, Failure, and Cancellation Semantics
 
 - **Timeout**: Step timeouts trigger step execution termination. The job status
-  transitions to `state: "failed"` with `error.timeout = true`.
+  transitions to `state: "failed"` with `error.timeout = true`. Timeout is not a
+  lifecycle state; the corresponding execution report classifies the outcome as
+  `status: "timeout"`. See [Reporting](reporting.md) for report outcome semantics.
 - **Cancellation**: Context cancellation (such as SIGINT during execution) triggers
   clean termination of subprocesses. The job status transitions to
   `state: "canceled"` with `error.canceled = true`.

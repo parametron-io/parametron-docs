@@ -18,7 +18,7 @@ Engine is the entry point. A caller provides a project (DSL, tables, CAD
 targets); Engine validates it, plans the work, and executes it. When CAD
 execution is required, Engine invokes a CAD adapter behind an Engine-owned
 contract. FreeCAD is the adapter/runtime used where it is the configured
-runtime. The adapter returns raw runtime results; Engine normalizes them into
+runtime. The adapter returns raw evidence; Engine normalizes it into
 engineering records and writes a local record/artifact package.
 
 ## Roles
@@ -45,14 +45,14 @@ simulate, or execute local projects.
 A CAD adapter is a runtime-specific execution layer behind Engine contracts. It
 may start CAD runtimes, open documents, observe parameters and metadata,
 traverse references, mutate documents, recompute models, export geometry and
-drawings, and capture runtime errors. It returns raw runtime results to Engine
+drawings, and capture runtime errors. It returns raw evidence to Engine
 and does not perform normalization, workflow, or durable storage.
 
 ### FreeCAD
 
 FreeCAD is one CAD adapter/runtime implementation. It performs CAD-native
-operations behind Engine-owned contracts and returns deterministic raw runtime
-results. Engine + FreeCAD are the immediate public engineering implementation
+operations behind Engine-owned contracts and returns deterministic raw
+evidence. Engine + FreeCAD are the immediate public engineering implementation
 focus.
 
 ## Standalone Local/Headless Usage

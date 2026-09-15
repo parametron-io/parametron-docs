@@ -105,6 +105,12 @@ The report is written atomically to `<runRoot>/report.json` in CLI runs, and to
 | `artifacts` | array | List of registered completion artifacts across all jobs. |
 | `error` | object | Structured error summary (present on failure, omitted on success). |
 
+`status: "timeout"` is an explicit report outcome classification. It is not a
+job lifecycle state: the job-state view represents the same execution error as
+`state: "failed"` with `error.timeout = true`. See
+[Job Lifecycle](job-lifecycle.md) for lifecycle state and failure metadata
+semantics.
+
 ## Runtime Object
 
 | Field | Type | Description |
