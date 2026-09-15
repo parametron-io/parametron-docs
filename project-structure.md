@@ -16,6 +16,15 @@ This is a structural index. For conceptual guidance and reading order, see
 | [docs/architecture/repo-boundaries.md](docs/architecture/repo-boundaries.md) | Current public engineering ownership rules |
 | [docs/engine/README.md](docs/engine/README.md) | Canonical current Engine engineering documentation |
 | [docs/engine/adapters/README.md](docs/engine/adapters/README.md) | Current Engine adapter-domain contracts and ownership |
+| [docs/engine/adapters/freecad/architecture.md](docs/engine/adapters/freecad/architecture.md) | FreeCAD adapter architecture, ownership boundary, and capability areas |
+| [docs/engine/adapters/freecad/runtime.md](docs/engine/adapters/freecad/runtime.md) | FreeCAD headless runtime invocation and execution lifecycle |
+| [docs/engine/adapters/freecad/contracts/artifacts.md](docs/engine/adapters/freecad/contracts/artifacts.md) | FreeCAD STEP/CSV/PDF artifact export contract |
+| [docs/engine/adapters/freecad/contracts/engine-invocation.md](docs/engine/adapters/freecad/contracts/engine-invocation.md) | FreeCAD in-process Engine invocation contract |
+| [docs/engine/adapters/freecad/contracts/manifest.md](docs/engine/adapters/freecad/contracts/manifest.md) | FreeCAD manifest transport and schema contract |
+| [docs/engine/adapters/freecad/contracts/observation.md](docs/engine/adapters/freecad/contracts/observation.md) | FreeCAD observation request/response contract |
+| [docs/engine/adapters/freecad/contracts/reference-traversal.md](docs/engine/adapters/freecad/contracts/reference-traversal.md) | FreeCAD reference-traversal request/output contract |
+| [docs/engine/adapters/freecad/contracts/result-and-failure.md](docs/engine/adapters/freecad/contracts/result-and-failure.md) | FreeCAD result, failure, and trace contracts |
+| [docs/engine/adapters/freecad/contracts/target-mutations.md](docs/engine/adapters/freecad/contracts/target-mutations.md) | FreeCAD target-mutation transport/native-capability boundary |
 | [docs/engine/architecture/system-overview.md](docs/engine/architecture/system-overview.md) | Current Engine pipeline and architecture |
 | [docs/engine/architecture/execution-model.md](docs/engine/architecture/execution-model.md) | Jobs, handoff, scheduling, attempts, and execution semantics |
 | [docs/engine/authoring/cad-contract.md](docs/engine/authoring/cad-contract.md) | CAD capture schema and validation contract |
@@ -65,6 +74,17 @@ This is a structural index. For conceptual guidance and reading order, see
 │   │   └── workflow.md
 │   └── engine
 │       ├── adapters
+│       │   ├── freecad
+│       │   │   ├── contracts
+│       │   │   │   ├── artifacts.md
+│       │   │   │   ├── engine-invocation.md
+│       │   │   │   ├── manifest.md
+│       │   │   │   ├── observation.md
+│       │   │   │   ├── reference-traversal.md
+│       │   │   │   ├── result-and-failure.md
+│       │   │   │   └── target-mutations.md
+│       │   │   ├── architecture.md
+│       │   │   └── runtime.md
 │       │   └── README.md
 │       ├── architecture
 │       │   ├── execution-model.md
@@ -102,5 +122,5 @@ This is a structural index. For conceptual guidance and reading order, see
 ├── project-structure.md
 └── README.md
 
-12 directories, 39 files
+14 directories, 48 files
 ```
