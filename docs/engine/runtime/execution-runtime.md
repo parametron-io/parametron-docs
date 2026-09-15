@@ -209,7 +209,7 @@ record package (`<runRoot>/parametron-record-package/`):
 | Execution | Yes | Yes (`recordmap.MapReport`) | Yes |
 | Failure | Yes | Yes (`recordmap.MapReport`) | Yes (on failed runs) |
 | Reference | Yes | Yes (`recordmap.MapReferenceTraversal`) | Yes (when raw traversal evidence exists) |
-| Artifact | Yes | Yes (`recordmap.MapArtifact`) | Available via mapper |
+| Artifact | Yes | Yes (`recordmap.MapArtifactStoreRecords`, `recordmap.MapArtifactStoreManifest`) | Available via mapper |
 | Observation | Yes | Yes (`recordmap.MapObserved`) | Available via mapper |
 | Verification | Yes | Yes (`recordmap.MapVerification`) | Available via mapper |
 
