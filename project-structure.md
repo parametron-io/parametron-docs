@@ -122,5 +122,5 @@ This is a structural index. For conceptual guidance and reading order, see
 ├── project-structure.md
 └── README.md
 
-14 directories, 48 files
+13 directories, 48 files
 ```
