@@ -57,7 +57,7 @@ CAD adapters own:
 - document mutation and recompute
 - geometry and drawing export
 - runtime-specific error capture
-- returning raw runtime results to Engine
+- returning raw evidence to Engine
 
 CAD adapters do not own:
 
@@ -66,13 +66,13 @@ CAD adapters do not own:
 - durable product storage
 - normalized durable record contracts beyond runtime result contracts
 
-CAD adapters return raw runtime results to Engine. Engine normalizes those
-results into engineering records.
+CAD adapters return raw evidence to Engine. Engine normalizes that evidence
+into engineering records.
 
 ## FreeCAD
 
 FreeCAD is one CAD adapter/runtime implementation. It executes CAD-native
-operations behind Engine-owned contracts and returns raw runtime results.
+operations behind Engine-owned contracts and returns raw evidence.
 Engine + FreeCAD are the immediate public engineering implementation focus.
 
 ## Normalized Records

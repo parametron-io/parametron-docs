@@ -139,8 +139,9 @@ Upon subprocess completion, Engine validates raw runtime evidence:
    - `<OutputDir>/parametron.observed.json` is loaded and structurally validated.
    - Observed working copy path and SHA-256 are verified against the prepared
      source model.
-4. **Reference Traversal Intake**:
-   - `<OutputDir>/parametron.reference-traversal.json` is captured if present.
+4. **Raw Traversal Evidence Intake**:
+   - Raw traversal evidence at
+     `<OutputDir>/parametron.reference-traversal.json` is captured if present.
 
 ## Engine-Owned Verification
 
@@ -207,24 +208,18 @@ record package (`<runRoot>/parametron-record-package/`):
 |---------------|:----------------:|:------------------:|:---------------------:|
 | Execution | Yes | Yes (`recordmap.MapReport`) | Yes |
 | Failure | Yes | Yes (`recordmap.MapReport`) | Yes (on failed runs) |
-| Reference | Yes | Yes (`recordmap.MapReferenceTraversal`) | Yes (when traversal evidence exists) |
+| Reference | Yes | Yes (`recordmap.MapReferenceTraversal`) | Yes (when raw traversal evidence exists) |
 | Artifact | Yes | Yes (`recordmap.MapArtifact`) | Available via mapper |
 | Observation | Yes | Yes (`recordmap.MapObserved`) | Available via mapper |
 | Verification | Yes | Yes (`recordmap.MapVerification`) | Available via mapper |
 
 ### Raw Evidence Preservation
 
-The emitted record package preserves raw evidence files under `raw/`:
-- `raw/engine/report.json`
-- `raw/engine/metadata.json`
-- `raw/engine/manifest.json`
-- `raw/engine/parametron.observed.json`
-- `raw/engine/parametron.verification.json`
-- `raw/engine/result.json`
-- `raw/runtime/reference-traversal.json` (if present)
-
-Raw evidence preserves operational paths and timestamps, while normalized records
-under `records/` maintain deterministic byte stability.
+The emitted record package preserves available raw evidence, including raw
+traversal evidence when eligible, while normalized records maintain deterministic
+byte stability. See [Engine-produced record contracts](../reference/record-contracts.md)
+for the canonical package layout, allowlisted raw evidence paths, and emission
+rules.
 
 ## Layered Cache
 

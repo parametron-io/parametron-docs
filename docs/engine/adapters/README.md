@@ -9,7 +9,7 @@ normalizing accepted results into Engine-owned records.
 An adapter performs CAD-native work behind those Engine contracts. It opens and
 observes documents, traverses references, applies requested mutations,
 recomputes models, saves native documents, exports requested artifacts, and
-returns raw runtime results and errors. It does not redefine Engine planning,
+returns raw evidence and errors. It does not redefine Engine planning,
 verification, failure interpretation, or normalized record semantics. FreeCAD
 is the only currently implemented CAD adapter.
 
