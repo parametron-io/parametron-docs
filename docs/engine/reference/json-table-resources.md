@@ -104,7 +104,7 @@ string.
 - Table fingerprints participate directly in cache key derivation for geometry,
   artifact, and metadata layers. Changing table content invalidates downstream
   caches without requiring path changes.
-- `metadata.json` records logical table IDs, names, and fingerprints in its
+- `prm.metadata.json` records logical table IDs, names, and fingerprints in its
   `tables` section.
 
 ## Error Model

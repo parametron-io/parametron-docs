@@ -1,12 +1,12 @@
 # Execution Reporting
 
-`report.json` is a machine-readable execution summary generated at the
+`prm.report.json` is a machine-readable execution summary generated at the
 completion of a run. It records run-level
 status, timing, step outcomes, registered artifacts, and structured error
 diagnostics.
 
-The report is written atomically to `<runRoot>/report.json` in CLI runs, and to
-`<runRoot>/jobs/<jobID>/report.json` in API runs.
+The report is written atomically to `<runRoot>/prm.report.json` in CLI runs, and to
+`<runRoot>/jobs/<jobID>/prm.report.json` in API runs.
 
 ## Schema Structure
 
@@ -166,7 +166,7 @@ artifact-store `id` or `class`. Artifact identity and classification belong to
 the canonical [job-scoped artifact inventory](job-artifacts.md), while normalized
 record identity and class belong to the [ArtifactRecord contract](../reference/record-contracts.md).
 One physical output can produce both an `execution_output` fact and a
-`verified_artifact` fact with distinct artifact-store IDs. Because `report.json`
+`verified_artifact` fact with distinct artifact-store IDs. Because `prm.report.json`
 does not project that class distinction, those facts can appear identical in its
 artifact array.
 
@@ -210,7 +210,7 @@ When execution fails, the `error` object contains detailed failure diagnostics:
 
 ## Determinism Guarantees
 
-`report.json` construction is strictly deterministic:
+`prm.report.json` construction is strictly deterministic:
 - Jobs appear in scheduler output order.
 - Steps appear in handoff package step order.
 - Artifacts are sorted by `(productId, stepId, path, filename, type, checksumSHA256)`.

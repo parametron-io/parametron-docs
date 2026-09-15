@@ -41,7 +41,7 @@ Reads `snapshot.json` from each directory and compares:
 - `inputs`
 - `generatedFiles`
 
-Also checks for presence of `report.json`, `metadata.json`, and `manifest.json` in each directory. If both directories contain a `report.json`, compares the `status` field.
+Also checks for presence of `prm.report.json`, `prm.metadata.json`, and `manifest.json` in each directory. If both directories contain a `prm.report.json`, compares the `status` field.
 
 Snapshot diff does not deep-compare artifact file contents.
 

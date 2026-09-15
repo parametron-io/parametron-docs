@@ -52,7 +52,7 @@ When a job is accepted via `POST /job`:
    - For successful runs, completion artifacts (`result.json`, declared output
      files, and verified artifacts) are registered into the artifact store in an
      atomic batch.
-   - An execution report (`report.json`) is constructed and written to disk
+   - An execution report (`prm.report.json`) is constructed and written to disk
      before updating the job status. Report write errors do not abort the
      transition.
    - The job status in the submission store transitions to its terminal state
@@ -87,4 +87,4 @@ When a job is accepted via `POST /job`:
 - [Job Artifacts](job-artifacts.md) — Job-scoped artifact listing endpoint.
 - [Artifact Serving](artifact-serving.md) — Generic artifact listing and file retrieval.
 - [Execution Runtime](execution-runtime.md) — Detailed processing pipeline and orchestration.
-- [Reporting](reporting.md) — Run-level `report.json` schema and contracts.
+- [Reporting](reporting.md) — Run-level `prm.report.json` schema and contracts.
