@@ -1,6 +1,6 @@
 # Result, Failure, and Trace Contracts
 
-## Success `result.json`
+## Success `prm.result.json`
 
 Written once, after a successful `execute` call.
 
@@ -20,9 +20,9 @@ empty `outputs: []` manifest produces `"artifacts": []`; the persisted native
 document is never added to this list (see
 [runtime.md](../runtime.md#native-persistence-vs-derived-artifacts)).
 
-## Structured failure `result.json`
+## Structured failure `prm.result.json`
 
-Handled `execute` failures write a failed `result.json` at the same path,
+Handled `execute` failures write a failed `prm.result.json` at the same path,
 when a safe result path is available.
 
 ```json
@@ -51,8 +51,8 @@ Stage attribution for handled failures includes: `parameter_assignment`,
 Behavior:
 
 - argument/path failures without a safe result path do not create
-  `result.json` at all
-- success-path `result.json` behavior is unaffected by this contract
+  `prm.result.json` at all
+- success-path `prm.result.json` behavior is unaffected by this contract
 - CLI exit codes and single-line stderr are unaffected (see
   [runtime.md](../runtime.md#process-outcomes))
 - failure-result emission is best-effort and never masks the original failure

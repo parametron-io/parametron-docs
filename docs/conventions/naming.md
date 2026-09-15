@@ -145,11 +145,11 @@ lack the canonical namespace, and use underscore-separated semantic naming.
 Generic active contract filenames such as `result.json` are migration candidates
 because they lack the Parametron contract namespace.
 
-These rules define canonical naming policy, not completed implementation state.
-Current implementation documentation may still describe older names. Migration
-of existing active surfaces is future work in the owning repositories; this
-policy does not rename files, change schemas or runtime behavior, or revise the
-record-package layout.
+These rules define canonical naming policy. The shared Engine–FreeCAD transport
+surfaces listed above and their newly emitted record-package evidence paths use
+the canonical names. Other implementation surfaces must be assessed in their
+owning repositories; this policy itself does not rename files, change schemas or
+runtime behavior, or revise package layouts.
 
 ### Active Contract Filenames and Preserved Raw-Evidence Filenames
 
@@ -270,7 +270,7 @@ CAD adapters return raw evidence to Engine. Engine validates and normalizes it.
 - `reference traversal` -> FreeCAD-owned runtime process or capability that
   discovers CAD references and emits traversal evidence
 - `raw traversal evidence` -> serialized raw evidence produced by reference
-  traversal, currently `parametron.reference-traversal.json`
+  traversal, currently `prm.reference-traversal.json`
 - `reference record` -> Engine-owned normalized record derived from traversal
   evidence
 - `engineering facts` -> engineering results produced by Engine

@@ -70,14 +70,14 @@ and descriptor writing succeed.
   "planHash": "<hash>",
   "inputs": { "width": 100, "material": "Steel" },
   "runRoot": "<out dir>",
-  "generatedFiles": ["manifest.json", "products/widget/export_manifest_v1.json"]
+  "generatedFiles": ["manifest.json", "products/widget/prm.export-manifest.json"]
 }
 ```
 
 - `profile` field is omitted when no active profile is present.
 - `generatedFiles` is a sorted list of paths relative to `runRoot`, collected
   before `snapshot.json` is written, so it excludes the descriptor itself.
-- The `products/widget/export_manifest_v1.json` example reflects active planner
+- The `products/widget/prm.export-manifest.json` example reflects active planner
   naming. FreeCAD plans use `RunCADRuntime` and the external runtime capability.
 - `snapshot.json` has stable content for equivalent inputs and the same output
   path; operational timestamps and raw runtime evidence are not promised to be

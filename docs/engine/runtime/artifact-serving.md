@@ -76,7 +76,7 @@ GET /artifacts/e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
 Artifact records carry an explicit `class` attribute:
 
 - `execution_output`: Intermediate and final execution deliverables, including
-  generated CSVs, export manifests, and CAD runtime `result.json`.
+  generated CSVs, export manifests, and CAD runtime `prm.result.json`.
 - `verified_artifact`: Release-facing deliverables (`step`, `csv`, `pdf`) that
   have passed an Engine-owned verification check.
 
@@ -91,7 +91,7 @@ Artifact records carry an explicit `class` attribute:
    declarations and verified outcomes. Arbitrary files in working directories are
    never registered or served.
 4. **Raw evidence preservation**: Native CAD manifests, observation requests, and
-   observed CAD state files (`parametron.observed.json`) remain raw evidence and
+   observed CAD state files (`prm.observed.json`) remain raw evidence and
    are not exposed as registered artifacts.
 
 ## Separation from Job-Scoped Listing

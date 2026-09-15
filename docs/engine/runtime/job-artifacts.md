@@ -20,11 +20,11 @@ GET /job/{id}/artifacts
 3. **Product scoping**: Artifacts are filtered to match the job's product key.
 4. **Artifact classes**:
    - `execution_output`: Registered execution deliverables and control files
-     such as input CSVs, export manifests, and CAD runtime `result.json`.
+     such as input CSVs, export manifests, and CAD runtime `prm.result.json`.
    - `verified_artifact`: Release-facing deliverables (`step`, `csv`, `pdf`)
      promoted after an explicit Engine-owned verification pass.
 5. **Raw evidence exclusion**: Native CAD manifests, observation requests,
-   `parametron.observed.json`, and intermediate working copy files are preserved
+   `prm.observed.json`, and intermediate working copy files are preserved
    as raw runtime evidence and are never registered as artifacts.
 6. **Atomic batch registration**: Artifact registration at the completion boundary
    is all-or-nothing. If any artifact in the batch fails validation or filesystem

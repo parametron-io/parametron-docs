@@ -154,7 +154,7 @@ For one `execute` call, in order:
 13. If observation is enabled, observe the same open live document — after
     persistence, exports, and traversal, before document close.
 14. Close the document.
-15. Write deterministic success `result.json` (see
+15. Write deterministic success `prm.result.json` (see
     [contracts/result-and-failure.md](contracts/result-and-failure.md)).
 
 Live-document observation and traversal both operate on the same open FreeCAD
@@ -174,8 +174,8 @@ configured native CAD document != derived exported artifact
 `document.save()` runs unconditionally after recompute, independent of
 whether any STEP/CSV/PDF export is declared. Execution with zero declared
 outputs (`outputs: []`) is supported: the native document is persisted, no
-derived export runs, and `result.json` reports `artifacts: []`. The persisted
-native document is not itself added to `result.json.artifacts`.
+derived export runs, and `prm.result.json` reports `artifacts: []`. The persisted
+native document is not itself added to `prm.result.json.artifacts`.
 
 ## Process outcomes
 

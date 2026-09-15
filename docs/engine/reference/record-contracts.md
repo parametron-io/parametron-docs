@@ -75,10 +75,10 @@ parametron-record-package/
     prm.metadata.json
     artifact-store/manifest.json
     handoff/
-    observed/parametron.observed.json
-    verification/parametron.verification.json
-    runtime/result.json
-    runtime/parametron.reference-traversal.json
+    observed/prm.observed.json
+    verification/prm.verification.json
+    runtime/prm.result.json
+    runtime/prm.reference-traversal.json
 ```
 
 This is the allowed layout, not a promise that every listed file exists per run.
@@ -106,8 +106,10 @@ Sentinels include `ErrInvalidPackageInput`, `ErrInvalidRecord`,
 performing record mapping. `EntryForContractPath` classifies static layout entries.
 `IsNormalizedRecordContractPath` recognizes only registered record paths.
 
-Raw runtime evidence is an explicit allowlist: `raw/runtime/result.json` and
-`raw/runtime/parametron.reference-traversal.json`. Arbitrary descendants under
+Raw CAD evidence uses an explicit allowlist:
+`raw/runtime/prm.result.json`, `raw/verification/prm.verification.json`,
+`raw/observed/prm.observed.json`, and
+`raw/runtime/prm.reference-traversal.json`. Arbitrary descendants under
 `raw/runtime/` are not accepted automatically. Safe descendants of `raw/handoff/`
 are dynamic handoff evidence files, not normalized records or raw runtime-result
 evidence. `raw/handoff` itself is a directory, not an evidence file. Unsafe and
@@ -127,10 +129,10 @@ error (`ErrInvalidReportMapping`, `ErrInvalidMetadataMapping`,
 | `prm.report.json` | `MapReport`: execution and optional failure record; status, timing, plan, jobs, steps, errors, retry/timeout/cancellation, deterministic linkage and outcome precedence | Execution/failure records and raw report |
 | `prm.metadata.json` | `MapMetadata`: provenance and input identities, plan and conservative runtime/toolchain enrichment | Provenance enrichment and available raw metadata |
 | Artifact store records / `manifest.json` | `MapArtifactStoreRecords` / `MapArtifactStoreManifest`: artifact records | Available raw inventory; normalized artifact emission is not integrated |
-| `parametron.observed.json` | `MapObserved`: observation and optional reference records | Available raw evidence; no observation-derived normalized records |
-| `parametron.verification.json` result | `MapVerification`: summary, categories, failure classes and evidence | Available raw evidence; no normalized verification emission |
-| Runtime `result.json` | `MapRuntimeResult` handles the legacy result shape only; success has no failure record | Available raw evidence; no direct aligned-result failure mapping |
-| `parametron.reference-traversal.json` | `MapReferenceTraversal`: optional reference record | Bounded verified-candidate integration described below |
+| Observed-state input | `MapObserved`: observation and optional reference records | Available raw evidence; no observation-derived normalized records |
+| Engine verification-result input | `MapVerification`: summary, categories, failure classes and evidence | Separate from the `prm.verification.json` request evidence; no normalized verification emission |
+| Legacy runtime-result input | `MapRuntimeResult` handles the legacy result shape only; success has no failure record | Separate from active `prm.result.json` decoding; no direct aligned-result failure mapping |
+| `prm.reference-traversal.json` | `MapReferenceTraversal`: optional reference record | Bounded verified-candidate integration described below |
 | Handoff package | Raw runtime/provenance evidence classification | No normalized handoff record mapping or automatic handoff collection |
 | Job status | Operational lifecycle state | Not a normalized record or durable storage contract |
 
@@ -146,9 +148,20 @@ conflicting digests. Verification category order is `components`, `metadata`,
 Normal non-cached runs emit under `<runRoot>/parametron-record-package/`, with
 package key `engine-run:<planHash>`. Execution records are always mapped when
 report construction succeeds; report failure material adds a validated failure
-record, including on failed runs. Raw report bytes remain unchanged. Available
-metadata, artifact inventory, observed, verification, and runtime-result evidence
-are included from their configured run-root locations.
+record, including on failed runs. Raw report bytes remain unchanged. Metadata and
+artifact inventory use their run-level sources. CAD result, verification-request,
+and observed evidence comes from authoritative paths retained from actual CAD
+attempts rather than guessed run-root locations.
+
+For the singular result, verification-request, and observed projection, the
+overall execution must succeed and exactly one CAD outcome must have completed
+without a job error and passed Engine verification. Zero eligible outcomes omit
+the projection; multiple eligible outcomes also omit it rather than selecting an
+attempt arbitrarily. Each available source is read through the existing
+working-copy confinement, symlink, and regular-file guards. Optional missing
+sources are omitted. The bytes read from each source are passed unchanged to
+package emission. In particular, `raw/verification/prm.verification.json` is the
+request sent to FreeCAD, not Engine's normalized or in-memory verification result.
 
 Normalized report mapping removes step/runtime timing for normal-run records.
 Equivalent normal runs have stable package keys, normalized record and manifest
@@ -185,7 +198,7 @@ Mapper linkage and provenance linkage reconcile independently for `JobID`,
 `ProductKey`, and `StepRef`, after trimming: empty plus a value adopts that value,
 equal values converge, and conflicting non-empty values fail. One resolved
 linkage populates both edge and provenance linkage. Canonical evidence is
-`kind = reference-traversal`, `ref = raw/runtime/parametron.reference-traversal.json`.
+`kind = reference-traversal`, `ref = raw/runtime/prm.reference-traversal.json`.
 Caller and provenance digests reconcile the same way; duplicate canonical evidence
 collapses to one entry. Unrelated provenance is preserved. Context validation
 occurs even for zero edges; valid zero-edge input returns no record and no error.
@@ -221,3 +234,8 @@ this bounded emission path. Package archiving and remote publishing are not
 implemented. Runtime collection is owned by
 [execution runtime](../runtime/execution-runtime.md); traversal request structure
 is owned by [adapter architecture](../adapters/README.md).
+
+Newly emitted packages use the current `prm.*` raw-evidence paths. No package
+migration walker, automatic old-name conversion, or compatibility alias was
+introduced for already-produced packages. Captured raw bytes remain unchanged,
+and normal package emission retains the overwrite behavior described above.

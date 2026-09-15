@@ -42,7 +42,7 @@ Execution Plan (StepRunCADRuntime)
         | Passed                                        | Failed / Non-retryable
         v                                               v
 Atomic Batch Registration                    Structured Error Reporting
-(result.json, execution & verified)          (no aligned artifacts)
+(prm.result.json, execution & verified)      (no aligned artifacts)
         |                                               |
         +-----------------------+-----------------------+
                                 |
@@ -79,9 +79,9 @@ Every CAD runtime invocation executes inside an isolated attempt workspace:
 - **Workspace Isolation**: Located at `<productDir>/_working/<attemptID>/`.
   - `source/`: Contains an atomic copy of the source CAD document.
   - `outputs/`: Dedicated directory for external runtime outputs.
-  - `export_manifest_v1.json`: Materialized native manifest.
-  - `parametron.verification.json`: Materialized verification request contract.
-  - `parametron.reference-traversal-request.json`: Reference traversal configuration.
+  - `prm.export-manifest.json`: Materialized native manifest.
+  - `prm.verification.json`: Materialized verification request contract.
+  - `prm.reference-traversal-request.json`: Reference traversal configuration.
 
 Attempts are completely isolated: retries use distinct attempt IDs and directories,
 preventing cross-attempt contamination.
@@ -91,14 +91,14 @@ preventing cross-attempt contamination.
 Before invoking the external CAD runtime:
 
 1. **Native Manifest**: The execution manifest is projected into the format
-   required by the runtime and written to `export_manifest_v1.json`.
+   required by the runtime and written to `prm.export-manifest.json`.
 2. **Verification Contract**: Engine derives the expected metadata, parameter,
    and reference constraints from the manifest intent and prepared source model,
-   writing `parametron.verification.json`.
+   writing `prm.verification.json`.
 3. **Reference Traversal Request**: If reference traversal is configured,
-   `parametron.reference-traversal-request.json` is materialized.
-4. **Pre-Invocation Freshness**: Stale contract-owned outputs (`result.json`,
-   `parametron.observed.json`, `parametron.reference-traversal.json`, and all
+   `prm.reference-traversal-request.json` is materialized.
+4. **Pre-Invocation Freshness**: Stale contract-owned outputs (`prm.result.json`,
+   `prm.observed.json`, `prm.reference-traversal.json`, and all
    declared artifact paths) are checked. Regular files from prior runs are
    removed; symlinks or non-regular files cause preflight rejection.
 
@@ -126,22 +126,22 @@ directly via `runtimecap.Capability`:
 
 Upon subprocess completion, Engine validates raw runtime evidence:
 
-1. **`result.json` Validation**:
-   - For exit code 0: `result.json` must exist with `status: "succeeded"` and
+1. **`prm.result.json` Validation**:
+   - For exit code 0: `prm.result.json` must exist with `status: "succeeded"` and
      valid artifact declarations.
-   - For non-zero exit: `result.json` is inspected for structured failure details.
+   - For non-zero exit: `prm.result.json` is inspected for structured failure details.
 2. **Artifact Declaration Correlation**:
    - Result artifact declarations must match manifest output declarations exactly
      in count, declaration order, ID, format (`step`, `csv`, `pdf`), and path.
    - Each artifact path must be a regular file strictly contained within
      `OutputDir`.
 3. **Observed CAD State Intake**:
-   - `<OutputDir>/parametron.observed.json` is loaded and structurally validated.
+   - `<OutputDir>/prm.observed.json` is loaded and structurally validated.
    - Observed working copy path and SHA-256 are verified against the prepared
      source model.
 4. **Raw Traversal Evidence Intake**:
    - Raw traversal evidence at
-     `<OutputDir>/parametron.reference-traversal.json` is captured if present.
+     `<OutputDir>/prm.reference-traversal.json` is captured if present.
 
 ## Engine-Owned Verification
 
@@ -175,7 +175,7 @@ The Executor correlates the attempt outcome against the active job request:
 
 When execution succeeds with a passed verification outcome:
 
-1. `result.json` is registered under class `execution_output` (`type: json`).
+1. `prm.result.json` is registered under class `execution_output` (`type: json`).
 2. Declared output files (`step`, `csv`, `pdf`) are registered under class
    `execution_output`.
 3. Those same declared output files are additionally promoted to class
@@ -195,7 +195,7 @@ A completed execution writes up to four run-level output files:
 | `prm.report.json` | Run outcome, step timing, artifact summary, and structured errors. |
 | `prm.metadata.json` | Toolchain versions, profile settings, product summaries, and table fingerprints. |
 | `manifest.json` | Deterministic artifact inventory from the artifact store. |
-| `export_manifest_v1.json` | Active per-product adapter manifest. |
+| `prm.export-manifest.json` | Active per-product adapter manifest. |
 
 ## Normalized Record Package Emission
 
@@ -215,11 +215,14 @@ record package (`<runRoot>/parametron-record-package/`):
 
 ### Raw Evidence Preservation
 
-The emitted record package preserves available raw evidence, including raw
-traversal evidence when eligible, while normalized records maintain deterministic
-byte stability. See [Engine-produced record contracts](../reference/record-contracts.md)
-for the canonical package layout, allowlisted raw evidence paths, and emission
-rules.
+The executor retains authoritative paths from each CAD attempt. Record-package
+projection uses guarded reads of those paths and supplies the resulting bytes to
+record emission; `recordemit` does not infer the attempt layout from the run root.
+The emitted package preserves available evidence, including traversal evidence
+when eligible, while normalized records maintain deterministic byte stability.
+See [Engine-produced record contracts](../reference/record-contracts.md) for the
+canonical package layout, allowlisted raw evidence paths, cardinality rules, and
+byte-preservation semantics.
 
 ## Layered Cache
 

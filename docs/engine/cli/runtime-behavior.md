@@ -53,7 +53,7 @@ That profile setting takes precedence and resolves under
 <base>/<plan-hash>/
 ├── products/<product-key>/
 │   ├── <parameter-csv>
-│   ├── export_manifest_v1.json
+│   ├── prm.export-manifest.json
 │   └── _working/<attempt-id>/
 ├── prm.report.json
 ├── manifest.json

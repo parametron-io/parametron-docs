@@ -36,7 +36,7 @@ The report is written atomically to `<runRoot>/prm.report.json` in CLI runs, and
       "productKey": "bracket",
       "expectedArtifacts": [
         "params.csv",
-        "export_manifest_v1.json",
+        "prm.export-manifest.json",
         "bracket.step"
       ],
       "steps": [

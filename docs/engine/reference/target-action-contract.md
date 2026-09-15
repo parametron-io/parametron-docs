@@ -141,7 +141,7 @@ from that registry or semantic-map family capability metadata.
 
 ## Aligned runtime manifest
 
-The filename stays `export_manifest_v1.json` for both content schemas.
+The filename is `prm.export-manifest.json` for both content schemas.
 Mutation-less, keep-only, scalar-assignment-only, and internal Parameters/Properties-only
 plans select schema `1.0`. Any Suppression, Visibility or Deletion in either
 destination selects schema `2.0`.
