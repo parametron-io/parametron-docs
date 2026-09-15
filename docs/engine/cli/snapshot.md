@@ -50,8 +50,8 @@ subdirectories:
 | `snapshot.json` | Snapshot metadata |
 | `inputs.json` | Input parameter values used |
 | `plan.json` | Resolved execution plan |
-| `report.json` | Execution report |
-| `metadata.json` | Run-level metadata |
+| `prm.report.json` | Execution report |
+| `prm.metadata.json` | Run-level metadata |
 | `manifest.json` | Artifact inventory |
 | Generated artifacts | CSV files under `products/<product-key>/`; CAD outputs in attempt workspaces below that product directory |
 
@@ -95,4 +95,4 @@ On success, the CLI prints: `"Snapshot created at <dir>"`
 
 - [Diff](diff.md) — comparing two snapshot directories
 - [Command families](command-families.md) — command routing and shared behavior
-- [Reporting](../runtime/reporting.md) — `report.json` schema
+- [Reporting](../runtime/reporting.md) — `prm.report.json` schema

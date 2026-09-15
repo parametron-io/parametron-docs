@@ -53,8 +53,8 @@ error conditions.
 ## Outputs
 
 Each case produces a subdirectory `case-<NNN>` under `--out`, containing:
-- `report.json`
-- `metadata.json`
+- `prm.report.json`
+- `prm.metadata.json`
 - `manifest.json`
 - Generated artifacts
 - `parametron-record-package/`
@@ -71,7 +71,7 @@ Case `status` values in `simulate_report.json` are:
 `skipped` is emitted for remaining cases that were not executed because `--fail-fast` or `--max-errors` stopped the run early.
 
 This status vocabulary is specific to `simulate_report.json`. It does not match
-`report.json`, which uses the run-level values documented in
+`prm.report.json`, which uses the run-level values documented in
 [reporting](../runtime/reporting.md).
 
 ```json
@@ -109,4 +109,4 @@ The cache is not used by `simulate`. Every case always executes regardless of ca
 
 - [Command families](command-families.md) — command routing and shared behavior
 - [CLI runtime behavior](runtime-behavior.md) — output directory strategy
-- [Reporting](../runtime/reporting.md) — `report.json` schema
+- [Reporting](../runtime/reporting.md) — `prm.report.json` schema

@@ -55,9 +55,9 @@ That profile setting takes precedence and resolves under
 │   ├── <parameter-csv>
 │   ├── export_manifest_v1.json
 │   └── _working/<attempt-id>/
-├── report.json
+├── prm.report.json
 ├── manifest.json
-├── metadata.json
+├── prm.metadata.json
 └── parametron-record-package/
 ```
 
@@ -66,7 +66,7 @@ under `products/`. Runtime evidence and derived CAD outputs use attempt
 workspaces described in [adapter architecture](../adapters/README.md).
 
 The tree lists output roles, not a guarantee that every file exists after every
-failure. After scheduler execution, the CLI attempts to write `report.json`
+failure. After scheduler execution, the CLI attempts to write `prm.report.json`
 for success or failure. On success it also writes artifact inventory and
 metadata. Report/metadata/inventory write errors are logged as warnings.
 Record-package emission runs when report construction succeeds; an emission

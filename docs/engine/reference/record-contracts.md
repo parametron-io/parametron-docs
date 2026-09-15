@@ -71,8 +71,8 @@ parametron-record-package/
     parametron.verification-record.json
   artifacts/files/
   raw/
-    report.json
-    metadata.json
+    prm.report.json
+    prm.metadata.json
     artifact-store/manifest.json
     handoff/
     observed/parametron.observed.json
@@ -124,8 +124,8 @@ error (`ErrInvalidReportMapping`, `ErrInvalidMetadataMapping`,
 
 | Input | Mapping | Normal-run use |
 | --- | --- | --- |
-| `report.json` | `MapReport`: execution and optional failure record; status, timing, plan, jobs, steps, errors, retry/timeout/cancellation, deterministic linkage and outcome precedence | Execution/failure records and raw report |
-| `metadata.json` | `MapMetadata`: provenance and input identities, plan and conservative runtime/toolchain enrichment | Provenance enrichment and available raw metadata |
+| `prm.report.json` | `MapReport`: execution and optional failure record; status, timing, plan, jobs, steps, errors, retry/timeout/cancellation, deterministic linkage and outcome precedence | Execution/failure records and raw report |
+| `prm.metadata.json` | `MapMetadata`: provenance and input identities, plan and conservative runtime/toolchain enrichment | Provenance enrichment and available raw metadata |
 | Artifact store records / `manifest.json` | `MapArtifactStoreRecords` / `MapArtifactStoreManifest`: artifact records | Available raw inventory; normalized artifact emission is not integrated |
 | `parametron.observed.json` | `MapObserved`: observation and optional reference records | Available raw evidence; no observation-derived normalized records |
 | `parametron.verification.json` result | `MapVerification`: summary, categories, failure classes and evidence | Available raw evidence; no normalized verification emission |

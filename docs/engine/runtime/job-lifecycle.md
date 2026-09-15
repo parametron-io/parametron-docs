@@ -130,7 +130,7 @@ GET /job/291a134a65b3dd43644f08e49339e31d8717d3d2c88f1dc21b34e55e88863aa9
 ## Terminal Report Publication
 
 Before publishing a terminal job state (`succeeded`, `failed`, or `canceled`), the
-runtime attempts to construct and write an execution report (`report.json`) to the
+runtime attempts to construct and write an execution report (`prm.report.json`) to the
 job product directory.
 
 > [!NOTE]
@@ -150,4 +150,4 @@ not survive server restart.
 - [Job Submission](job-submission.md) — How jobs are submitted and registered.
 - [Job Artifacts](job-artifacts.md) — Querying artifacts produced by a succeeded job.
 - [API Overview](api-overview.md) — Endpoints and HTTP server configuration.
-- [Reporting](reporting.md) — Run-level `report.json` schema and contracts.
+- [Reporting](reporting.md) — Run-level `prm.report.json` schema and contracts.

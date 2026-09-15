@@ -47,7 +47,7 @@ Atomic Batch Registration                    Structured Error Reporting
         +-----------------------+-----------------------+
                                 |
                                 v
-                Run Outputs (report.json, metadata.json)
+                Run Outputs (prm.report.json, prm.metadata.json)
                                 |
                                 v
            Local Record Package Emission (recordemit)
@@ -192,8 +192,8 @@ A completed execution writes up to four run-level output files:
 
 | File | Purpose |
 |------|---------|
-| `report.json` | Run outcome, step timing, artifact summary, and structured errors. |
-| `metadata.json` | Toolchain versions, profile settings, product summaries, and table fingerprints. |
+| `prm.report.json` | Run outcome, step timing, artifact summary, and structured errors. |
+| `prm.metadata.json` | Toolchain versions, profile settings, product summaries, and table fingerprints. |
 | `manifest.json` | Deterministic artifact inventory from the artifact store. |
 | `export_manifest_v1.json` | Active per-product adapter manifest. |
 
@@ -249,5 +249,5 @@ semantic table fingerprints.
 
 - [Adapter Architecture](../adapters/README.md) — Adapter contracts and working copy boundaries.
 - [Execution Model](../architecture/execution-model.md) — Scheduler, executor, and worker pool.
-- [Reporting](reporting.md) — `report.json` schema and contract.
+- [Reporting](reporting.md) — `prm.report.json` schema and contract.
 - [Record Contracts](../reference/record-contracts.md) — Normalized record models and packaging rules.
