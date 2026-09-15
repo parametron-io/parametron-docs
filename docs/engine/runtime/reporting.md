@@ -161,6 +161,15 @@ semantics.
 | `checksumSHA256` | string | SHA-256 checksum of the artifact file (optional). |
 | `sizeBytes` | integer | File size in bytes. |
 
+These entries are an operational summary of produced files; they do not carry
+artifact-store `id` or `class`. Artifact identity and classification belong to
+the canonical [job-scoped artifact inventory](job-artifacts.md), while normalized
+record identity and class belong to the [ArtifactRecord contract](../reference/record-contracts.md).
+One physical output can produce both an `execution_output` fact and a
+`verified_artifact` fact with distinct artifact-store IDs. Because `report.json`
+does not project that class distinction, those facts can appear identical in its
+artifact array.
+
 ## Structured Error Summary
 
 When execution fails, the `error` object contains detailed failure diagnostics:
