@@ -42,7 +42,7 @@ Engine outputs[].object -> aligned outputs[].id -> document.getObject(id) -> one
 
 Engine owns selector choice/validation and artifact acceptance; FreeCAD owns
 exact CAD-native lookup and export of the selected object. FreeCAD invents no
-durable artifact or record identity from the selector; `result.json`
+durable artifact or record identity from the selector; `prm.result.json`
 preserves the declared `id` as raw runtime evidence only (see
 [result-and-failure.md](result-and-failure.md)).
 

@@ -49,7 +49,7 @@ When a job is accepted via `POST /job`:
    - external capability and executable resolution (`runtimecap.NewExecutableResolver`, `runtimecap.NewExternalCapability`)
    - isolated per-job working directory (`jobs/<jobID>`)
 5. Upon job execution completion:
-   - For successful runs, completion artifacts (`result.json`, declared output
+   - For successful runs, completion artifacts (`prm.result.json`, declared output
      files, and verified artifacts) are registered into the artifact store in an
      atomic batch.
    - An execution report (`prm.report.json`) is constructed and written to disk

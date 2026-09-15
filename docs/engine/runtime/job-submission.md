@@ -57,7 +57,7 @@ The request body is a JSON object containing a single `handoff` root object.
       "values": [100, 50]
     },
     "manifest": {
-      "manifestFilename": "export_manifest_v1.json",
+      "manifestFilename": "prm.export-manifest.json",
       "schemaVersion": "1.0",
       "planHash": "a1b2c3d4e5f67890...",
       "adapter": "freecad",
@@ -85,8 +85,8 @@ The request body is a JSON object containing a single `handoff` root object.
     "cadRuntime": {
       "productKey": "bracket",
       "adapter": "freecad",
-      "manifestFilename": "export_manifest_v1.json",
-      "resultFilename": "result.json"
+      "manifestFilename": "prm.export-manifest.json",
+      "resultFilename": "prm.result.json"
     },
     "tables": [
       {
@@ -108,7 +108,7 @@ The request body is a JSON object containing a single `handoff` root object.
       {
         "type": "WriteExportManifest",
         "manifest": {
-          "manifestFilename": "export_manifest_v1.json",
+          "manifestFilename": "prm.export-manifest.json",
           "schemaVersion": "1.0",
           "planHash": "a1b2c3d4e5f67890...",
           "adapter": "freecad",
@@ -125,8 +125,8 @@ The request body is a JSON object containing a single `handoff` root object.
         "cadRuntime": {
           "productKey": "bracket",
           "adapter": "freecad",
-          "manifestFilename": "export_manifest_v1.json",
-          "resultFilename": "result.json"
+          "manifestFilename": "prm.export-manifest.json",
+          "resultFilename": "prm.result.json"
         }
       }
     ]
@@ -154,8 +154,8 @@ The `cadRuntime` object specifies authoring intent for external runtime invocati
 |-------|------|-------------|
 | `productKey` | string | Target product execution key. |
 | `adapter` | string | Adapter identifier (e.g. `"freecad"`). |
-| `manifestFilename` | string | Expected manifest filename (e.g. `"export_manifest_v1.json"`). |
-| `resultFilename` | string | Expected runtime result filename (e.g. `"result.json"`). |
+| `manifestFilename` | string | Expected manifest filename (e.g. `"prm.export-manifest.json"`). |
+| `resultFilename` | string | Expected runtime result filename (e.g. `"prm.result.json"`). |
 
 > [!IMPORTANT]
 > The `cadRuntime` payload represents **logical authoring intent only**. It must

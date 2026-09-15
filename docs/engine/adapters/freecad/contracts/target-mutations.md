@@ -53,7 +53,7 @@ FreeCAD's runtime still loads and validates every manifest exclusively
 through the schema `1.0` path. A schema `2.0` manifest — mutation-bearing or
 not — is rejected before document opening, parameter assignment, recompute,
 save, export, or success-result writing. Handled validation failures still
-attempt a failed `result.json` when a safe destination is supplied. There is
+attempt a failed `prm.result.json` when a safe destination is supplied. There is
 no native suppression, unsuppression, visibility, or deletion execution, and
 no post-mutation validity or target-observation behavior.
 

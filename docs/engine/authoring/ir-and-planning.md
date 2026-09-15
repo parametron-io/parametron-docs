@@ -71,8 +71,8 @@ separate from executable selection, retry attempts, and workspace preparation.
 
 The AST planner preserves product and parameter declaration order in the
 corresponding plan/CSV surfaces. It validates product filenames and rejects
-collisions. FreeCAD manifests use `export_manifest_v1.json`, with
-`result.json` as the required runtime result. Derived output paths are logical
+collisions. FreeCAD manifests use `prm.export-manifest.json`, with
+`prm.result.json` as the required runtime result. Derived output paths are logical
 paths under `outputs/`. Explicit `outputs = ["none"]` retains the runtime
 step while declaring an empty export list.
 

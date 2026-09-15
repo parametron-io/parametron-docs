@@ -57,7 +57,7 @@ successful no-result execution mode: the success writer requires a path.
 All fields are required. Observation delegates to the observation entrypoint
 and the Engine-compatible requested-scope observation helper. It uses the
 injected document without opening, mutating, recomputing, or closing it, and
-writes `<output_directory>/parametron.observed.json` atomically. It does not
+writes `<output_directory>/prm.observed.json` atomically. It does not
 load a verification file or compute the supplied digest. `working_copy_path`
 is payload context, not a validated containment root for this invocation.
 The caller owns document lifecycle and the supplied context/digest.
@@ -72,8 +72,8 @@ External execute-plus-observation support does not enable the callable's
 
 ## Files and environment
 
-Execution consumes the `export_manifest_v1.json` contract and produces
-`result.json` plus the declared STEP/CSV/PDF [artifacts](artifacts.md). Paths
+Execution consumes the `prm.export-manifest.json` contract and produces
+`prm.result.json` plus the declared STEP/CSV/PDF [artifacts](artifacts.md). Paths
 are supplied by the caller; canonical contract filenames do not cause
 automatic file discovery. Handled execution failures attempt a structured
 failed result; success-result writing occurs only after successful execution.

@@ -18,15 +18,15 @@ Loaded strictly via `--reference-traversal-request <path>` on `execute`
 (requires `--output-dir`; the path must be an existing file inside the
 working copy). CLI validation does not read the file's JSON content; the
 runtime loads it exactly once, before FreeCAD/document work. A malformed
-request fails top-level `result.json` at stage `request_validation` (see
+request fails top-level `prm.result.json` at stage `request_validation` (see
 [result-and-failure.md](result-and-failure.md)) and also emits the canonical
 failed raw traversal payload described below.
 
 Canonical filenames:
 
 ```text
-request:  parametron.reference-traversal-request.json
-output:   parametron.reference-traversal.json
+request:  prm.reference-traversal-request.json
+output:   prm.reference-traversal.json
 ```
 
 **Schema `1.0`** (closed): `{"schemaVersion": "1.0"}` only.
@@ -215,7 +215,7 @@ output.
 
 ## Output containment and emission
 
-`<output-dir>/parametron.reference-traversal.json` is written atomically
+`<output-dir>/prm.reference-traversal.json` is written atomically
 using the exact supplied `--working-copy` as the sole containment root — the
 same exact containment model as the rest of the runtime (see
 [runtime.md](../runtime.md#working-copy--execution-root-contract)). The

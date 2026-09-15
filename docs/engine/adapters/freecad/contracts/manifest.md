@@ -6,7 +6,7 @@ parameter assignments, and declared exports.
 Transport filename (both schema versions):
 
 ```text
-export_manifest_v1.json
+prm.export-manifest.json
 ```
 
 The transport filename and the schema version are separate concepts; there is

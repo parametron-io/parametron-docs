@@ -4,7 +4,7 @@ Observation reads requested CAD-native state from an already-mutated,
 recomputed, and persisted document. It never evaluates checks or makes
 verification decisions — that is Engine's job.
 
-## Request: `parametron.verification.json`
+## Request: `prm.verification.json`
 
 Malformed JSON, duplicate keys, non-JSON constants, and non-object roots are
 rejected; decoded requests must also fit the supported observation scope.
@@ -42,12 +42,12 @@ working copy and requires `--output-dir`. The runtime:
 2. observes the same open, already-mutated, recomputed, and persisted
    document, after artifact export and reference traversal, before it is
    closed;
-3. writes `<output-dir>/parametron.observed.json` atomically.
+3. writes `<output-dir>/prm.observed.json` atomically.
 
 A standalone external `observe` command does not exist; observation is only
 available aligned onto `execute`.
 
-## Response: `parametron.observed.json`
+## Response: `prm.observed.json`
 
 ```json
 {
@@ -99,8 +99,8 @@ graph traversal described in
 Request loading, source hashing, observation generation, serialization, and
 output-writing failures all use structured-failure stage `observation` (see
 [result-and-failure.md](result-and-failure.md)). The document is still closed
-through the normal lifecycle; no success `result.json` is written after an
-observation failure; a failed `result.json` is written when its path is safe.
+through the normal lifecycle; no success `prm.result.json` is written after an
+observation failure; a failed `prm.result.json` is written when its path is safe.
 
 ## Ownership
 
