@@ -104,31 +104,128 @@ Examples:
 
 - `verification-standard.md`
 - `workflow.md`
-- `parametron.verification.json`
-- `parametron.observed.json`
+- `prm.verification.json`
+- `prm.observed.json`
 
 ---
 
 ## JSON Contract Naming
 
-Contracts follow this format:
+Parametron-owned JSON contract filenames MUST follow this canonical form:
 
 ```text
-parametron.<name>.json
+prm.<semantic-name>.json
 ```
 
 Examples:
 
-- `parametron.capture.json`
-- `parametron.observed.json`
-- `parametron.verification.json`
-- `parametron.lock.json`
+- `prm.export-manifest.json`
+- `prm.result.json`
+- `prm.observed.json`
+- `prm.verification.json`
+- `prm.reference-traversal.json`
+- `prm.reference-traversal-request.json`
 
 Rules:
 
-- Must start with `parametron.`
-- Use lowercase
-- Use descriptive, single-purpose names
+- `prm.` is the reserved **contract filename namespace** for Parametron JSON
+  contract files. It is a filename namespace abbreviation, not a general product
+  abbreviation, and MUST NOT be reused as the naming basis for unrelated
+  identifiers.
+- The **semantic name** identifies the contract's purpose. It MUST be lowercase,
+  explicit, descriptive, and single-purpose.
+- Multi-word semantic names MUST use hyphens. Unnecessary abbreviations such as
+  `ref-trav` SHOULD be avoided; use `reference-traversal`.
+- Schema versions MUST NOT appear in filenames. Schema versions MUST be carried
+  inside the contract, for example through `schemaVersion`.
+
+Names such as `export_manifest_v1.json` are deprecated as active
+transport/configuration filenames: they encode a schema version in the filename,
+lack the canonical namespace, and use underscore-separated semantic naming.
+Generic active contract filenames such as `result.json` are migration candidates
+because they lack the Parametron contract namespace.
+
+These rules define canonical naming policy, not completed implementation state.
+Current implementation documentation may still describe older names. Migration
+of existing active surfaces is future work in the owning repositories; this
+policy does not rename files, change schemas or runtime behavior, or revise the
+record-package layout.
+
+### Active Contract Filenames and Preserved Raw-Evidence Filenames
+
+An **active contract surface** is a transport or configuration boundary where a
+contract file is produced, selected, or consumed for current execution. Its
+**active contract filename** identifies the file at that boundary.
+
+**Preserved raw evidence** is received/generated transport material retained as
+evidence of an execution or historical event. A **preserved raw-evidence
+filename** retains that material's original transport identity for provenance.
+Raw runtime output can serve as an active contract before being preserved as
+evidence; calling it raw evidence does not exempt its active surface.
+
+| Role | Naming policy |
+| --- | --- |
+| Active transport/configuration contract surface | MUST use `prm.<semantic-name>.json` as the canonical filename. |
+| Preserved historical/raw evidence | MAY retain the original filename when retaining the received/generated transport identity is necessary for provenance. |
+
+New active contract surfaces MUST use canonical naming. Once an existing
+surface's relevant migration is complete, newly produced active runtime,
+transport, or configuration contracts MUST NOT retain the old filenames.
+
+Names such as `parametron.*.json`, `result.json`, and `export_manifest_v1.json`
+MUST NOT automatically be treated as globally forbidden strings. They MAY remain
+in preserved raw evidence, historical evidence, migration history, and
+tests/fixtures that intentionally prove compatibility or provenance, when that
+use is semantically legitimate. Preservation MUST NOT be used to justify
+continued production under an old name on a migrated active surface.
+
+Migration audits MUST ask: **"Is the old filename still used by an active
+contract surface?"** They MUST NOT use **"Does the old filename exist anywhere?"**
+as the migration-completion criterion.
+
+An old contract filename is not automatically a retired planning/product term.
+Filename migration policy and [Legacy Terms](#legacy-terms) policy are separate
+concerns; preserved evidence filenames MUST NOT automatically be placed in a
+generic Legacy Terms category.
+
+---
+
+## Environment Variable Naming
+
+Parametron-owned environment variables MUST retain the canonical product prefix
+`PARAMETRON_` and use uppercase, underscore-separated words. The JSON filename
+namespace `prm.` MUST NOT be used to derive environment-variable naming or imply
+a migration to `PRM_`.
+
+### Component Configuration
+
+**Component configuration** supplies settings for a component, such as its
+executable or operating mode. Names MUST follow:
+
+```text
+PARAMETRON_<COMPONENT>_<NAME>
+```
+
+`<COMPONENT>` identifies the configured component; `<NAME>` describes the setting.
+Examples:
+
+- `PARAMETRON_FREECAD_BIN`
+- `PARAMETRON_FREECAD_STRICT_SMOKE`
+- `PARAMETRON_FREECAD_RUNTIME`
+
+### Behavior, Test, and Execution Toggles
+
+A **behavior/test toggle** controls whether a workflow, test, integration, or
+execution path runs, rather than supplying component configuration. Such toggles
+MAY use an action-oriented name under `PARAMETRON_` when it communicates that
+purpose more clearly than the component configuration form.
+
+`PARAMETRON_RUN_FREECAD_INTEGRATION` is an explicit example of this category:
+its action-oriented name expresses whether the FreeCAD integration path runs.
+It is not an accidental violation of the component configuration convention and
+does not require renaming under this standard. A boolean value alone does not
+determine the category; the variable's purpose does. These naming categories
+define policy without renaming existing variables or changing their behavior.
 
 ---
 
