@@ -3,7 +3,7 @@
 The CLI parses and validates DSL/project inputs, plans requested work, and
 executes through Engine adapters and external runtime capabilities. This page
 owns command configuration, output locations, overrides, and cache behavior.
-The [execution runtime](https://github.com/parametron-io/parametron-engine/blob/main/docs/engine/execution-runtime.md) owns the detailed
+The [execution runtime](../runtime/execution-runtime.md) owns the detailed
 runtime and evidence-processing lifecycle.
 
 ## Entry points and overrides
@@ -40,7 +40,7 @@ and flag tables are merged; a duplicate ID across the two sources is rejected.
 Loaded tables feed table-aware validation/planning and contribute names and
 fingerprints to metadata. I/O, decoding, and schema validation failures remain
 distinct table error categories. See
-[JSON table resources](https://github.com/parametron-io/parametron-engine/blob/main/docs/engine/json-table-resources.md).
+[JSON table resources](../reference/json-table-resources.md).
 
 ## Output directories
 
@@ -71,7 +71,7 @@ for success or failure. On success it also writes artifact inventory and
 metadata. Report/metadata/inventory write errors are logged as warnings.
 Record-package emission runs when report construction succeeds; an emission
 failure prevents a successful return and cache completion. See
-[record contracts](https://github.com/parametron-io/parametron-engine/blob/main/docs/reference/record-contracts.md) for package contents.
+[record contracts](../reference/record-contracts.md) for package contents.
 
 Snapshot uses its selected output directory directly, without a plan-hash
 subdirectory; other command-specific layouts are defined in their command pages.
@@ -102,7 +102,7 @@ Cache setup/check failures are logged and execution continues. Successful
 execution and record-package emission precede cache-marker updates.
 `snapshot` and `simulate` execute without this cache. `sweep` validates and
 plans cases without executing CAD. See
-[execution runtime](https://github.com/parametron-io/parametron-engine/blob/main/docs/engine/execution-runtime.md) for cache internals.
+[execution runtime](../runtime/execution-runtime.md) for cache internals.
 
 ## External runtime configuration
 

@@ -207,6 +207,6 @@ Unknown identifiers outside an enum context are rejected.
 
 - [DSL overview](dsl-overview.md) — file structure and top-level constructs
 - [DSL semantics](dsl-semantics.md) — evaluation model, dependency resolution, type rules, table lookup semantics
-- [JSON table resources](https://github.com/parametron-io/parametron-engine/blob/main/docs/engine/json-table-resources.md) — JSON table resource format and validation rules
-- [Target-action contract](https://github.com/parametron-io/parametron-engine/blob/main/docs/reference/target-action-contract.md) — target-action semantics,
+- [JSON table resources](../reference/json-table-resources.md) — JSON table resource format and validation rules
+- [Target-action contract](../reference/target-action-contract.md) — target-action semantics,
   resolution, capability validation, mutation routing, and runtime contract

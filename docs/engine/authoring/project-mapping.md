@@ -199,4 +199,4 @@ Tables declared in the `tables` field are loaded by logical ID when a project en
 
 - [Validate](../cli/validate.md) — project directory and project file as CLI entrypoints
 - [DSL overview](dsl-overview.md) — DSL file structure, profile settings, and product-level execution declarations including `source_model`
-- [JSON table resources](https://github.com/parametron-io/parametron-engine/blob/main/docs/engine/json-table-resources.md) — JSON table file format
+- [JSON table resources](../reference/json-table-resources.md) — JSON table file format

@@ -55,7 +55,7 @@ subdirectories:
 | `manifest.json` | Artifact inventory |
 | Generated artifacts | CSV files under `products/<product-key>/`; CAD outputs in attempt workspaces below that product directory |
 
-Execution also uses the normal [record-package emission](https://github.com/parametron-io/parametron-engine/blob/main/docs/reference/record-contracts.md).
+Execution also uses the normal [record-package emission](../reference/record-contracts.md).
 Execution failures may leave partial outputs. If execution returns an error,
 snapshot writes its descriptor before returning that error when file enumeration
 and descriptor writing succeed.
@@ -95,4 +95,4 @@ On success, the CLI prints: `"Snapshot created at <dir>"`
 
 - [Diff](diff.md) — comparing two snapshot directories
 - [Command families](command-families.md) — command routing and shared behavior
-- [Reporting](https://github.com/parametron-io/parametron-engine/blob/main/docs/engine/reporting.md) — `report.json` schema
+- [Reporting](../runtime/reporting.md) — `report.json` schema

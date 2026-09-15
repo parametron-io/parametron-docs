@@ -72,7 +72,7 @@ Case `status` values in `simulate_report.json` are:
 
 This status vocabulary is specific to `simulate_report.json`. It does not match
 `report.json`, which uses the run-level values documented in
-[reporting](https://github.com/parametron-io/parametron-engine/blob/main/docs/engine/reporting.md).
+[reporting](../runtime/reporting.md).
 
 ```json
 {
@@ -109,4 +109,4 @@ The cache is not used by `simulate`. Every case always executes regardless of ca
 
 - [Command families](command-families.md) — command routing and shared behavior
 - [CLI runtime behavior](runtime-behavior.md) — output directory strategy
-- [Reporting](https://github.com/parametron-io/parametron-engine/blob/main/docs/engine/reporting.md) — `report.json` schema
+- [Reporting](../runtime/reporting.md) — `report.json` schema
