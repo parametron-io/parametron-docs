@@ -15,6 +15,24 @@ The cross-repository architecture remains canonical in the
 [Repository Boundaries](../architecture/repo-boundaries.md). This area links to
 those documents instead of repeating the full system architecture.
 
+## Authoring
+
+Start with the [DSL overview](authoring/dsl-overview.md), then use the
+[grammar](authoring/dsl-grammar.md) and [semantics](authoring/dsl-semantics.md)
+references. The authoring area also defines [IR and planning](authoring/ir-and-planning.md),
+the [project mapping contract](authoring/project-mapping.md), and the
+[CAD capture contract](authoring/cad-contract.md).
+
+## CLI
+
+See [CLI command families](cli/command-families.md) for command selection and
+[CLI runtime behavior](cli/runtime-behavior.md) for shared configuration and
+output rules. Command references cover [validate](cli/validate.md),
+[simulate](cli/simulate.md), [sweep](cli/sweep.md),
+[snapshot](cli/snapshot.md), and [diff](cli/diff.md).
+
+## Adapters
+
 Adapter documentation belongs to the Engine adapter domain. See the
 [Adapter Domain](adapters/README.md) for the current Engine-owned boundary
 between planning and CAD-native execution. FreeCAD is the currently implemented
