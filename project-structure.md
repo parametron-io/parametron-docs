@@ -14,6 +14,8 @@ This is a structural index. For conceptual guidance and reading order, see
 | [docs/architecture/product-family.md](docs/architecture/product-family.md) | Minimum naming and product-boundary context |
 | [docs/architecture/system-overview.md](docs/architecture/system-overview.md) | Current Engine + FreeCAD engineering system overview |
 | [docs/architecture/repo-boundaries.md](docs/architecture/repo-boundaries.md) | Current public engineering ownership rules |
+| [docs/engine/README.md](docs/engine/README.md) | Canonical current Engine engineering documentation |
+| [docs/engine/adapters/README.md](docs/engine/adapters/README.md) | Current Engine adapter-domain contracts and ownership |
 | [docs/development/workflow.md](docs/development/workflow.md) | GitHub-native engineering workflow and coordination rules |
 | [docs/development/verification-standard.md](docs/development/verification-standard.md) | Canonical definition of done for all phases and issues |
 | [docs/conventions/phases.md](docs/conventions/phases.md) | What a phase is: definition, characteristics, ownership, naming |
@@ -33,13 +35,17 @@ This is a structural index. For conceptual guidance and reading order, see
 │   │   ├── commit-messages.md
 │   │   ├── naming.md
 │   │   └── phases.md
-│   └── development
-│       ├── verification-standard.md
-│       └── workflow.md
+│   ├── development
+│   │   ├── verification-standard.md
+│   │   └── workflow.md
+│   └── engine
+│       ├── adapters
+│       │   └── README.md
+│       └── README.md
 ├── CONTRIBUTING.md
 ├── LICENSE
 ├── project-structure.md
 └── README.md
 
-5 directories, 12 files
+7 directories, 14 files
 ```

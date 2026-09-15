@@ -30,6 +30,7 @@ conventions, and workflow documentation** for the current implementation focus.
 | [Product Family](docs/architecture/product-family.md) | Minimum naming and product-boundary context |
 | [System Overview](docs/architecture/system-overview.md) | Current Engine + FreeCAD engineering flow |
 | [Repository Boundaries](docs/architecture/repo-boundaries.md) | Current public engineering ownership rules |
+| [Engine Documentation](docs/engine/README.md) | Canonical current Engine engineering documentation |
 | [Development Workflow](docs/development/workflow.md) | GitHub-native work state and cross-repository coordination |
 | [Phase System](docs/conventions/phases.md) | Phase definitions and characteristics |
 | [Naming Conventions](docs/conventions/naming.md) | Shared terminology and naming rules |
