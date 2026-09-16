@@ -25,7 +25,8 @@ the Project describe what is currently being done.
 - **Phase** — a maintainer-owned, bounded engineering objective with related
   work and explicit exit criteria. A Phase groups the work needed to reach one
   engineering boundary.
-- **Task**, **Bug**, **Feature** — the normal child/work-item issue types
+- **Task** — a maintainer-owned work-item issue type used for planned repository work under a Phase. Task creation is reserved for maintainers.
+- **Bug**, **Feature** — the normal child/work-item issue types
   carried out under a Phase.
 
 For what a Phase is conceptually, see [Phases](../conventions/phases.md).
