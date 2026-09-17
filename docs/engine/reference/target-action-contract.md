@@ -2,9 +2,12 @@
 
 Engine evaluates target actions, resolves semantic targets, checks captured
 capabilities, and projects deterministic runtime mutation intent. FreeCAD owns
-native lookup, mutation, recompute, post-delete validity, save/reopen persistence,
-observation, and native failures. Engine owns verification decisions and record
-normalization. Engine handoff tests do not prove native mutation correctness.
+native lookup, mutation, recompute, native post-mutation/post-delete validity
+inspection, raw native dependency evidence, save/reopen persistence,
+observation, and native failures. Engine owns expected-versus-observed
+comparison, tolerance evaluation, engineering verification decisions, and
+record normalization. Engine handoff tests do not prove native mutation
+correctness.
 
 Current runtime limitation: Engine currently supports planning, capability
 validation, lowering, routing, and schema 2.0 manifest projection for target
@@ -13,13 +16,18 @@ execute schema 2.0 target mutations. FreeCAD has a tested native
 suppression/unsuppression consumer for validated native object/state entries,
 and a tested native visibility consumer for validated `{object, visible}`
 entries. The visibility consumer supports both projected mappings (`hide` to
-`visible: false` and `unhide` to `visible: true`). Neither standalone consumer
-is connected to schema 2.0 execute, and native deletion remains unavailable.
-Engine handoff plus these standalone capabilities therefore does not provide
-end-to-end target-mutation execution. FreeCAD remains the owner of native
-lookup, mutation, recompute, persistence, observation, and native failure
-behavior; Engine remains the owner of verification decisions and record
-normalization.
+`visible: false` and `unhide` to `visible: true`). FreeCAD also has implemented
+and tested bounded, read-only native post-mutation PartDesign Body validity
+inspection and deterministic native `InList`/`OutList` dependency evidence.
+These standalone capabilities are not connected to schema 2.0 execute, and
+native deletion remains unavailable. Final lifecycle ordering and structured
+runtime failure mapping remain issue #6 work. Engine handoff plus these
+standalone capabilities therefore does not provide end-to-end target-mutation
+execution. Engine handoff tests remain proof of Engine planning and projection,
+distinct from native runtime proof. FreeCAD remains the owner of native lookup,
+mutation, recompute, validity inspection, raw dependency evidence, persistence,
+observation, and native failure behavior; Engine retains the comparison,
+tolerance, verification, and normalization responsibilities stated above.
 
 ## Authoring and action evaluation
 
