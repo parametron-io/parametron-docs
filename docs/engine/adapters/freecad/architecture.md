@@ -27,6 +27,7 @@ owns CAD-native execution and raw evidence capture:
 | Planning, manifest projection, working-copy preparation | Owns | — |
 | Runtime invocation, evidence intake, verification decisions | Owns | — |
 | Document lifecycle (open, mutate, recompute, save, close) | — | Owns |
+| Native shape validity inspection and raw dependency evidence | — | Owns |
 | Requested observation and reference discovery | — | Owns |
 | Artifact export (STEP/CSV/PDF) | — | Owns |
 | Normalized engineering records, durable storage | Owns | — |
@@ -110,8 +111,12 @@ unhide/delete) contract metadata and strict validation, but the current
 runtime does not execute schema 2.0 manifests. A focused FreeCAD-native
 suppression/unsuppression consumer is implemented and tested independently,
 and a focused FreeCAD-native visibility hide/unhide consumer is likewise
-implemented and tested independently. Neither is connected to the schema 2.0
-execute path, and native deletion remains unimplemented. See
+implemented and tested independently. Focused read-only post-mutation
+PartDesign Body validity inspection and deterministic native dependency
+evidence are also implemented and tested independently. None of these
+standalone target-mutation capabilities is connected to the schema 2.0 execute
+path, and native deletion remains unimplemented. Final lifecycle ordering and
+structured runtime failure mapping remain issue #6 work. See
 [contracts/target-mutations.md](contracts/target-mutations.md) for the exact
 boundary between validation, native capability, and execute integration, and
 [Target-Action Contract](../../reference/target-action-contract.md) for

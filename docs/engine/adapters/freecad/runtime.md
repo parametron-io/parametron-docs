@@ -11,6 +11,13 @@ reference-traversal, and artifact schemas, see the documents under
 attempt isolation, request materialization, evidence intake validation, and
 verification — see [Execution Runtime](../../runtime/execution-runtime.md).
 
+Separately from the normal external lifecycle documented below, FreeCAD has
+implemented and tested standalone read-only native post-mutation validity and
+dependency inspection. Normal `execute` does not invoke that infrastructure:
+schema 2.0 target-mutation execution remains unavailable. Issue #6 owns its
+future lifecycle placement and translation through the structured runtime
+failure boundary; see [Target Mutations](contracts/target-mutations.md).
+
 ## Invocation
 
 For the separate in-process `run_engine_invocation` callable, its request
