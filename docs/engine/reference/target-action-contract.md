@@ -9,10 +9,14 @@ normalization. Engine handoff tests do not prove native mutation correctness.
 Current runtime limitation: Engine currently supports planning, capability
 validation, lowering, routing, and schema 2.0 manifest projection for target
 actions, but the current `parametron-freecad` execution runtime does not yet
-execute schema 2.0 target mutations. Engine-side planning and manifest handoff
-support therefore must not be interpreted as proof of end-to-end native
-mutation support. FreeCAD remains the owner of native lookup, mutation,
-recompute, persistence, observation, and native failure behavior.
+execute schema 2.0 target mutations. FreeCAD has a tested native
+suppression/unsuppression consumer for validated native object/state entries,
+but that consumer is not yet connected to schema 2.0 execute. Native
+visibility and deletion consumers remain unavailable. Engine handoff plus the
+standalone suppression capability therefore does not provide end-to-end
+target-mutation execution. FreeCAD remains the owner of native lookup,
+mutation, recompute, persistence, observation, and native failure behavior;
+Engine remains the owner of verification decisions and record normalization.
 
 ## Authoring and action evaluation
 

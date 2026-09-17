@@ -49,13 +49,17 @@ dot-form data (`export_manifest.v1.json` shape) into this schema, e.g.
 rejects Engine name-only parameter assignments that lack explicit FreeCAD
 target data.
 
-## Schema 2.0 (contract metadata and validation implemented; runtime execution not implemented)
+## Schema 2.0 (contract metadata and validation implemented; execute integration not implemented)
 
 Schema 2.0 adds optional target-mutation sections on top of the same core
 fields. Its contract metadata and strict validator are implemented and
-tested, but **the runtime does not yet accept or execute schema 2.0
-manifests** — see [target-mutations.md](target-mutations.md) for the exact
-boundary between what is validated and what is executed.
+tested, but **the current execute entrypoint does not yet accept schema 2.0
+manifests for real execution**. A focused native suppression/unsuppression
+consumer is implemented and tested independently downstream of validation,
+but the execute entrypoint does not connect validated schema 2.0 mutation
+sections to it. Native visibility and deletion execution remain unavailable.
+See [target-mutations.md](target-mutations.md) for the exact boundary between
+validation, standalone native capability, and execute integration.
 
 Required top-level fields: `schemaVersion`, `sourceDocument`,
 `parameterAssignments`, `outputs` (the same field shapes as schema 1.0).
@@ -109,4 +113,6 @@ semantic intent behind requested mutations — see [Target-Action
 Contract](../../../reference/target-action-contract.md) for that projection.
 Neither the manifest nor its validator performs CAD-native mutation,
 recompute, or persistence by themselves — see [runtime.md](../runtime.md) for
-the execution lifecycle.
+the currently wired schema 1.0 execution lifecycle. The standalone native
+suppression consumer is a downstream capability and does not change that
+validator boundary.
