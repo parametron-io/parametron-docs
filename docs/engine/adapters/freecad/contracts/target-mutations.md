@@ -26,9 +26,9 @@ Three layers exist for this capability, at different levels of completeness:
 Layer 1 — Contract/Type Metadata:   implemented
 Layer 2 — Manifest Validation:      implemented
 Layer 3 — Native Execution:         partial
-  suppression / unsuppression:     implemented and tested
+  suppression / unsuppression:     standalone consumer implemented and tested
+  visibility hide / unhide:        standalone consumer implemented and tested
   schema 2.0 execute integration:  not implemented
-  visibility:                      not implemented
   deletion:                        not implemented
 ```
 
@@ -79,27 +79,56 @@ semantic resolution or Label, alias, fuzzy, or case-normalized lookup. It does
 not synthesize `Suppressed`, and it does not use or change visibility as a
 substitute for suppression.
 
-#### Execute integration, visibility, and deletion (not implemented)
+#### Visibility hide and unhide (implemented and tested)
+
+FreeCAD has a focused native consumer for already validated `{object,
+visible}` entries. As with suppression, Engine retains ownership of semantic
+target resolution, captured capability validation, routing, ordering, and
+schema 2.0 projection. The consumer checks native operation support at the
+execution boundary; that check does not replace Engine capability validation.
+
+For each supplied entry, in supplied order, the consumer:
+
+1. resolves the exact `object` name through `document.getObject(object)`;
+2. requires an existing App-level native `Visibility` property;
+3. requires `getTypeIdOfProperty("Visibility") == "App::PropertyBool"`; and
+4. writes the requested boolean directly to `target.Visibility`.
+
+Both `visible: false` (hide) and `visible: true` (unhide) are supported.
+Processing stops at the first failure, retaining any earlier successful writes
+and not applying later entries. Missing targets, unsupported native
+capabilities, and native lookup, inspection, or write failures produce
+controlled consumer failures; underlying native exceptions are preserved
+where applicable. Empty visibility collections are accepted, and caller input
+is not mutated.
+
+Lookup is by exact native object name only. The consumer does not perform
+Label, alias, fuzzy, or case-normalized lookup, and it does not synthesize
+`Visibility`. It uses neither `FreeCADGui` nor `ViewObject`. Visibility remains
+independent of suppression; the consumer does not use suppression as a
+visibility substitute.
+
+#### Execute integration and deletion (not implemented)
 
 FreeCAD's runtime still loads and validates every manifest exclusively
 through the schema `1.0` path. A schema `2.0` manifest — mutation-bearing or
 not — is rejected before document opening, parameter assignment, recompute,
 save, export, or success-result writing. Handled validation failures still
 attempt a failed `prm.result.json` when a safe destination is supplied. The
-standalone suppression consumer is therefore not invoked by the normal
-external `parametron-freecad execute` lifecycle.
+standalone suppression and visibility consumers are therefore not invoked by
+the normal external `parametron-freecad execute` lifecycle.
 
-Schema 2.0 execute-entrypoint integration, native visibility and deletion
-consumers, runtime-stage integration, recompute/save sequencing around target
-mutations, structured execute failure mapping, compatibility integration,
-post-mutation validity, and target observation are not implemented.
+Schema 2.0 execute-entrypoint integration, native deletion, runtime-stage
+integration, recompute/save sequencing around target mutations, structured
+execute failure mapping, compatibility integration, post-mutation validity,
+and target observation are not implemented.
 
 Engine-side planning, capability validation, lowering, routing, and schema
 2.0 manifest projection for target actions must not be interpreted as proof
 of end-to-end native mutation support: Engine handoff tests exercise Engine's
-own planning and projection. The standalone native suppression consumer plus
-Engine handoff still does not provide schema 2.0 execution through the normal
-external lifecycle.
+own planning and projection. The standalone native suppression and visibility
+consumers plus Engine handoff still do not provide schema 2.0 execution through
+the normal external lifecycle.
 
 ## Native structure precedent
 
@@ -117,9 +146,21 @@ unsuppressed intermediate features becoming suppressed. They also demonstrate
 that `Suppressed` is an `App::PropertyBool`, relevant visibility state remains
 unchanged, unsupported native targets are rejected without synthetic
 properties, and the committed fixture remains unchanged. This is evidence for
-the standalone native consumer, not for schema 2.0 execute integration,
-recompute/save orchestration, observation, or persistence through normal
-execute.
+the standalone suppression consumer.
+
+Permanent real-FreeCAD tests separately invoke the production visibility
+consumer against temporary fixture copies. They demonstrate hiding the
+initially visible `MutationBody` and unhiding the initially hidden
+`BaseSketch`, with App-level `Visibility` exposed as `App::PropertyBool`. They
+also demonstrate that suppression remains unchanged, missing exact native
+targets fail through the controlled consumer, and the committed fixture
+remains byte-identical.
+
+These consumer tests are native execution proof for the standalone suppression
+and visibility consumers. The fixture contract tests establish only starting
+structure and preconditions. Neither form of proof establishes schema 2.0
+execute integration, recompute/save orchestration, target-state observation,
+or persistence through normal execute.
 
 ## Ownership
 
