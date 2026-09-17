@@ -109,8 +109,9 @@ Manifest schema 2.0 also defines target-mutation (suppress/unsuppress/hide/
 unhide/delete) contract metadata and strict validation, but the current
 runtime does not execute schema 2.0 manifests. A focused FreeCAD-native
 suppression/unsuppression consumer is implemented and tested independently,
-but it is not connected to the schema 2.0 execute path. Native visibility and
-deletion consumers remain unimplemented. See
+and a focused FreeCAD-native visibility hide/unhide consumer is likewise
+implemented and tested independently. Neither is connected to the schema 2.0
+execute path, and native deletion remains unimplemented. See
 [contracts/target-mutations.md](contracts/target-mutations.md) for the exact
 boundary between validation, native capability, and execute integration, and
 [Target-Action Contract](../../reference/target-action-contract.md) for

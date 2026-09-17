@@ -56,8 +56,9 @@ fields. Its contract metadata and strict validator are implemented and
 tested, but **the current execute entrypoint does not yet accept schema 2.0
 manifests for real execution**. A focused native suppression/unsuppression
 consumer is implemented and tested independently downstream of validation,
-but the execute entrypoint does not connect validated schema 2.0 mutation
-sections to it. Native visibility and deletion execution remain unavailable.
+and a focused native visibility hide/unhide consumer is also implemented and
+tested independently. The execute entrypoint does not connect validated schema
+2.0 mutation sections to either consumer. Native deletion remains unavailable.
 See [target-mutations.md](target-mutations.md) for the exact boundary between
 validation, standalone native capability, and execute integration.
 
@@ -114,5 +115,5 @@ Contract](../../../reference/target-action-contract.md) for that projection.
 Neither the manifest nor its validator performs CAD-native mutation,
 recompute, or persistence by themselves — see [runtime.md](../runtime.md) for
 the currently wired schema 1.0 execution lifecycle. The standalone native
-suppression consumer is a downstream capability and does not change that
-validator boundary.
+suppression and visibility consumers are downstream capabilities and do not
+change that validator boundary.

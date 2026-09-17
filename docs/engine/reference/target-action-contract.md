@@ -11,12 +11,15 @@ validation, lowering, routing, and schema 2.0 manifest projection for target
 actions, but the current `parametron-freecad` execution runtime does not yet
 execute schema 2.0 target mutations. FreeCAD has a tested native
 suppression/unsuppression consumer for validated native object/state entries,
-but that consumer is not yet connected to schema 2.0 execute. Native
-visibility and deletion consumers remain unavailable. Engine handoff plus the
-standalone suppression capability therefore does not provide end-to-end
-target-mutation execution. FreeCAD remains the owner of native lookup,
-mutation, recompute, persistence, observation, and native failure behavior;
-Engine remains the owner of verification decisions and record normalization.
+and a tested native visibility consumer for validated `{object, visible}`
+entries. The visibility consumer supports both projected mappings (`hide` to
+`visible: false` and `unhide` to `visible: true`). Neither standalone consumer
+is connected to schema 2.0 execute, and native deletion remains unavailable.
+Engine handoff plus these standalone capabilities therefore does not provide
+end-to-end target-mutation execution. FreeCAD remains the owner of native
+lookup, mutation, recompute, persistence, observation, and native failure
+behavior; Engine remains the owner of verification decisions and record
+normalization.
 
 ## Authoring and action evaluation
 
