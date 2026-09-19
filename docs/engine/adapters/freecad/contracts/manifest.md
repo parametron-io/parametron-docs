@@ -57,8 +57,11 @@ tested, but **the current execute entrypoint does not yet accept schema 2.0
 manifests for real execution**. A focused native suppression/unsuppression
 consumer is implemented and tested independently downstream of validation,
 and a focused native visibility hide/unhide consumer is also implemented and
-tested independently. The execute entrypoint does not connect validated schema
-2.0 mutation sections to either consumer. Native deletion remains unavailable.
+tested independently. A conservative native deletion consumer and the
+deterministic post-mutation validity/dependency infrastructure supporting its
+standalone boundary are implemented and tested as well. The execute entrypoint
+does not connect validated schema 2.0 mutation sections to any of these
+consumers.
 See [target-mutations.md](target-mutations.md) for the exact boundary between
 validation, standalone native capability, and execute integration.
 
@@ -88,7 +91,8 @@ writes remain exclusively the job of `parameterAssignments`.
   `deletion` are recognized; anything else (`parameters`, `keep`, `actions`,
   `targets`, …) is rejected.
 - **Strict entry shape** — unknown/extra entry fields (`force`, `cascade`,
-  `action`, `targetKind`, …) are rejected.
+  `recursive`, `dependencyPolicy`, `repair`, `action`, `targetKind`, …) are
+  rejected.
 - **Strict JSON booleans** — `suppressed`/`visible` must satisfy
   `type(value) is bool`; numeric or string coercions (`0`, `1`, `"true"`) are
   rejected.
@@ -115,5 +119,6 @@ Contract](../../../reference/target-action-contract.md) for that projection.
 Neither the manifest nor its validator performs CAD-native mutation,
 recompute, or persistence by themselves — see [runtime.md](../runtime.md) for
 the currently wired schema 1.0 execution lifecycle. The standalone native
-suppression and visibility consumers are downstream capabilities and do not
-change that validator boundary.
+suppression, visibility, and conservative deletion consumers are downstream
+capabilities, supported by standalone deterministic post-mutation
+validity/dependency infrastructure, and do not change that validator boundary.

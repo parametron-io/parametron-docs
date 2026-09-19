@@ -27,6 +27,7 @@ owns CAD-native execution and raw evidence capture:
 | Planning, manifest projection, working-copy preparation | Owns | — |
 | Runtime invocation, evidence intake, verification decisions | Owns | — |
 | Document lifecycle (open, mutate, recompute, save, close) | — | Owns |
+| Conservative native deletion and its dependent-safety boundary | — | Owns |
 | Native shape validity inspection and raw dependency evidence | — | Owns |
 | Requested observation and reference discovery | — | Owns |
 | Artifact export (STEP/CSV/PDF) | — | Owns |
@@ -113,10 +114,14 @@ suppression/unsuppression consumer is implemented and tested independently,
 and a focused FreeCAD-native visibility hide/unhide consumer is likewise
 implemented and tested independently. Focused read-only post-mutation
 PartDesign Body validity inspection and deterministic native dependency
-evidence are also implemented and tested independently. None of these
-standalone target-mutation capabilities is connected to the schema 2.0 execute
-path, and native deletion remains unimplemented. Final lifecycle ordering and
-structured runtime failure mapping remain issue #6 work. See
+evidence are also implemented and tested independently. A focused conservative
+native deletion consumer is also implemented and tested independently: it uses
+the exact native target, rejects surviving native dependents, performs native
+removal, recomputes, and requires bounded post-delete supported Body validity,
+failing closed when required evidence is unavailable. None of these standalone
+target-mutation capabilities is connected to the schema 2.0 execute path. Final
+lifecycle ordering and structured runtime failure mapping remain issue #6 work.
+Target-state observation remains separate issue #5 scope. See
 [contracts/target-mutations.md](contracts/target-mutations.md) for the exact
 boundary between validation, native capability, and execute integration, and
 [Target-Action Contract](../../reference/target-action-contract.md) for

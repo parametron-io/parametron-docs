@@ -19,15 +19,21 @@ entries. The visibility consumer supports both projected mappings (`hide` to
 `visible: false` and `unhide` to `visible: true`). FreeCAD also has implemented
 and tested bounded, read-only native post-mutation PartDesign Body validity
 inspection and deterministic native `InList`/`OutList` dependency evidence.
-These standalone capabilities are not connected to schema 2.0 execute, and
-native deletion remains unavailable. Final lifecycle ordering and structured
-runtime failure mapping remain issue #6 work. Engine handoff plus these
+FreeCAD also has a tested standalone conservative native deletion consumer for
+validated `{object}` entries: it resolves the exact projected native object,
+rejects surviving native dependents, performs native removal, recomputes, and
+requires bounded supported post-delete Body validity. These standalone
+capabilities are not connected to schema 2.0 execute. Final lifecycle ordering
+and structured runtime failure mapping remain issue #6 work; target-state
+observation remains separate issue #5 scope. Engine handoff plus these
 standalone capabilities therefore does not provide end-to-end target-mutation
 execution. Engine handoff tests remain proof of Engine planning and projection,
 distinct from native runtime proof. FreeCAD remains the owner of native lookup,
 mutation, recompute, validity inspection, raw dependency evidence, persistence,
 observation, and native failure behavior; Engine retains the comparison,
 tolerance, verification, and normalization responsibilities stated above.
+See [FreeCAD Target Mutations](../adapters/freecad/contracts/target-mutations.md)
+for the detailed native deletion and evidence boundary.
 
 ## Authoring and action evaluation
 

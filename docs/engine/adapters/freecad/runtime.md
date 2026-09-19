@@ -12,11 +12,14 @@ attempt isolation, request materialization, evidence intake validation, and
 verification — see [Execution Runtime](../../runtime/execution-runtime.md).
 
 Separately from the normal external lifecycle documented below, FreeCAD has
-implemented and tested standalone read-only native post-mutation validity and
-dependency inspection. Normal `execute` does not invoke that infrastructure:
-schema 2.0 target-mutation execution remains unavailable. Issue #6 owns its
-future lifecycle placement and translation through the structured runtime
-failure boundary; see [Target Mutations](contracts/target-mutations.md).
+implemented and tested standalone native suppression/unsuppression, visibility,
+and conservative deletion consumers, plus deterministic post-mutation validity
+and dependency inspection. Normal `execute` does not invoke those consumers or
+that infrastructure: schema 2.0 target-mutation execution remains unavailable.
+Issue #6 owns their future lifecycle placement and translation through the
+structured runtime failure boundary; target-state observation remains separate
+issue #5 scope. See [Target Mutations](contracts/target-mutations.md) for the
+standalone capability semantics.
 
 ## Invocation
 
