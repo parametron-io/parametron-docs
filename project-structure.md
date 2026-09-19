@@ -52,6 +52,7 @@ This is a structural index. For conceptual guidance and reading order, see
 | [docs/engine/reference/target-action-contract.md](docs/engine/reference/target-action-contract.md) | Semantic target-action validation and runtime projection |
 | [docs/development/workflow.md](docs/development/workflow.md) | GitHub-native engineering workflow and coordination rules |
 | [docs/development/verification-standard.md](docs/development/verification-standard.md) | Canonical definition of done for all phases and issues |
+| [docs/governance/open-source.md](docs/governance/open-source.md) | Parametron open-source intent and scope |
 | [docs/conventions/phases.md](docs/conventions/phases.md) | What a phase is: definition, characteristics, ownership, naming |
 | [docs/conventions/naming.md](docs/conventions/naming.md) | Naming rules for repositories, phases, files, and contracts |
 | [docs/conventions/commit-messages.md](docs/conventions/commit-messages.md) | Commit format, types, scopes, and issue referencing |
@@ -72,6 +73,8 @@ This is a structural index. For conceptual guidance and reading order, see
 │   ├── development
 │   │   ├── verification-standard.md
 │   │   └── workflow.md
+│   ├── governance
+│   │   └── open-source.md
 │   └── engine
 │       ├── adapters
 │       │   ├── freecad
@@ -122,5 +125,5 @@ This is a structural index. For conceptual guidance and reading order, see
 ├── project-structure.md
 └── README.md
 
-13 directories, 48 files
+14 directories, 49 files
 ```
