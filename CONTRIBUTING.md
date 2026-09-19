@@ -4,7 +4,7 @@ Contributions are welcome. Parametron is early-stage, and focused corrections, c
 
 ## Understand the Scope
 
-Before proposing a change, read the [Product Family](docs/architecture/product-family.md), [System Overview](docs/architecture/system-overview.md), and [Repository Boundaries](docs/architecture/repo-boundaries.md).
+Before proposing a change, read the [Product Family](docs/architecture/product-family.md), [System Overview](docs/architecture/system-overview.md), [Repository Boundaries](docs/architecture/repo-boundaries.md), and [Open Source](docs/governance/open-source.md).
 
 This repository owns cross-repository architecture, conventions, and coordination documentation. Implementation changes and code-specific documentation belong in the repository that owns the behavior. Preserve the documented ownership boundaries and use the current [Naming Conventions](docs/conventions/naming.md).
 
