@@ -107,22 +107,25 @@ behind the same launcher entry point:
   graph evidence. See
   [contracts/reference-traversal.md](contracts/reference-traversal.md).
 
-Manifest schema 2.0 also defines target-mutation (suppress/unsuppress/hide/
-unhide/delete) contract metadata and strict validation, but the current
-runtime does not execute schema 2.0 manifests. A focused FreeCAD-native
-suppression/unsuppression consumer is implemented and tested independently,
-and a focused FreeCAD-native visibility hide/unhide consumer is likewise
-implemented and tested independently. Focused read-only post-mutation
-PartDesign Body validity inspection and deterministic native dependency
-evidence are also implemented and tested independently. A focused conservative
-native deletion consumer is also implemented and tested independently: it uses
-the exact native target, rejects surviving native dependents, performs native
+Engine's canonical FreeCAD runtime manifest contract is schema `1.0`, which
+defines optional target-mutation sections (suppression, visibility, deletion) on
+top of the core execution fields. FreeCAD retains transitional schema-2 metadata
+and validation from an earlier pre-release split, but the active runtime does
+not execute schema 2.0 manifests, and Engine rejects schema 2.0. A focused
+FreeCAD-native suppression/unsuppression consumer is implemented and tested
+independently, and a focused FreeCAD-native visibility hide/unhide consumer is
+likewise implemented and tested independently. Focused read-only post-mutation
+PartDesign Body validity inspection and deterministic native dependency evidence
+are also implemented and tested independently. A focused conservative native
+deletion consumer is also implemented and tested independently: it uses the
+exact native target, rejects surviving native dependents, performs native
 removal, recomputes, and requires bounded post-delete supported Body validity,
 failing closed when required evidence is unavailable. None of these standalone
-target-mutation capabilities is connected to the schema 2.0 execute path. Final
-lifecycle ordering and structured runtime failure mapping remain issue #6 work.
-Target-state observation remains separate issue #5 scope. See
-[contracts/target-mutations.md](contracts/target-mutations.md) for the exact
+target-mutation capabilities is connected to the normal external execute path,
+and FreeCAD has not yet been aligned to consume mutation-bearing canonical schema
+1.0 manifests. Final lifecycle ordering and structured runtime failure mapping
+remain downstream FreeCAD work; target-state observation remains separate scope.
+See [contracts/target-mutations.md](contracts/target-mutations.md) for the exact
 boundary between validation, native capability, and execute integration, and
 [Target-Action Contract](../../reference/target-action-contract.md) for
 Engine's semantic ownership of target actions.

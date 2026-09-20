@@ -10,22 +10,22 @@ record normalization. Engine handoff tests do not prove native mutation
 correctness.
 
 Current runtime limitation: Engine currently supports planning, capability
-validation, lowering, routing, and schema 2.0 manifest projection for target
-actions, but the current `parametron-freecad` execution runtime does not yet
-execute schema 2.0 target mutations. FreeCAD has a tested native
-suppression/unsuppression consumer for validated native object/state entries,
-and a tested native visibility consumer for validated `{object, visible}`
-entries. The visibility consumer supports both projected mappings (`hide` to
-`visible: false` and `unhide` to `visible: true`). FreeCAD also has implemented
-and tested bounded, read-only native post-mutation PartDesign Body validity
-inspection and deterministic native `InList`/`OutList` dependency evidence.
-FreeCAD also has a tested standalone conservative native deletion consumer for
-validated `{object}` entries: it resolves the exact projected native object,
-rejects surviving native dependents, performs native removal, recomputes, and
-requires bounded supported post-delete Body validity. These standalone
-capabilities are not connected to schema 2.0 execute. Final lifecycle ordering
-and structured runtime failure mapping remain issue #6 work; target-state
-observation remains separate issue #5 scope. Engine handoff plus these
+validation, lowering, routing, and canonical schema 1.0 manifest projection for
+target actions, but the current `parametron-freecad` execution runtime has not yet
+been aligned to consume mutation-bearing canonical schema 1.0 manifests. FreeCAD
+has a tested native suppression/unsuppression consumer for validated native
+object/state entries, and a tested native visibility consumer for validated
+`{object, visible}` entries. The visibility consumer supports both projected
+mappings (`hide` to `visible: false` and `unhide` to `visible: true`). FreeCAD also
+has implemented and tested bounded, read-only native post-mutation PartDesign
+Body validity inspection and deterministic native `InList`/`OutList` dependency
+evidence. FreeCAD also has a tested standalone conservative native deletion
+consumer for validated `{object}` entries: it resolves the exact projected
+native object, rejects surviving native dependents, performs native removal,
+recomputes, and requires bounded supported post-delete Body validity. These
+standalone capabilities are not connected to normal execute. Final lifecycle
+ordering and structured runtime failure mapping remain downstream FreeCAD work;
+target-state observation remains separate scope. Engine handoff plus these
 standalone capabilities therefore does not provide end-to-end target-mutation
 execution. Engine handoff tests remain proof of Engine planning and projection,
 distinct from native runtime proof. FreeCAD remains the owner of native lookup,
@@ -162,35 +162,40 @@ from that registry or semantic-map family capability metadata.
 
 ## Aligned runtime manifest
 
-The filename is `prm.export-manifest.json` for both content schemas.
-Mutation-less, keep-only, scalar-assignment-only, and internal Parameters/Properties-only
-plans select schema `1.0`. Any Suppression, Visibility or Deletion in either
-destination selects schema `2.0`.
+The canonical active filename is `prm.export-manifest.json` across all
+Engine-authored FreeCAD manifests. All Engine-authored FreeCAD runtime manifests
+select canonical schema `1.0`, whether mutation-free or mutation-bearing.
+Mutation-less, keep-only, scalar-assignment-only, and internal
+Parameters/Properties-only plans emit schema `1.0`. Any Suppression,
+Visibility, or Deletion in either Part or Assembly destination also emits schema
+`1.0`.
 
-Schema `1.0` has exactly `schemaVersion`, `sourceDocument`,
-`parameterAssignments`, and `outputs`. Schema `2.0` additionally carries non-empty
-`partMutations` and/or `assemblyMutations`. Empty families/sections are omitted.
+Core top-level fields under schema `1.0` are `schemaVersion`, `sourceDocument`,
+`parameterAssignments`, and `outputs`. When target mutations are present, the
+manifest additionally carries optional `assemblyMutations` and/or
+`partMutations`. Absent or empty mutation sections and families are omitted.
 Runtime mutation entries have closed key sets: `{object, suppressed}`,
 `{object, visible}`, and `{object}`. Booleans, including false, are explicit.
 
-Nested Parameters and Properties are filtered from runtime sections. Top-level
-`parameterAssignments` is the sole executable scalar-write surface; internal
-parameter metadata still supports resolving `Object.Property` targets. Runtime
-entries exclude semantic IDs, target kinds, scope, force, cascade, recursive and
-dependency policy. Native object names and Part/Assembly destinations are preserved.
+Nested Parameters and Properties are filtered from runtime mutation sections.
+Top-level `parameterAssignments` is the sole executable scalar-write surface;
+internal parameter metadata still supports resolving `Object.Property` targets.
+Runtime entries exclude semantic IDs, target kinds, scope, force, cascade,
+recursive, and dependency policy. Native object names and Part/Assembly
+destinations are preserved.
 
-The projector validates schemas without silently upgrading schema `1.0` when
-mutations are present. Unsupported versions and schema-1 target mutations fail;
-attempt-local materialization reports typed `manifest_validation` errors.
-Direct schema-2 input without mutations is structurally accepted, although planner
-selection uses schema 1 for that case.
+The projector validates schemas strictly: Engine rejects schema `2.0` as
+unsupported, along with any other unsupported schema version or empty schema
+string. Attempt-local materialization reports typed `manifest_validation`
+errors before writing files.
 
 Product-level and attempt-local emission share
 `ProjectFreeCADRuntimeExportManifest` and `MarshalFreeCADRuntimeExportManifestJSON`
-in the Engine-owned FreeCAD contract projection. They preserve scalar assignments, schemas,
-mutation families and outputs; only `sourceDocument` is adjusted to the prepared
-working-copy relative path. Root `--json-plan` exposes the same normal planner
-`WriteExportManifestPayload`, not private lowered intents or a separate serializer.
+in the Engine-owned FreeCAD contract projection. They preserve scalar
+assignments, canonical schema `1.0`, mutation families, and outputs; only
+`sourceDocument` is adjusted to the prepared working-copy relative path. Root
+`--json-plan` exposes the same normal planner `WriteExportManifestPayload`, not
+private lowered intents or a separate serializer.
 
 ## Canonical ordering and identity
 
@@ -218,7 +223,9 @@ key `engine-run:<planHash>`. Each mutation action, opposite state and family cha
 normal serialized identity material without a special hash salt. Equivalent target
 declaration permutations converge, including draft hashes and resolved file-pattern
 filenames. Repeated table-selected actions are deterministic; changed selected
-actions change identity through their payloads.
+actions change identity through their payloads. Consolidating to canonical schema
+`1.0` preserves this normal serialized identity behavior without introducing a new
+hashing algorithm or hash salt.
 
 Nil collections remain nil; empty collections need no allocation; nil target-family
 slices remain nil. Empty families are semantically empty, but individual non-nil
