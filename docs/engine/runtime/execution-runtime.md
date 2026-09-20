@@ -94,7 +94,11 @@ Before invoking the external CAD runtime:
    required by the runtime and written to `prm.export-manifest.json`.
 2. **Verification Contract**: Engine derives the expected metadata, parameter,
    and reference constraints from the manifest intent and prepared source model,
-   writing `prm.verification.json`.
+   and can additionally derive optional request-scoped target-state observation
+   identities (`suppression`, `visibility`, `existence`) from canonical target
+   mutation intent, writing `prm.verification.json`. Current `parametron-freecad`
+   normal `execute` does not yet support the target-state request fields or
+   produce the corresponding native target-state evidence.
 3. **Reference Traversal Request**: If reference traversal is configured,
    `prm.reference-traversal-request.json` is materialized.
 4. **Pre-Invocation Freshness**: Stale contract-owned outputs (`prm.result.json`,
@@ -137,6 +141,10 @@ Upon subprocess completion, Engine validates raw runtime evidence:
      `OutputDir`.
 3. **Observed CAD State Intake**:
    - `<OutputDir>/prm.observed.json` is loaded and structurally validated.
+     Engine's observed contract can structurally accept and validate
+     target-state evidence (`suppression`, `visibility`, `existence`), while
+     current `parametron-freecad` normal `execute` does not yet produce that
+     native target-state evidence.
    - Observed working copy path and SHA-256 are verified against the prepared
      source model.
 4. **Raw Traversal Evidence Intake**:
@@ -150,6 +158,10 @@ comparison (`verification.Verify`):
 
 - **Contract vs Observed**: Compares expected values against observed values
   across four categories: `parameters`, `metadata`, `references`, and `components`.
+  Engine `verification.Verify` does not yet semantically compare target-state
+  evidence or classify target-state verification outcomes; target-state
+  expected-versus-observed verification and failure classification remain
+  subsequent Engine work.
 - **Decision Authority**: The verification decision belongs entirely to Engine.
   The external runtime cannot approve or verify its own output.
 - **Deterministic Classification**: Mismatches produce typed failure classes:
