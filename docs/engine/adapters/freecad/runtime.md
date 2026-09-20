@@ -15,11 +15,14 @@ Separately from the normal external lifecycle documented below, FreeCAD has
 implemented and tested standalone native suppression/unsuppression, visibility,
 and conservative deletion consumers, plus deterministic post-mutation validity
 and dependency inspection. Normal `execute` does not invoke those consumers or
-that infrastructure: schema 2.0 target-mutation execution remains unavailable.
-Issue #6 owns their future lifecycle placement and translation through the
-structured runtime failure boundary; target-state observation remains separate
-issue #5 scope. See [Target Mutations](contracts/target-mutations.md) for the
-standalone capability semantics.
+that infrastructure. While Engine now supplies canonical schema `1.0`
+target-mutation intent, current normal FreeCAD execute has not yet been aligned
+to consume or apply those optional mutation sections; manifest-driven
+target-mutation execution remains unavailable in the normal lifecycle.
+Downstream FreeCAD work owns their future lifecycle placement and translation
+through the structured runtime failure boundary; target-state observation
+remains separate scope. See [Target Mutations](contracts/target-mutations.md)
+for the standalone capability semantics.
 
 ## Invocation
 
