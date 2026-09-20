@@ -24,11 +24,14 @@ consumer for validated `{object}` entries: it resolves the exact projected
 native object, rejects surviving native dependents, performs native removal,
 recomputes, and requires bounded supported post-delete Body validity. These
 standalone capabilities are not connected to normal execute. Final lifecycle
-ordering and structured runtime failure mapping remain downstream FreeCAD work;
-target-state observation remains separate scope. Engine handoff plus these
-standalone capabilities therefore does not provide end-to-end target-mutation
-execution. Engine handoff tests remain proof of Engine planning and projection,
-distinct from native runtime proof. FreeCAD remains the owner of native lookup,
+ordering and structured runtime failure mapping remain downstream FreeCAD work.
+While Engine defines the canonical schema 1.0 target-state observation contract,
+FreeCAD-native target-state observation in normal execute is not yet
+implemented, and Engine-owned semantic verification, failure classification,
+and record normalization for target-state evidence remain subsequent work.
+Engine handoff plus these standalone capabilities therefore does not provide
+end-to-end target-mutation execution. Engine handoff tests remain proof of
+Engine planning and projection, distinct from native runtime proof. FreeCAD remains the owner of native lookup,
 mutation, recompute, validity inspection, raw dependency evidence, persistence,
 observation, and native failure behavior; Engine retains the comparison,
 tolerance, verification, and normalization responsibilities stated above.
@@ -245,3 +248,71 @@ derived filenames for native-only execution. The native working document is not
 included. Empty-output non-CADRuntime packages retain `ErrManifestOutputsEmpty`.
 Native-only plan/hash/cache/job identity is stable and distinct from derived-output
 runs; parameter and mutation intent survives unchanged.
+
+## Target-state observation request bridge
+
+Canonical target mutation intent bridges deterministically to Engine-owned
+target-state observation requests in `prm.verification.json`:
+
+```text
+suppression mutation -> suppression observation request
+visibility mutation  -> visibility observation request
+deletion mutation    -> existence observation request
+```
+
+### Observation identity model
+
+Observation requests reuse the established native target boundary rather than
+introducing a competing identity system.
+
+In `prm.export-manifest.json`, mutations are partitioned by destination into
+`partMutations` and `assemblyMutations`, with entries containing `{object,
+suppressed}`, `{object, visible}`, or `{object}`.
+
+In contrast, target-state observation requests in `prm.verification.json`
+represent destination explicitly within each target identity:
+
+```json
+{
+  "destination": "part",
+  "object": "Pad"
+}
+```
+
+- `destination`: closed vocabulary of `"assembly"` or `"part"`.
+- `object`: exact native CAD object name (non-blank, case-sensitive, matching
+  the routed native entity).
+
+This structure preserves exact native object names (`Feature.Name` /
+`Component.Name`) and destination boundaries (`assembly` vs. `part`) without
+relying on semantic IDs as runtime observation keys.
+
+### Raw evidence independence and limitations
+
+The observation request specifies which native facts to inspect post-execution;
+it does not copy requested mutation booleans as observed values:
+
+```text
+requested mutation != observed native state
+```
+
+For example, a requested mutation of `visible: false` leads to a visibility
+observation request for that object, but does not dictate whether the raw
+evidence will report `status: "observed"` with `value: true` or `value: false`,
+`status: "target_missing"`, or `status: "unavailable"`.
+The raw result contract faithfully records live native state.
+
+For complete schema details, status vocabularies, and canonical ordering
+rules, see the canonical
+[Observation Contract](../adapters/freecad/contracts/observation.md).
+
+Current implementation boundaries remain clearly separated:
+
+1. **Engine observation contract**: Canonical schema `1.0` target-state
+   request and result contracts are defined.
+2. **FreeCAD runtime observation**: Current `parametron-freecad` normal
+   `execute` does not yet support target-mutation manifest execution or produce
+   native target-state evidence.
+3. **Engine verification and normalization**: Expected-versus-observed semantic
+   comparison, target-state failure classification, and normalized record
+   mapping remain subsequent Engine work.
