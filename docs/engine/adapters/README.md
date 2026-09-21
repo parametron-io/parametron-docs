@@ -37,6 +37,13 @@ resolved command, standard output, and standard error. Runtime-specific code
 performs the CAD API operations and returns raw evidence through that contract;
 Engine owns its acceptance, verification, and normalized interpretation.
 
+Structured failures cross the same ownership boundary: each adapter/runtime
+interprets its native failure vocabulary into a generic Engine CAD runtime
+failure outcome, and the shared `MapCADRuntimeFailure` mapper produces the
+normalized failure record. A future adapter can translate its own native
+vocabulary into that generic outcome without introducing an adapter-specific
+normalized record mapper.
+
 ## Adding an Adapter Implementation
 
 Within the current Engine architecture, an adapter implementation plugs in by:
