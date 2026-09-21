@@ -25,9 +25,9 @@ through the structured runtime failure boundary. FreeCAD-native target-state
 observation in normal execute likewise remains pending downstream work behind
 the defined Engine-owned contract. When valid canonical target-state evidence is
 supplied, Engine already performs expected-versus-observed verification, failure
-classification, and normalized observation/verification mapping. Normal-run
-normalized target-state record emission remains separate Engine integration
-work. See [Target Mutations](contracts/target-mutations.md)
+classification, normalized observation/verification mapping, and normal record
+emission through the existing record families. See [Target
+Mutations](contracts/target-mutations.md)
 for the standalone capability semantics and
 [Observation Contract](contracts/observation.md) for the canonical target-state
 observation contract.

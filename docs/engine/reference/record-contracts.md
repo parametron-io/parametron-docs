@@ -18,7 +18,7 @@ Registry order and filenames are:
 | Family | Filename under `records/` | Material |
 | --- | --- | --- |
 | execution | `parametron.execution-record.json` | Execution outcome, jobs, steps, timing and related record links |
-| artifact | `parametron.artifact-record.json` | Artifact identity, inventory and content metadata |
+| artifact | `artifacts/<identityId>/parametron.artifact-record.json` | Artifact identity, inventory and content metadata |
 | observation | `parametron.observation-record.json` | Normalized observed facts and evidence |
 | reference | `parametron.reference-record.json` | Normalized reference edges, endpoints, resolution and evidence |
 | failure | `parametron.failure-record.json` | Class, message, stage, severity, code, location, retry/timeout/cancellation and evidence |
@@ -64,7 +64,9 @@ parametron-record-package/
   parametron.record-package.json
   records/
     parametron.execution-record.json
-    parametron.artifact-record.json
+    artifacts/
+      <artifactRecordIdentity>/
+        parametron.artifact-record.json
     parametron.observation-record.json
     parametron.reference-record.json
     parametron.failure-record.json
@@ -82,14 +84,20 @@ parametron-record-package/
 ```
 
 This is the allowed layout, not a promise that every listed file exists per run.
-There is at most one record per family. `PackageInput` requires `PackageRoot`,
-`PackageKey`, and one or more validated records; artifact and raw evidence files
-are optional. By default it writes directly to the resolved root;
+The artifact family is the bounded exception to the otherwise-singular family
+model: a package may contain zero, one, or multiple artifact records, with one
+record per artifact. The identity-addressed path applies even when exactly one
+artifact record exists. Execution, observation, reference, failure, and
+verification remain singular. Duplicate artifact identities or resolved paths
+fail rather than overwriting or collapsing records. `PackageInput` requires
+`PackageRoot`, `PackageKey`, and one or more validated records; artifact and raw
+evidence files are optional. By default it writes directly to the resolved root;
 `UseCanonicalDirectoryName` selects the canonical child directory.
 
 `parametron.record-package.json` indexes records, artifacts and raw evidence and
 includes `schemaVersion`, `packageKey`, `layoutVersion`, and ownership metadata.
-Records follow registry family order, artifacts sort by contract path, and raw
+Records follow registry family order. Artifact record entries sort by normalized
+record identity; packaged artifact payloads sort by contract path, and raw
 evidence follows layout order. Safe `raw/handoff/...` files sort lexically at the
 handoff layout slot. Writer-owned JSON uses two-space indentation and a trailing
 newline. Input payload buffers are copied.
@@ -121,28 +129,35 @@ Engine performs deterministic, validated, copy-safe mapping;
 it does not write package files. Each mapping family exposes a typed invalid-input
 error (`ErrInvalidReportMapping`, `ErrInvalidMetadataMapping`,
 `ErrInvalidArtifactMapping`, `ErrInvalidObservedMapping`,
-`ErrInvalidVerificationMapping`, `ErrInvalidRuntimeResultMapping`, or
+`ErrInvalidVerificationMapping`, `ErrInvalidCADRuntimeFailureMapping`, or
 `ErrInvalidReferenceTraversalMapping`).
 
 | Input | Mapping | Normal-run use |
 | --- | --- | --- |
 | `prm.report.json` | `MapReport`: execution and optional failure record; status, timing, plan, jobs, steps, errors, retry/timeout/cancellation, deterministic linkage and outcome precedence | Execution/failure records and raw report |
 | `prm.metadata.json` | `MapMetadata`: provenance and input identities, plan and conservative runtime/toolchain enrichment | Provenance enrichment and available raw metadata |
-| Artifact store records / `manifest.json` | `MapArtifactStoreRecords` / `MapArtifactStoreManifest`: artifact records | Available raw inventory; normalized artifact emission is not integrated |
-| Observed-state input | `MapObserved`: observation and optional reference records, including canonical target-state facts | Available raw evidence; no observation-derived normalized records |
-| Engine verification-result input | `MapVerification`: summary, categories, failure classes and evidence, including target-state category/failures and observed-evidence provenance when target-state verification is enabled | Separate from the `prm.verification.json` request evidence; no normalized verification emission |
-| Legacy runtime-result input | `MapRuntimeResult` handles the legacy result shape only; success has no failure record | Separate from active `prm.result.json` decoding; no direct aligned-result failure mapping |
+| Artifact store records / `manifest.json` | `MapArtifactStoreRecords` / `MapArtifactStoreManifest`: one artifact record per artifact | All applicable records are emitted at deterministic identity-addressed paths |
+| Typed observed-state input | `MapObserved`: observation and optional reference records, including canonical target-state facts | Applicable observation record emitted; exact `prm.observed.json` bytes remain raw evidence |
+| Engine verification-result input | `MapVerification`: summary, categories, failure classes and evidence, including target-state category/failures and observed-evidence provenance when target-state verification is enabled | Applicable verification record emitted; distinct from raw `prm.verification.json` request bytes |
+| Generic CAD runtime failure outcome | `MapCADRuntimeFailure`: adapter-neutral semantic class/stage plus native code/message, linkage, retry context and provenance | May replace the report-derived failure for one uniquely correlated terminal failed CAD outcome |
 | `prm.reference-traversal.json` | `MapReferenceTraversal`: optional reference record | Bounded verified-candidate integration described below |
 | Handoff package | Raw runtime/provenance evidence classification | No normalized handoff record mapping or automatic handoff collection |
 | Job status | Operational lifecycle state | Not a normalized record or durable storage contract |
 
-The retained legacy runtime-result mapper is separate from the aligned decoder.
-It does not reinterpret
-aligned `succeeded`/`failed` payloads as the old result shape. Its failure mapping
-preserves known classifications, uses a runtime fallback for unknown ones, and
-uses caller-supplied linkage. Verification and runtime-result mappers validate
-optional evidence digests, collapse matching evidence references, and reject
-conflicting digests. Verification category order is `components`, `metadata`,
+`MapCADRuntimeFailure` accepts an Engine-owned generic CAD runtime failure
+outcome, not an adapter-native result type. Runtime-specific interpretation
+happens before this mapper. Current FreeCAD-native argument/manifest validation
+failures map to `validation / validation`; availability/access failures and
+native observation/traversal failures map to `adapter / adapter`; artifact
+export failure maps to `export / export`; and ordinary execution failures or
+otherwise-valid unknown native vocabulary use the deterministic
+`runtime / runtime` fallback. The exact native boundary, category, stage, code,
+and message remain in raw `prm.result.json`; normalized records contain Engine
+interpretation, with native code and message preserved.
+
+Verification and CAD runtime failure mappers validate optional evidence digests,
+collapse matching evidence references, and reject conflicting digests.
+Verification category order is `components`, `metadata`,
 `parameters`, `references`, `target_state` under record normalization. This is
 normalized-record ordering, not the semantic verifier's first-failure evaluation
 order.
@@ -183,17 +198,41 @@ artifact inventory use their run-level sources. CAD result, verification-request
 and observed evidence comes from authoritative paths retained from actual CAD
 attempts rather than guessed run-root locations.
 
-For the singular result, verification-request, and observed projection, the
+For successful result, verification-request, and observed projection, the
 overall execution must succeed and exactly one CAD outcome must have completed
 without a job error and passed Engine verification. Zero eligible outcomes omit
 the projection; multiple eligible outcomes also omit it rather than selecting an
-attempt arbitrarily. Each available source is read through the existing
+attempt arbitrarily. Exact `prm.result.json`, `prm.verification.json`, and
+`prm.observed.json` bytes are preserved where available. Typed observed evidence
+is supplied to `MapObserved`, while the Engine-owned in-memory verification
+result is supplied to `MapVerification`; raw bytes are provenance material, not
+semantic substitutes for those typed inputs.
+
+On a failed run, runtime-native evidence is eligible only when exactly one CAD
+failure outcome correlates with the authoritative terminal report failure by
+established job, product, and step linkage. A valid unique candidate is mapped
+through `MapCADRuntimeFailure` and replaces the report-derived normalized
+failure. Zero or multiple matching candidates, absent or malformed evidence, or
+evidence that cannot be uniquely correlated retain the report-derived fallback;
+there is no first- or last-match selection. The package contains at most one
+failure record. Execution and raw report evidence remain report-derived, and
+Engine-owned retry count and plan-hash provenance are retained. A successful
+runtime followed by an Engine verification mismatch is not a runtime-native
+failure, and malformed, invalid, missing, or unavailable evidence does not
+fabricate one. Retry authority remains with the executor and scheduler.
+
+Each available source is read through the existing
 working-copy confinement, symlink, and regular-file guards. Optional missing
 sources are omitted. The bytes read from each source are passed unchanged to
 package emission. In particular, `raw/verification/prm.verification.json` is the
 request sent to FreeCAD, not Engine's normalized or in-memory verification result.
+For an applicable native failure, SHA-256 provenance is calculated over the exact
+preserved `raw/runtime/prm.result.json` bytes, not a reserialized typed value.
 
 Normalized report mapping removes step/runtime timing for normal-run records.
+Consequently, normal emitted report-derived and runtime-native failure records
+omit `OccurredAt`, although the generic CAD runtime failure mapper can normalize
+an explicitly supplied occurrence timestamp. Retry count remains present.
 Equivalent normal runs have stable package keys, normalized record and manifest
 bytes, file sets, and indexes. Raw evidence preserves timestamps and operational
 paths; full package-tree byte equality is not guaranteed. Successful non-cached

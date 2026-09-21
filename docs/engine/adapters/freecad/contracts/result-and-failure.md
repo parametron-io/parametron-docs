@@ -85,6 +85,10 @@ is preserved; `message` is `null` when absent.
 FreeCAD owns writing these files as raw runtime evidence. Engine owns
 interpreting them for verification, acceptance, and normalized-record
 generation; none of these payloads carry comparison results, tolerances, or
-pass/fail decisions. See [Record
+pass/fail decisions. For a valid uniquely correlated failed result, the
+adapter/runtime-specific boundary interprets FreeCAD's native vocabulary into a
+generic Engine CAD runtime failure outcome; `MapCADRuntimeFailure` then produces
+the singular normalized `FailureRecord`. The raw result independently retains
+its exact native boundary, category, stage, code, and message. See [Record
 Contracts](../../../reference/record-contracts.md) for the normalized
 execution and failure record families these raw files map into.

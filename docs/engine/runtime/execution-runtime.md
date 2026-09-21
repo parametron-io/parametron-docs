@@ -51,6 +51,10 @@ Atomic Batch Registration                    Structured Error Reporting
                                 |
                                 v
            Local Record Package Emission (recordemit)
+        successful eligible CAD outcome: artifacts / observation /
+                                      verification / raw evidence
+        failed authoritative CAD outcome: native failure when uniquely
+                                      correlated, otherwise report fallback
 ```
 
 ## Architectural Composition
@@ -245,11 +249,17 @@ record package (`<runRoot>/parametron-record-package/`):
 | Record Family | Contract Defined | Mapper Implemented | Emitted on Normal Run |
 |---------------|:----------------:|:------------------:|:---------------------:|
 | Execution | Yes | Yes (`recordmap.MapReport`) | Yes |
-| Failure | Yes | Yes (`recordmap.MapReport`) | Yes (on failed runs) |
+| Failure | Yes | Yes (`recordmap.MapReport`, `recordmap.MapCADRuntimeFailure`) | One on failed runs: uniquely correlated runtime-native failure takes precedence; otherwise report-derived fallback |
 | Reference | Yes | Yes (`recordmap.MapReferenceTraversal`) | Yes (when raw traversal evidence exists) |
-| Artifact | Yes | Yes (`recordmap.MapArtifactStoreRecords`, `recordmap.MapArtifactStoreManifest`) | Available via mapper |
-| Observation | Yes | Yes (`recordmap.MapObserved`, including target state) | Available via mapper |
-| Verification | Yes | Yes (`recordmap.MapVerification`, including target state) | Available via mapper |
+| Artifact | Yes | Yes (`recordmap.MapArtifactStoreRecords`, `recordmap.MapArtifactStoreManifest`) | Yes, one record per applicable artifact |
+| Observation | Yes | Yes (`recordmap.MapObserved`, including target state) | Yes, for typed observed evidence from the uniquely eligible successful CAD outcome |
+| Verification | Yes | Yes (`recordmap.MapVerification`, including target state) | Yes, for the Engine-owned verification result from the uniquely eligible successful CAD outcome |
+
+Target-state material uses the existing observation and verification families;
+there is no separate target-state record family. This Engine emission capability
+does not change the current FreeCAD limitation described above: normal FreeCAD
+`execute` does not yet consume target mutations or produce native target-state
+evidence.
 
 ### Raw Evidence Preservation
 
@@ -258,6 +268,10 @@ projection uses guarded reads of those paths and supplies the resulting bytes to
 record emission; `recordemit` does not infer the attempt layout from the run root.
 The emitted package preserves available evidence, including traversal evidence
 when eligible, while normalized records maintain deterministic byte stability.
+For a failed run, exact native result bytes are preserved when a valid uniquely
+correlated runtime-native failure is selected. If native evidence is absent,
+invalid, ambiguous, or does not correlate with the authoritative terminal
+failure, the existing report-derived failure record remains authoritative.
 See [Engine-produced record contracts](../reference/record-contracts.md) for the
 canonical package layout, allowlisted raw evidence paths, cardinality rules, and
 byte-preservation semantics.

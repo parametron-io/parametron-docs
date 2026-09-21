@@ -123,13 +123,15 @@ removal, recomputes, and requires bounded post-delete supported Body validity,
 failing closed when required evidence is unavailable. None of these standalone
 target-mutation capabilities is connected to the normal external execute path,
 and FreeCAD has not yet been aligned to consume mutation-bearing canonical schema
-1.0 manifests. Final lifecycle ordering and structured runtime failure mapping
-remain downstream FreeCAD work. While Engine defines the canonical schema 1.0
+1.0 manifests. Final lifecycle ordering and production and translation of
+FreeCAD-native target-mutation lifecycle failures remain downstream FreeCAD
+work; Engine's adapter-neutral normalized failure mapping is implemented. While
+Engine defines the canonical schema 1.0
 target-state observation contract, FreeCAD-native target-state observation in
 normal execute is not yet implemented. Engine-owned semantic verification and
 normalized observation/verification mapping for valid canonical target-state
-evidence are implemented; normal-run emission of those normalized mappings is
-not yet integrated.
+evidence are implemented, including emission through the normal Engine record
+package path when that evidence is supplied.
 See [contracts/target-mutations.md](contracts/target-mutations.md) for the exact
 boundary between validation, native capability, and execute integration, and
 [Target-Action Contract](../../reference/target-action-contract.md) for

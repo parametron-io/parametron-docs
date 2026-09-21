@@ -261,11 +261,11 @@ target-state evidence.
 
 When valid canonical target-state evidence is supplied, Engine consumes it
 through its expected-versus-observed verifier and the existing normalized
-observation and verification mappers. See
+observation and verification mappers, then emits the resulting records through
+the normal package path. See
 [Execution Runtime](../../../runtime/execution-runtime.md) for verification
 semantics and [Record Contracts](../../../reference/record-contracts.md) for
-normalized mapping semantics. Mapper availability does not imply normal-run
-normalized record emission.
+normalized mapping and emission semantics.
 
 Specifically:
 

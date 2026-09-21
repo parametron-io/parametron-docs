@@ -24,14 +24,16 @@ consumer for validated `{object}` entries: it resolves the exact projected
 native object, rejects surviving native dependents, performs native removal,
 recomputes, and requires bounded supported post-delete Body validity. These
 standalone capabilities are not connected to normal execute. Final lifecycle
-ordering and structured runtime failure mapping remain downstream FreeCAD work.
+ordering and production of FreeCAD-native lifecycle failures remain downstream
+FreeCAD work; Engine's generic CAD runtime failure normalization is implemented.
 While Engine defines the canonical schema 1.0 target-state observation contract,
 FreeCAD-native target-state observation in normal execute is not yet
 implemented. Engine independently derives expected target state in memory,
 compares valid canonical observed evidence, classifies target-state verification
 failures, and maps target-state observation and verification material through the
-existing normalized record families. Normal-run emission of those normalized
-target-state mappings is not yet integrated.
+existing normalized record families. When valid canonical evidence is supplied,
+Engine emits those normalized observation and verification records through the
+normal package path.
 Engine handoff plus these standalone capabilities therefore does not provide
 end-to-end target-mutation execution. Engine handoff tests remain proof of
 Engine planning and projection, distinct from native runtime proof. FreeCAD remains the owner of native lookup,
@@ -323,5 +325,6 @@ Current implementation boundaries remain clearly separated:
    identity-only. Engine validates canonical evidence before comparing the exact
    `(destination, object)` target, classifies target-state outcomes, and maps
    accepted observation and verification material through the existing record
-   families. Normal-run emission of these normalized mappings remains separate
-   integration work.
+   families. Normal execution emits those mappings through the existing
+   observation and verification record families when valid canonical evidence
+   is supplied.
