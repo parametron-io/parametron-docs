@@ -23,9 +23,11 @@ target-mutation execution remains unavailable in the normal lifecycle.
 Downstream FreeCAD work owns their future lifecycle placement and translation
 through the structured runtime failure boundary. FreeCAD-native target-state
 observation in normal execute likewise remains pending downstream work behind
-the defined Engine-owned contract, and Engine-owned semantic verification,
-failure classification, and record normalization for target-state evidence
-remain subsequent Engine work. See [Target Mutations](contracts/target-mutations.md)
+the defined Engine-owned contract. When valid canonical target-state evidence is
+supplied, Engine already performs expected-versus-observed verification, failure
+classification, and normalized observation/verification mapping. Normal-run
+normalized target-state record emission remains separate Engine integration
+work. See [Target Mutations](contracts/target-mutations.md)
 for the standalone capability semantics and
 [Observation Contract](contracts/observation.md) for the canonical target-state
 observation contract.

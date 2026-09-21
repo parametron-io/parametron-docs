@@ -92,13 +92,17 @@ Before invoking the external CAD runtime:
 
 1. **Native Manifest**: The execution manifest is projected into the format
    required by the runtime and written to `prm.export-manifest.json`.
-2. **Verification Contract**: Engine derives the expected metadata, parameter,
-   and reference constraints from the manifest intent and prepared source model,
-   and can additionally derive optional request-scoped target-state observation
-   identities (`suppression`, `visibility`, `existence`) from canonical target
-   mutation intent, writing `prm.verification.json`. Current `parametron-freecad`
-   normal `execute` does not yet support the target-state request fields or
-   produce the corresponding native target-state evidence.
+2. **Verification Contract**: Engine derives expected metadata, parameter,
+   reference, and target-state material from the manifest intent and prepared
+   source model. For target state, suppression and visibility expectations are
+   the canonical mutation booleans, while deletion expects post-execution
+   absence. Engine retains those expectations in its in-memory verification
+   model. The schema `1.0` target-state requests written to
+   `prm.verification.json` contain only the exact `(destination, object)`
+   identities to observe; they do not serialize expected values. Parsing that
+   request therefore cannot reconstruct or fabricate expected target state.
+   Current `parametron-freecad` normal `execute` does not yet support these
+   target-state request fields or produce the corresponding native evidence.
 3. **Reference Traversal Request**: If reference traversal is configured,
    `prm.reference-traversal-request.json` is materialized.
 4. **Pre-Invocation Freshness**: Stale contract-owned outputs (`prm.result.json`,
@@ -156,20 +160,42 @@ Upon subprocess completion, Engine validates raw runtime evidence:
 After raw output validation succeeds, Engine performs an in-memory verification
 comparison (`verification.Verify`):
 
-- **Contract vs Observed**: Compares expected values against observed values
-  across four categories: `parameters`, `metadata`, `references`, and `components`.
-  Engine `verification.Verify` does not yet semantically compare target-state
-  evidence or classify target-state verification outcomes; target-state
-  expected-versus-observed verification and failure classification remain
-  subsequent Engine work.
+- **Contract vs Observed**: Compares expected values against actual observed
+  values across `parameters`, `metadata`, `references`, `components`, and target
+  state. Target-state matching uses the exact `(destination, object)` identity.
+  For suppression and visibility, `status: "observed"` passes only when its
+  boolean equals the Engine-owned expectation. For deletion/existence,
+  `status: "absent"` passes and `status: "exists"` is a mismatch. Requested
+  mutation values establish expected state; they never substitute for observed
+  native values.
+- **Validation Before Comparison**: Malformed or structurally invalid observed
+  evidence is rejected before semantic target-state comparison. Valid but
+  omitted required evidence is different from explicit `target_missing`, native
+  evidence reported as `unavailable`, and a valid observed-state mismatch.
 - **Decision Authority**: The verification decision belongs entirely to Engine.
   The external runtime cannot approve or verify its own output.
-- **Deterministic Classification**: Mismatches produce typed failure classes:
+- **Deterministic Classification**: Verification produces typed failure classes:
+  - `verification_contract_invalid`
+  - `observed_artifact_invalid`
+  - `component_mismatch`
   - `metadata_mismatch`
   - `reference_mismatch`
   - `parameter_mismatch`
   - `required_observation_missing`
+  - `target_state_mismatch`
+  - `target_missing`
+  - `native_evidence_unavailable`
   - `internal_verification_error`
+
+  For target state, an observed boolean that differs from expectation or an
+  existence result of `exists` produces `target_state_mismatch`; explicit
+  `target_missing` produces `target_missing`; `unavailable` produces
+  `native_evidence_unavailable`; and an omitted required entry produces
+  `required_observation_missing`. Explicit deletion evidence of `absent` is a
+  successful observation, not missing evidence. A CAD-native runtime failure is
+  separate and short-circuits semantic verification. Semantic first-failure
+  precedence is components, parameters, metadata, references, then target state;
+  this is distinct from normalized verification-record sorting.
 
 ## Outcome Consumption and Retries
 
@@ -222,8 +248,8 @@ record package (`<runRoot>/parametron-record-package/`):
 | Failure | Yes | Yes (`recordmap.MapReport`) | Yes (on failed runs) |
 | Reference | Yes | Yes (`recordmap.MapReferenceTraversal`) | Yes (when raw traversal evidence exists) |
 | Artifact | Yes | Yes (`recordmap.MapArtifactStoreRecords`, `recordmap.MapArtifactStoreManifest`) | Available via mapper |
-| Observation | Yes | Yes (`recordmap.MapObserved`) | Available via mapper |
-| Verification | Yes | Yes (`recordmap.MapVerification`) | Available via mapper |
+| Observation | Yes | Yes (`recordmap.MapObserved`, including target state) | Available via mapper |
+| Verification | Yes | Yes (`recordmap.MapVerification`, including target state) | Available via mapper |
 
 ### Raw Evidence Preservation
 

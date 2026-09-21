@@ -129,8 +129,8 @@ error (`ErrInvalidReportMapping`, `ErrInvalidMetadataMapping`,
 | `prm.report.json` | `MapReport`: execution and optional failure record; status, timing, plan, jobs, steps, errors, retry/timeout/cancellation, deterministic linkage and outcome precedence | Execution/failure records and raw report |
 | `prm.metadata.json` | `MapMetadata`: provenance and input identities, plan and conservative runtime/toolchain enrichment | Provenance enrichment and available raw metadata |
 | Artifact store records / `manifest.json` | `MapArtifactStoreRecords` / `MapArtifactStoreManifest`: artifact records | Available raw inventory; normalized artifact emission is not integrated |
-| Observed-state input | `MapObserved`: observation and optional reference records | Available raw evidence; no observation-derived normalized records |
-| Engine verification-result input | `MapVerification`: summary, categories, failure classes and evidence | Separate from the `prm.verification.json` request evidence; no normalized verification emission |
+| Observed-state input | `MapObserved`: observation and optional reference records, including canonical target-state facts | Available raw evidence; no observation-derived normalized records |
+| Engine verification-result input | `MapVerification`: summary, categories, failure classes and evidence, including target-state category/failures and observed-evidence provenance when target-state verification is enabled | Separate from the `prm.verification.json` request evidence; no normalized verification emission |
 | Legacy runtime-result input | `MapRuntimeResult` handles the legacy result shape only; success has no failure record | Separate from active `prm.result.json` decoding; no direct aligned-result failure mapping |
 | `prm.reference-traversal.json` | `MapReferenceTraversal`: optional reference record | Bounded verified-candidate integration described below |
 | Handoff package | Raw runtime/provenance evidence classification | No normalized handoff record mapping or automatic handoff collection |
@@ -143,7 +143,37 @@ preserves known classifications, uses a runtime fallback for unknown ones, and
 uses caller-supplied linkage. Verification and runtime-result mappers validate
 optional evidence digests, collapse matching evidence references, and reject
 conflicting digests. Verification category order is `components`, `metadata`,
-`parameters`, `references` under record normalization.
+`parameters`, `references`, `target_state` under record normalization. This is
+normalized-record ordering, not the semantic verifier's first-failure evaluation
+order.
+
+### Target-state observation and verification mapping
+
+`MapObserved` represents canonical target-state evidence through the existing
+observation family with `kind = target_state`; it does not introduce a separate
+record family. The supported fact keys are `suppression`, `visibility`, and
+`existence`. Each fact subject retains the exact destination and object identity.
+Its value preserves the raw evidence status, and includes boolean material only
+when suppression or visibility evidence semantically contains an observed
+boolean. In particular, `target_missing` and `unavailable` are statuses, not
+boolean `false` values. Existence retains `absent`, `exists`, or `unavailable` as
+the raw semantic status.
+
+`MapVerification` supports the existing verification family's
+`category = target_state`. Target-state outcomes use
+`target_state_mismatch`, `target_missing`, and
+`native_evidence_unavailable`; the shared `required_observation_missing` class
+also applies when required target-state evidence is omitted. Existing contract
+and observed-artifact invalidity classes remain distinct from these semantic
+outcomes.
+
+When target-state verification is enabled, normalized verification provenance
+can reference both `raw/verification/prm.verification.json`, the serialized
+identity-only request and Engine verification input contract, and
+`raw/observed/prm.observed.json`, the actual evidence used in comparison.
+Optional SHA-256 digests are independent. Matching references are deduplicated;
+conflicting supplied digests fail mapping instead of replacing evidence. These
+normalized references do not replace either raw source.
 
 Normal non-cached runs emit under `<runRoot>/parametron-record-package/`, with
 package key `engine-run:<planHash>`. Execution records are always mapped when
