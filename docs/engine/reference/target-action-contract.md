@@ -27,8 +27,11 @@ standalone capabilities are not connected to normal execute. Final lifecycle
 ordering and structured runtime failure mapping remain downstream FreeCAD work.
 While Engine defines the canonical schema 1.0 target-state observation contract,
 FreeCAD-native target-state observation in normal execute is not yet
-implemented, and Engine-owned semantic verification, failure classification,
-and record normalization for target-state evidence remain subsequent work.
+implemented. Engine independently derives expected target state in memory,
+compares valid canonical observed evidence, classifies target-state verification
+failures, and maps target-state observation and verification material through the
+existing normalized record families. Normal-run emission of those normalized
+target-state mappings is not yet integrated.
 Engine handoff plus these standalone capabilities therefore does not provide
 end-to-end target-mutation execution. Engine handoff tests remain proof of
 Engine planning and projection, distinct from native runtime proof. FreeCAD remains the owner of native lookup,
@@ -313,6 +316,12 @@ Current implementation boundaries remain clearly separated:
 2. **FreeCAD runtime observation**: Current `parametron-freecad` normal
    `execute` does not yet support target-mutation manifest execution or produce
    native target-state evidence.
-3. **Engine verification and normalization**: Expected-versus-observed semantic
-   comparison, target-state failure classification, and normalized record
-   mapping remain subsequent Engine work.
+3. **Engine verification and normalization**: Engine derives suppression and
+   visibility expectations from canonical mutation booleans and derives an
+   `absent` expectation from deletion. Those values remain in the in-memory
+   verification model; the serialized schema `1.0` observation request stays
+   identity-only. Engine validates canonical evidence before comparing the exact
+   `(destination, object)` target, classifies target-state outcomes, and maps
+   accepted observation and verification material through the existing record
+   families. Normal-run emission of these normalized mappings remains separate
+   integration work.
