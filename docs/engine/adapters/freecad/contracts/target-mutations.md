@@ -216,13 +216,12 @@ Downstream FreeCAD work owns final mutation → recompute → validity → save/
 ordering and translation of validity failures through the structured runtime
 failure boundary. Target-state observation remains separate scope.
 
-Engine-side planning, capability validation, lowering, routing, and canonical
-schema 1.0 manifest projection for target actions must not be interpreted as
-proof of end-to-end native mutation support: Engine handoff tests exercise
-Engine's own planning and projection. The standalone native suppression,
-visibility, and deletion consumers, standalone native inspection
-infrastructure, and Engine handoff still do not provide target-mutation
-execution through the normal external FreeCAD lifecycle.
+Engine's complete normal-CLI contract-package proof uses a controlled external
+runtime; see the [Target-Action Contract](../../../reference/target-action-contract.md)
+for its scope. It does not establish end-to-end native mutation support in real
+FreeCAD. The standalone native suppression, visibility, and deletion consumers,
+standalone native inspection infrastructure, and Engine handoff still do not
+provide target-mutation execution through the normal external FreeCAD lifecycle.
 
 ## Native structure precedent
 

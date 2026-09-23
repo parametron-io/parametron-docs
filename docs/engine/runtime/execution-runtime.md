@@ -59,6 +59,23 @@ Atomic Batch Registration                    Structured Error Reporting
 
 ## Architectural Composition
 
+Permanent tests exercise this complete Engine-owned path from supported CLI
+project input and target-action authoring through planning, scheduler, executor
+handoff, attempt preparation, request materialization, the actual external
+`runtimecap` process, raw result and observed-evidence intake, Engine
+verification, outcome consumption, and normal record-package emission. The
+external participant is a repository-controlled, contract-compliant runtime,
+not real FreeCAD. It reads canonical schema `1.0` `prm.export-manifest.json` and
+`prm.verification.json` and returns canonical `prm.result.json` and
+`prm.observed.json`. The proof covers suppression and unsuppression, hide and
+unhide, deletion, combined mutation families, Part and Assembly destination
+identity, deterministic ordering and materialization, attempt-contained
+authoritative paths, and staged source use. It covers the normal CLI path,
+not HTTP API target-mutation submission. Current real `parametron-freecad`
+`execute` still lacks the complete native mutation and target-state observation
+lifecycle. See [Target-Action Contract](../reference/target-action-contract.md)
+for semantic ownership and proof scope.
+
 CAD-runtime execution is composed of four decoupled layers:
 
 1. **CAD adapter:**
@@ -201,6 +218,14 @@ comparison (`verification.Verify`):
   precedence is components, parameters, metadata, references, then target state;
   this is distinct from normalized verification-record sorting.
 
+The controlled-runtime normal-CLI proof checks successful suppression and
+visibility evidence and deletion success through confirmed `absent` evidence.
+It also checks mismatches, omitted required evidence, explicit native evidence
+unavailability, and missing targets. Malformed evidence is rejected at intake
+before semantic verification; a runtime-native failure remains a distinct
+outcome. The controlled process supplies observations independently of the
+requested mutations, so identical intent can yield different Engine decisions.
+
 ## Outcome Consumption and Retries
 
 The Executor correlates the attempt outcome against the active job request:
@@ -261,6 +286,14 @@ does not change the current FreeCAD limitation described above: normal FreeCAD
 `execute` does not yet consume target mutations or produce native target-state
 evidence.
 
+Applicable successful controlled-runtime proof runs observe normal package
+emission of execution, artifact, observation, and verification records, rather
+than calling record mappers in isolation. They also preserve the raw runtime
+result, verification request, and observed evidence at
+`raw/runtime/prm.result.json`, `raw/verification/prm.verification.json`, and
+`raw/observed/prm.observed.json`. Normalized records are Engine interpretations,
+not mirrors of raw runtime vocabulary.
+
 ### Raw Evidence Preservation
 
 The executor retains authoritative paths from each CAD attempt. Record-package
@@ -275,6 +308,13 @@ failure, the existing report-derived failure record remains authoritative.
 See [Engine-produced record contracts](../reference/record-contracts.md) for the
 canonical package layout, allowlisted raw evidence paths, cardinality rules, and
 byte-preservation semantics.
+
+Equivalent proof runs establish stable Engine-owned plan/hash, job, and attempt
+identities; canonical runtime manifests; observation-request semantics and bytes
+when execution location is equivalent; semantic verification results; normalized
+records; and package entry ordering and identities. Runtime-produced raw
+material can contain operational paths or other run-specific data, so the proof
+does not claim those raw bytes are identical across differing locations.
 
 ## Layered Cache
 

@@ -9,7 +9,21 @@ comparison, tolerance evaluation, engineering verification decisions, and
 record normalization. Engine handoff tests do not prove native mutation
 correctness.
 
-Current runtime limitation: Engine currently supports planning, capability
+Permanent Engine tests now prove the complete Engine-owned runtime contract
+package through the normal CLI path. Supported project and DSL target actions
+pass through semantic lowering, planning, scheduling, mutation-preserving
+executor handoff, isolated attempt preparation with staged source, canonical
+schema `1.0` request materialization, actual external `runtimecap` process
+invocation, canonical raw evidence intake, Engine verification, outcome
+consumption, and normal normalized/raw record-package emission. A
+repository-controlled, contract-compliant external runtime supplies the
+responses. The proof covers `suppress`, `unsuppress`, `hide`, `unhide`, `delete`,
+and combined mutation families, including Part and Assembly destinations.
+It does not establish real FreeCAD-native mutation correctness or cover HTTP API
+target-mutation submission. See [Execution Runtime](../runtime/execution-runtime.md)
+for the execution and evidence boundaries.
+
+Current FreeCAD runtime limitation: Engine provides planning, capability
 validation, lowering, routing, and canonical schema 1.0 manifest projection for
 target actions, but the current `parametron-freecad` execution runtime has not yet
 been aligned to consume mutation-bearing canonical schema 1.0 manifests. FreeCAD
@@ -35,8 +49,10 @@ existing normalized record families. When valid canonical evidence is supplied,
 Engine emits those normalized observation and verification records through the
 normal package path.
 Engine handoff plus these standalone capabilities therefore does not provide
-end-to-end target-mutation execution. Engine handoff tests remain proof of
-Engine planning and projection, distinct from native runtime proof. FreeCAD remains the owner of native lookup,
+end-to-end target-mutation execution in real FreeCAD. Handoff tests prove
+Engine planning and projection; the complete controlled-runtime normal-CLI
+proof exercises Engine orchestration beyond handoff; real FreeCAD-native
+execution proof remains separate. FreeCAD remains the owner of native lookup,
 mutation, recompute, validity inspection, raw dependency evidence, persistence,
 observation, and native failure behavior; Engine retains the comparison,
 tolerance, verification, and normalization responsibilities stated above.
@@ -306,6 +322,13 @@ observation request for that object, but does not dictate whether the raw
 evidence will report `status: "observed"` with `value: true` or `value: false`,
 `status: "target_missing"`, or `status: "unavailable"`.
 The raw result contract faithfully records live native state.
+
+The permanent normal-CLI proof demonstrates this independence across the actual
+runtime boundary: the controlled external process supplies its own canonical
+`prm.observed.json`, and Engine consumes that returned evidence. Different
+observations for the same requested mutation produce different Engine
+verification outcomes. This establishes the Engine evidence and comparison
+boundary, not FreeCAD-native target-state observation.
 
 For complete schema details, status vocabularies, and canonical ordering
 rules, see the canonical
