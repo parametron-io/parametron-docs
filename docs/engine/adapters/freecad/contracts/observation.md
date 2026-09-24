@@ -28,8 +28,9 @@ carries per-category lookup data (e.g. `expected.references[]` entries with
 `kind`/`name`). `checks` is recognized contract shape only; FreeCAD does not
 evaluate checks.
 
-Of the categories defined in schema `1.0`, only `parameters`, `metadata`, and
-`references` have an implemented observation helper in current FreeCAD.
+Of the categories defined in schema `1.0`, `parameters`, `metadata`,
+`references`, and request-scoped `targetState` have implemented observation
+handling in current FreeCAD.
 `components` is recognized contract shape only; the external request
 compatibility check rejects enabled component observation and non-empty
 component expectations.
@@ -255,9 +256,23 @@ graph traversal described in
 
 ## Current FreeCAD support
 
-Current `parametron-freecad` normal `execute` implementation does not yet
-support the target-state request fields or produce the corresponding native
-target-state evidence.
+Current `parametron-freecad` normal `execute` accepts canonical schema `1.0`
+target-state request fields through the existing observation request loader.
+It validates the requested families and exact `{destination, object}` identities,
+reads only requested facts from the same live document used by other observation,
+and emits canonical raw `observation.targetState` in the existing atomic
+`prm.observed.json` output. It resolves objects by exact native lookup and reads
+supported App-level suppression and visibility booleans. Missing objects yield
+boolean `target_missing`; objects lacking a supported boolean yield
+`unavailable`. Exact native lookup normally yields definitive `exists` or
+`absent` evidence; lookup exceptions are observation failures, not invented
+existence `unavailable` results. The canonical existence vocabulary still
+includes `unavailable`. Entries are ordered by destination, then object. When
+target state is unrequested, `observation.targetState` is absent and existing
+parameter, metadata, and reference behavior is unchanged.
+
+Normal `execute` does not yet apply canonical target mutations. Final placement
+of target-state observation after those mutations is issue #6 work.
 
 When valid canonical target-state evidence is supplied, Engine consumes it
 through its expected-versus-observed verifier and the existing normalized
@@ -271,13 +286,10 @@ Specifically:
 
 - **Engine-owned contract shape**: Canonical schema `1.0` request and result
   contracts for `targetState` are fully defined.
-- **FreeCAD runtime observation**: Of the categories defined in schema `1.0`,
-  current FreeCAD normal `execute` implements observation helpers only for
-  `parameters`, `metadata`, and `references`. `components` is recognized
-  contract shape only and rejected if enabled. Target-state request fields
-  (`observe.targetState`, `observationContext.targetState`) are not yet consumed
-  by the normal `execute` request loader, and native target-state evidence
-  (`observation.targetState`) is not yet emitted.
+- **FreeCAD runtime observation**: Normal `execute` consumes
+  `observe.targetState` and `observationContext.targetState` and emits native
+  `observation.targetState` when requested. `components` remains recognized
+  contract shape only and is rejected if enabled.
 
 ## Failure behavior
 
@@ -290,8 +302,8 @@ observation failure; a failed `prm.result.json` is written when its path is safe
 ## Ownership
 
 FreeCAD owns: document lifecycle, CAD-native mutation, recompute, native
-persistence, export, and reading requested parameter/metadata/reference facts
-(and future native target-state facts) into canonical raw observation output.
+persistence, export, and reading requested parameter/metadata/reference and
+target-state facts into canonical raw observation output.
 FreeCAD never evaluates checks or makes verification decisions.
 
 Engine owns: defining requested observation facts and raw result schemas,

@@ -127,8 +127,11 @@ and FreeCAD has not yet been aligned to consume mutation-bearing canonical schem
 FreeCAD-native target-mutation lifecycle failures remain downstream FreeCAD
 work; Engine's adapter-neutral normalized failure mapping is implemented. While
 Engine defines the canonical schema 1.0
-target-state observation contract, FreeCAD-native target-state observation in
-normal execute is not yet implemented. Engine-owned semantic verification and
+target-state observation contract. FreeCAD-native target-state observation is
+implemented and tested in normal execute's existing observation stage: FreeCAD
+performs exact native lookup and state reads and returns raw evidence. Engine
+constructs requests and expected state, compares evidence, verifies outcomes,
+and normalizes records. Engine-owned semantic verification and
 normalized observation/verification mapping for valid canonical target-state
 evidence are implemented, including emission through the normal Engine record
 package path when that evidence is supplied.

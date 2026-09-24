@@ -22,8 +22,10 @@ to consume or apply those optional mutation sections; manifest-driven
 target-mutation execution remains unavailable in the normal lifecycle.
 Downstream FreeCAD work owns their future lifecycle placement and translation
 through the structured runtime failure boundary. FreeCAD-native target-state
-observation in normal execute likewise remains pending downstream work behind
-the defined Engine-owned contract. When valid canonical target-state evidence is
+observation is implemented in the existing observation stage of normal execute
+when requested, using the same live document and canonical `prm.observed.json`
+output. Final ordering after canonical target mutations remains issue #6 work.
+When valid canonical target-state evidence is
 supplied, Engine already performs expected-versus-observed verification, failure
 classification, normalized observation/verification mapping, and normal record
 emission through the existing record families. See [Target
