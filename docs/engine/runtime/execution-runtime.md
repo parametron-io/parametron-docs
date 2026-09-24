@@ -71,9 +71,11 @@ not real FreeCAD. It reads canonical schema `1.0` `prm.export-manifest.json` and
 unhide, deletion, combined mutation families, Part and Assembly destination
 identity, deterministic ordering and materialization, attempt-contained
 authoritative paths, and staged source use. It covers the normal CLI path,
-not HTTP API target-mutation submission. Current real `parametron-freecad`
-`execute` still lacks the complete native mutation and target-state observation
-lifecycle. See [Target-Action Contract](../reference/target-action-contract.md)
+not HTTP API target-mutation submission. Real `parametron-freecad execute` now
+supports request-scoped native target-state observation, but the complete native
+target-mutation and post-mutation observation lifecycle is not yet integrated.
+The controlled external-runtime proof does not establish real FreeCAD target
+mutation execution. See [Target-Action Contract](../reference/target-action-contract.md)
 for semantic ownership and proof scope.
 
 CAD-runtime execution is composed of four decoupled layers:

@@ -40,9 +40,11 @@ recomputes, and requires bounded supported post-delete Body validity. These
 standalone capabilities are not connected to normal execute. Final lifecycle
 ordering and production of FreeCAD-native lifecycle failures remain downstream
 FreeCAD work; Engine's generic CAD runtime failure normalization is implemented.
-While Engine defines the canonical schema 1.0 target-state observation contract,
-FreeCAD-native target-state observation in normal execute is not yet
-implemented. Engine independently derives expected target state in memory,
+FreeCAD-native target-state observation is implemented through normal execute's
+aligned observation path under the canonical schema 1.0 contract. The standalone
+mutation consumers remain disconnected from normal execute, so end-to-end native
+target-mutation execution and its final post-mutation observation ordering remain
+downstream issue #6 work. Engine independently derives expected target state in memory,
 compares valid canonical observed evidence, classifies target-state verification
 failures, and maps target-state observation and verification material through the
 existing normalized record families. When valid canonical evidence is supplied,
