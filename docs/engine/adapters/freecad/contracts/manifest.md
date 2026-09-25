@@ -59,58 +59,31 @@ resolved only through `document.getObject(name)`. There is no Label lookup,
 `document.Objects` fallback, unit conversion, spreadsheet cell semantics,
 constraint/expression target support, or capture-backed target projection.
 
-A transitional Engine-shaped compatibility path adapts Engine-authored
-dot-form data (`export_manifest.v1.json` shape) into this schema, e.g.
-`inputs.sourceModel -> sourceDocument`, `outputs[].type -> format`,
-`outputs[].filename -> path`, `outputs[].object -> id`. It intentionally
-rejects Engine name-only parameter assignments that lack explicit FreeCAD
-target data.
+## Current FreeCAD runtime behavior
 
-## Current FreeCAD implementation and transitional alignment gap
+Normal `parametron-freecad execute` validates and consumes canonical schema
+`1.0` directly, including optional mutation sections and their strict mutation
+rules. It rejects schema `2.0`. FreeCAD retains schema-2 metadata and a strict
+standalone validator from the earlier pre-release split as transitional
+validation surfaces; they are not the production mutation transport contract.
 
-`parametron-freecad` has not yet been aligned to consume mutation-bearing
-canonical schema `1.0` manifests.
+The legacy Engine-manifest normalization helper remains for the rehearsal /
+compatibility surface. Normal execute does not import or invoke it.
 
-Current FreeCAD implementation state:
+### Strict mutation validation rules
 
-1. **Normal execute uses closed schema 1.0 validation**: Runtime execution
-   loads and validates manifests through `validate_export_manifest_v1`. In that
-   validator, top-level fields are closed (`schemaVersion`, `sourceDocument`,
-   `parameterAssignments`, `outputs`); `assemblyMutations` and `partMutations`
-   are rejected as unknown fields.
-2. **Transitional schema 2.0 metadata and validator**: FreeCAD still retains
-   standalone schema `2.0` contract metadata and a strict validator
-   (`validate_export_manifest_v2`) from an earlier pre-release split.
-3. **Normal execute rejects schema 2.0**: The normal external
-   `parametron-freecad execute` entrypoint explicitly rejects schema `2.0`
-   manifests.
-4. **Standalone native capabilities are not connected**: Standalone native
-   suppression, visibility, and deletion consumers and post-mutation
-   validity/dependency inspection infrastructure are implemented and tested
-   independently, but they are not wired into normal `execute`.
-5. **Execute alignment is pending**: Normal FreeCAD execute does not gain
-   mutation support merely because Engine's schema has been consolidated to
-   schema `1.0`. FreeCAD still requires its own follow-up alignment before
-   mutation-bearing canonical schema `1.0` can be consumed through normal
-   execute.
-
-FreeCAD's existing schema-2 metadata and validator represent a **transitional
-implementation artifact of the earlier pre-release split**, not the active
-Engine contract. Engine does not author or accept schema `2.0`.
-
-### Transitional FreeCAD validation rules
-
-FreeCAD's standalone manifest validation infrastructure implements the
-following rules (currently defined under its transitional schema-2 validator,
-awaiting alignment into the normal execute path):
+FreeCAD's canonical schema 1.0 validator applies the following rules in normal
+execute. The retained standalone schema-2 validator also validates its
+transitional schema surface:
 
 - **Exact version dispatch** — `"1.0"` and `"2.0"` are matched by exact string
   equality in the standalone validator dispatch; no trimming, case folding, or
   numeric coercion. Normal execute enforces schema 1.0.
-- **Closed core schema 1.0** — under current FreeCAD schema 1.0 validation,
-  `assemblyMutations`/`partMutations` are rejected as unknown fields.
+- **Canonical schema 1.0 mutation sections** — normal execute accepts optional
+  `assemblyMutations` and `partMutations`; each section is closed to
+  `suppression`, `visibility`, and `deletion`.
 - **Optional mutation sections** — absent, `{}`, or sparse valid collections
-  are accepted where mutation sections are supported.
+  are accepted.
 - **Closed mutation collections** — only `suppression`, `visibility`,
   `deletion` are recognized; anything else (`parameters`, `keep`, `actions`,
   `targets`, …) is rejected.
@@ -140,15 +113,10 @@ Engine owns manifest authoring and canonical schema `1.0` projection, including
 the semantic intent behind optional target mutations — see [Target-Action
 Contract](../../../reference/target-action-contract.md).
 
-FreeCAD owns manifest loading, strict validation, and native execution. Its
-current normal execute path consumes the existing schema-1 core surface,
-including parameter assignments and outputs, but does not yet consume the
-optional target-mutation sections of the canonical Engine schema-1 contract.
+FreeCAD owns manifest loading, strict validation, and native execution. Normal
+execute consumes schema 1.0 parameter assignments, outputs, and optional
+target-mutation sections directly.
 
-FreeCAD also preserves ownership of its document lifecycle, recompute, native
-document persistence, exports, reference traversal, observation, and native
-result/failure evidence — see [runtime.md](../runtime.md) for the currently wired
-schema 1.0 execution lifecycle. The standalone native suppression, visibility,
-and conservative deletion consumers are downstream capabilities, supported by
-standalone deterministic post-mutation validity/dependency infrastructure, and
-remain outside the normal execute lifecycle until follow-up FreeCAD alignment.
+FreeCAD also owns document lifecycle, recompute, native persistence, exports,
+reference traversal, observation, and native result/failure evidence — see
+[runtime.md](../runtime.md) for the schema 1.0 execution lifecycle.

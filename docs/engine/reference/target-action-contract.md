@@ -23,43 +23,22 @@ It does not establish real FreeCAD-native mutation correctness or cover HTTP API
 target-mutation submission. See [Execution Runtime](../runtime/execution-runtime.md)
 for the execution and evidence boundaries.
 
-Current FreeCAD runtime limitation: Engine provides planning, capability
-validation, lowering, routing, and canonical schema 1.0 manifest projection for
-target actions, but the current `parametron-freecad` execution runtime has not yet
-been aligned to consume mutation-bearing canonical schema 1.0 manifests. FreeCAD
-has a tested native suppression/unsuppression consumer for validated native
-object/state entries, and a tested native visibility consumer for validated
-`{object, visible}` entries. The visibility consumer supports both projected
-mappings (`hide` to `visible: false` and `unhide` to `visible: true`). FreeCAD also
-has implemented and tested bounded, read-only native post-mutation PartDesign
-Body validity inspection and deterministic native `InList`/`OutList` dependency
-evidence. FreeCAD also has a tested standalone conservative native deletion
-consumer for validated `{object}` entries: it resolves the exact projected
-native object, rejects surviving native dependents, performs native removal,
-recomputes, and requires bounded supported post-delete Body validity. These
-standalone capabilities are not connected to normal execute. Final lifecycle
-ordering and production of FreeCAD-native lifecycle failures remain downstream
-FreeCAD work; Engine's generic CAD runtime failure normalization is implemented.
-FreeCAD-native target-state observation is implemented through normal execute's
-aligned observation path under the canonical schema 1.0 contract. The standalone
-mutation consumers remain disconnected from normal execute, so end-to-end native
-target-mutation execution and its final post-mutation observation ordering remain
-downstream issue #6 work. Engine independently derives expected target state in memory,
-compares valid canonical observed evidence, classifies target-state verification
-failures, and maps target-state observation and verification material through the
-existing normalized record families. When valid canonical evidence is supplied,
-Engine emits those normalized observation and verification records through the
-normal package path.
-Engine handoff plus these standalone capabilities therefore does not provide
-end-to-end target-mutation execution in real FreeCAD. Handoff tests prove
-Engine planning and projection; the complete controlled-runtime normal-CLI
-proof exercises Engine orchestration beyond handoff; real FreeCAD-native
-execution proof remains separate. FreeCAD remains the owner of native lookup,
-mutation, recompute, validity inspection, raw dependency evidence, persistence,
-observation, and native failure behavior; Engine retains the comparison,
-tolerance, verification, and normalization responsibilities stated above.
-See [FreeCAD Target Mutations](../adapters/freecad/contracts/target-mutations.md)
-for the detailed native deletion and evidence boundary.
+Canonical schema 1.0 target mutations are integrated into normal
+`parametron-freecad execute`. Optional `assemblyMutations` and `partMutations`
+sections support suppression, visibility, and conservative deletion. FreeCAD
+performs exact native `Name` lookup, mutation, recompute and applicable validity,
+conservative deletion safety, persistence, and request-scoped raw target-state
+observation. The detailed lifecycle and native semantics are documented in
+[FreeCAD Target Mutations](../adapters/freecad/contracts/target-mutations.md).
+
+Engine independently derives expected target state in memory, compares valid
+canonical observed evidence, classifies target-state verification failures, and
+maps target-state observation and verification material through existing
+normalized record families. FreeCAD reports actual raw native state and does
+not evaluate checks, compare expected and observed values, or normalize records.
+The controlled-runtime Engine proof and real-native FreeCAD proof remain
+separate; no single live production Engine process invoking real FreeCAD is
+established.
 
 ## Authoring and action evaluation
 
@@ -340,9 +319,9 @@ Current implementation boundaries remain clearly separated:
 
 1. **Engine observation contract**: Canonical schema `1.0` target-state
    request and result contracts are defined.
-2. **FreeCAD runtime observation**: Current `parametron-freecad` normal
-   `execute` does not yet support target-mutation manifest execution or produce
-   native target-state evidence.
+2. **FreeCAD runtime observation**: Normal `parametron-freecad execute`
+   supports canonical schema 1.0 target mutations and emits raw native
+   target-state evidence when requested.
 3. **Engine verification and normalization**: Engine derives suppression and
    visibility expectations from canonical mutation booleans and derives an
    `absent` expectation from deletion. Those values remain in the in-memory

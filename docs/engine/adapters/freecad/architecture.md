@@ -96,7 +96,8 @@ behind the same launcher entry point:
 - **Launcher/CLI**: process bootstrap, host resolution, structured argument
   forwarding, and deterministic exit/stdout/stderr propagation.
 - **Execution**: manifest loading and validation, parameter assignment,
-  recompute, native document persistence, and STEP/CSV/PDF export. See
+  canonical schema 1.0 target mutations, applicable recompute and native
+  validity, persistence, and STEP/CSV/PDF export. See
   [contracts/manifest.md](contracts/manifest.md) and
   [contracts/artifacts.md](contracts/artifacts.md).
 - **Observation**: requested parameter, metadata, and reference-existence
@@ -107,47 +108,29 @@ behind the same launcher entry point:
   graph evidence. See
   [contracts/reference-traversal.md](contracts/reference-traversal.md).
 
-Engine's canonical FreeCAD runtime manifest contract is schema `1.0`, which
-defines optional target-mutation sections (suppression, visibility, deletion) on
-top of the core execution fields. FreeCAD retains transitional schema-2 metadata
-and validation from an earlier pre-release split, but the active runtime does
-not execute schema 2.0 manifests, and Engine rejects schema 2.0. A focused
-FreeCAD-native suppression/unsuppression consumer is implemented and tested
-independently, and a focused FreeCAD-native visibility hide/unhide consumer is
-likewise implemented and tested independently. Focused read-only post-mutation
-PartDesign Body validity inspection and deterministic native dependency evidence
-are also implemented and tested independently. A focused conservative native
-deletion consumer is also implemented and tested independently: it uses the
-exact native target, rejects surviving native dependents, performs native
-removal, recomputes, and requires bounded post-delete supported Body validity,
-failing closed when required evidence is unavailable. None of these standalone
-target-mutation capabilities is connected to the normal external execute path,
-and FreeCAD has not yet been aligned to consume mutation-bearing canonical schema
-1.0 manifests. Final lifecycle ordering and production and translation of
-FreeCAD-native target-mutation lifecycle failures remain downstream FreeCAD
-work; Engine's adapter-neutral normalized failure mapping is implemented. While
-Engine defines the canonical schema 1.0
-target-state observation contract. FreeCAD-native target-state observation is
-implemented and tested in normal execute's existing observation stage: FreeCAD
-performs exact native lookup and state reads and returns raw evidence. Engine
-constructs requests and expected state, compares evidence, verifies outcomes,
-and normalizes records. Engine-owned semantic verification and
-normalized observation/verification mapping for valid canonical target-state
-evidence are implemented, including emission through the normal Engine record
-package path when that evidence is supplied.
+Engine's canonical FreeCAD runtime manifest contract is schema `1.0`, with
+optional `assemblyMutations` and `partMutations` sections for suppression,
+visibility, and conservative deletion. Normal FreeCAD execute validates and
+consumes these sections directly. The active runtime rejects schema 2.0;
+retained schema-2 metadata and strict standalone validation are transitional
+surfaces. Native mutation and required validity work are integrated into the
+normal execution lifecycle, and requested target-state observation reads the
+live post-mutation document and returns raw evidence. Engine constructs requests
+and expected state, compares evidence, verifies outcomes, and normalizes
+records.
 See [contracts/target-mutations.md](contracts/target-mutations.md) for the exact
-boundary between validation, native capability, and execute integration, and
+contract, native semantics, and lifecycle, and
 [Target-Action Contract](../../reference/target-action-contract.md) for
 Engine's semantic ownership of target actions.
 
 ## Document Lifecycle
 
-FreeCAD executes one ordered lifecycle per `execute` call: validate arguments,
-resolve the manifest and source document, open the document, apply parameter
-assignments, recompute, persist the native document, export declared
-artifacts, run reference traversal, run observation, close the document, and
-write a deterministic result. [runtime.md](runtime.md) owns the full ordered
-lifecycle and failure-stage detail; this document does not repeat it.
+FreeCAD executes one ordered lifecycle per `execute` call: validate requests,
+open the prepared document, apply parameter assignments and target mutations,
+perform applicable recompute and validity checks, persist the native document,
+run exports, optional traversal and optional observation, close the document,
+and write a deterministic success result. [runtime.md](runtime.md) owns the
+full ordering and failure-stage detail.
 
 ## Observation and Reference-Traversal Ownership
 
