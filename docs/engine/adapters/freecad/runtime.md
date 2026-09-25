@@ -11,28 +11,25 @@ reference-traversal, and artifact schemas, see the documents under
 attempt isolation, request materialization, evidence intake validation, and
 verification — see [Execution Runtime](../../runtime/execution-runtime.md).
 
-Separately from the normal external lifecycle documented below, FreeCAD has
-implemented and tested standalone native suppression/unsuppression, visibility,
-and conservative deletion consumers, plus deterministic post-mutation validity
-and dependency inspection. Normal `execute` does not invoke those consumers or
-that infrastructure. While Engine supplies canonical schema `1.0`
-target-mutation intent alongside a defined canonical schema `1.0` target-state
-observation contract, current normal FreeCAD execute has not yet been aligned
-to consume or apply those optional mutation sections; manifest-driven
-target-mutation execution remains unavailable in the normal lifecycle.
-Downstream FreeCAD work owns their future lifecycle placement and translation
-through the structured runtime failure boundary. FreeCAD-native target-state
-observation is implemented in the existing observation stage of normal execute
-when requested, using the same live document and canonical `prm.observed.json`
-output. Final ordering after canonical target mutations remains issue #6 work.
-When valid canonical target-state evidence is
-supplied, Engine already performs expected-versus-observed verification, failure
-classification, normalized observation/verification mapping, and normal record
-emission through the existing record families. See [Target
-Mutations](contracts/target-mutations.md)
-for the standalone capability semantics and
-[Observation Contract](contracts/observation.md) for the canonical target-state
-observation contract.
+Normal `execute` consumes canonical schema `1.0` mutation sections and invokes
+the native suppression, visibility, and conservative deletion consumers.
+Mutation work follows parameter assignment and precedes persistence and
+downstream evidence. Recompute and validity behavior depends on the mutation
+sequence: mutation-free execution retains its established recompute behavior;
+suppression/visibility state receives a required final recompute and supported
+Body validity inspection; deletion performs removal, exact absence verification,
+recompute, and surviving-Body validity checks for each deletion. Later mutation
+state after deletion receives its required final pass, while a final deletion
+does not receive a redundant pass. See [Target
+Mutations](contracts/target-mutations.md) for the detailed composition.
+
+After successful mutation processing and applicable recompute/validity, the
+runtime saves the native working document, runs declared exports, optional
+reference traversal, and optional observation on the same live document, then
+closes it before writing the success result. Observation emits raw live
+post-mutation target state when requested; Engine alone compares that evidence
+with expected state and normalizes records. See [Observation
+Contract](contracts/observation.md) for request and evidence shapes.
 
 ## Invocation
 
@@ -168,22 +165,24 @@ For one `execute` call, in order:
    [contracts/observation.md](contracts/observation.md)).
 7. Open the FreeCAD document.
 8. Apply parameter assignments in manifest order.
-9. Recompute once.
-10. Persist the configured native working document with `document.save()`.
-11. Export declared STEP/CSV/PDF artifacts (see
+9. Apply target mutations in deterministic section/family order when present.
+10. Perform applicable recompute and native validity checks (see
+    [contracts/target-mutations.md](contracts/target-mutations.md)).
+11. Persist the configured native working document with `document.save()`.
+12. Export declared STEP/CSV/PDF artifacts (see
     [contracts/artifacts.md](contracts/artifacts.md)).
-12. If reference traversal is enabled, run it on the recomputed, persisted
+13. If reference traversal is enabled, run it on the recomputed, persisted
     live document and emit the canonical raw traversal output.
-13. If observation is enabled, observe the same open live document — after
+14. If observation is enabled, observe the same open live document — after
     persistence, exports, and traversal, before document close.
-14. Close the document.
-15. Write deterministic success `prm.result.json` (see
+15. Close the document.
+16. Write deterministic success `prm.result.json` (see
     [contracts/result-and-failure.md](contracts/result-and-failure.md)).
 
 Live-document observation and traversal both operate on the same open FreeCAD
-document instance that received mutation, recompute, and persistence; the
-document is not reopened. The original external/project source document
-remains outside the mutation target.
+document instance that received mutation, applicable recompute/validity, and
+persistence; the document is not reopened. The original external/project
+source document remains outside the mutation target.
 
 ### Native persistence vs. derived artifacts
 
@@ -194,7 +193,8 @@ exported artifacts:
 configured native CAD document != derived exported artifact
 ```
 
-`document.save()` runs unconditionally after recompute, independent of
+`document.save()` runs unconditionally after parameter/mutation processing and
+applicable recompute/validity, independent of
 whether any STEP/CSV/PDF export is declared. Execution with zero declared
 outputs (`outputs: []`) is supported: the native document is persisted, no
 derived export runs, and `prm.result.json` reports `artifacts: []`. The persisted

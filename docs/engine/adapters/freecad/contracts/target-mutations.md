@@ -10,64 +10,55 @@ writes already handled by `parameterAssignments` (see
 Engine owns semantic target-action intent: authoring, semantic-target
 resolution, capability validation, lowering to mutation intent, routing to
 Part/Assembly destinations, and canonical schema 1.0 manifest projection with
-optional target-mutation sections. That ownership, including the current
-runtime limitation this document describes, is canonical in [Target-Action
+optional target-mutation sections. That ownership is canonical in [Target-Action
 Contract](../../../reference/target-action-contract.md).
 
 This document owns the FreeCAD adapter's transport and native-capability
 boundary for the same mutations: what the manifest contract declares, what
-FreeCAD validates, and what FreeCAD currently executes.
+FreeCAD validates and executes.
 
 ## Current implementation status
 
-Three layers exist for this capability, at different levels of completeness:
+The contract, validation, native consumers, and production lifecycle are
+implemented:
 
 ```text
-Layer 1 — Contract/Type Metadata:   transitional FreeCAD metadata defines schema 2.0;
-                                    Engine authors canonical schema 1.0
-Layer 2 — Manifest Validation:      transitional FreeCAD schema-2 validator implemented;
-                                    Engine validates/rejects schema 2.0
-Layer 3 — Native Execution:         partial
-  suppression / unsuppression:     standalone consumer implemented and tested
-  visibility hide / unhide:        standalone consumer implemented and tested
-  post-mutation validity / native
-    dependency evidence:           standalone infrastructure implemented and tested
-  conservative native deletion:    standalone consumer implemented and tested
-  canonical schema 1.0 execute
-    alignment/integration:         not implemented
+Layer 1 — Contract:                 canonical schema 1.0 mutation sections
+Layer 2 — Validation:               strict canonical schema 1.0 validation
+Layer 3 — Native execution:         suppression, visibility, deletion, validity
+Layer 4 — Lifecycle:                integrated into normal execute
+Layer 5 — Observation:              raw post-mutation target-state evidence
 ```
 
-### Layer 1 — Contract metadata (transitional FreeCAD artifact vs. Engine canonical contract)
+### Layer 1 — Canonical contract and retained transitional metadata
 
-FreeCAD's manifest contract metadata still defines manifest schema `2.0`'s
-optional `assemblyMutations`/`partMutations` sections and their
-`suppression`/`visibility`/`deletion` entry shapes from the earlier pre-release
-split, whereas Engine now projects these optional sections under canonical
-schema `1.0`. See [manifest.md](manifest.md) for the exact field surface.
-This metadata is frozen, tuple-based, import-safe, and free of FreeCAD
-dependencies or filesystem/runtime side effects.
+Canonical schema 1.0 defines optional `assemblyMutations` and `partMutations`
+sections with closed `suppression`, `visibility`, and `deletion` families.
+FreeCAD also retains schema-2 metadata and a strict standalone validator from
+the earlier pre-release split; these remain transitional validation surfaces,
+not the active production mutation contract. See [manifest.md](manifest.md).
 
-### Layer 2 — Manifest validation (transitional FreeCAD validator vs. Engine rejection)
+### Layer 2 — Strict manifest validation
 
-FreeCAD strictly validates schema `2.0` manifests in its standalone validator:
+Normal execute strictly validates canonical schema `1.0` mutation manifests:
 exact version dispatch, closed mutation collections, strict entry shapes and
 JSON-boolean typing, duplicate-target rejection, within-scope and cross-scope
-conflict rejection, and deterministic diagnostic ordering. This validator is a
-transitional implementation artifact that can validate standalone schema `2.0`
-payloads today, but normal execute enforces schema 1.0 and does not accept
-schema `2.0`. On the Engine side, schema `2.0` is unsupported and rejected.
+conflict rejection, and deterministic diagnostic ordering. The retained
+standalone schema-2 validator is transitional; normal execute rejects schema
+`2.0`. Engine also does not author or accept schema `2.0`.
 
-### Layer 3 — Native execution (partial)
+### Layer 3 — Native execution
 
-#### Suppression and unsuppression (implemented and tested)
+#### Suppression and unsuppression (integrated and tested)
 
 The standalone suppression consumer uses entry shapes that correspond to the
 `{object, suppressed}` mutation entries projected by Engine's canonical schema
 1.0 contract. Engine resolves semantic targets, validates captured capabilities,
 selects Part or Assembly routing, establishes canonical order, and projects native
 object identities under canonical schema 1.0. The consumer starts at the
-downstream native boundary; it does not repeat those Engine decisions, and it is
-not currently invoked through the normal Engine → FreeCAD execute handoff.
+downstream native boundary; it does not repeat those Engine decisions. Normal
+FreeCAD execute invokes it after parameter assignment. Focused consumer tests
+remain useful isolation proof alongside integrated lifecycle coverage.
 
 For each supplied entry, in supplied order, the consumer:
 
@@ -87,7 +78,7 @@ semantic resolution or Label, alias, fuzzy, or case-normalized lookup. It does
 not synthesize `Suppressed`, and it does not use or change visibility as a
 substitute for suppression.
 
-#### Visibility hide and unhide (implemented and tested)
+#### Visibility hide and unhide (integrated and tested)
 
 The standalone visibility consumer uses entry shapes that correspond to the
 `{object, visible}` mutation entries projected by Engine's canonical schema 1.0
@@ -95,8 +86,9 @@ contract. As with suppression, Engine retains ownership of semantic target
 resolution, captured capability validation, routing, ordering, and canonical
 schema 1.0 projection. The consumer checks native operation support at the
 execution boundary; that check does not replace Engine capability validation,
-and the consumer is not currently invoked through the normal Engine → FreeCAD
-execute handoff.
+and normal FreeCAD execute invokes it after parameter assignment. Focused
+consumer tests remain useful isolation proof alongside integrated lifecycle
+coverage.
 
 For each supplied entry, in supplied order, the consumer:
 
@@ -119,15 +111,17 @@ Label, alias, fuzzy, or case-normalized lookup, and it does not synthesize
 independent of suppression; the consumer does not use suppression as a
 visibility substitute.
 
-#### Conservative native deletion (implemented and tested)
+#### Conservative native deletion (integrated and tested)
 
 The standalone conservative deletion consumer uses entry shapes that correspond
 to the `{object}` mutation entries projected by Engine's canonical schema 1.0
 contract. Engine owns semantic policy, target resolution, captured capability
 validation, routing, canonical ordering before handoff, and canonical schema 1.0
 projection. The consumer starts with the exact native object identity supplied by
-its caller, applies conservative FreeCAD-native deletion safety, and is not
-currently invoked through the normal Engine → FreeCAD execute handoff.
+its caller and applies conservative FreeCAD-native deletion safety. Normal
+FreeCAD execute invokes it as part of the target-mutation lifecycle. Focused
+consumer tests remain useful isolation proof alongside integrated lifecycle
+coverage.
 
 For each supplied entry, in supplied order, the consumer:
 
@@ -193,35 +187,42 @@ this standalone boundary.
 
 All inspection APIs are import-safe and read-only. They do not mutate objects,
 recompute, save, export, close, or delete. Mutation and recompute are owned by
-the caller. The standalone deletion consumer owns removal and recompute around
-these helpers; normal execute lifecycle placement remains issue #6 work.
+the caller. The deletion consumer composes removal and recompute with these
+helpers; normal execute also applies the required final recompute and validity
+pass when later mutation state requires it.
 
-#### Execute integration (not implemented)
+#### Production execute lifecycle
 
-FreeCAD's runtime still loads and validates every manifest exclusively
-through the schema `1.0` path. In current FreeCAD, that schema-1 validator
-enforces closed top-level fields and rejects unknown mutation sections. A
-schema `2.0` manifest — mutation-bearing or not — is rejected before document
-opening, parameter assignment, recompute, save, export, or success-result
-writing. Handled validation failures still attempt a failed `prm.result.json`
-when a safe destination is supplied. The standalone suppression, visibility,
-and deletion consumers and the standalone validity/dependency inspection
-infrastructure are therefore not invoked by the normal external
-`parametron-freecad execute` lifecycle.
+Normal execute validates and consumes canonical schema 1.0 mutation sections
+directly. Mutation ordering is deterministic: Assembly suppression, visibility,
+deletion, then Part suppression, visibility, deletion; entries in each supplied
+collection preserve caller order. FreeCAD performs exact native `Name` lookup.
 
-Canonical schema 1.0 target-mutation execute alignment, runtime-stage
-integration, final recompute/save sequencing around target mutations, structured
-execute failure mapping, and compatibility integration are not implemented.
-Downstream FreeCAD work owns final mutation → recompute → validity → save/etc.
-ordering and translation of validity failures through the structured runtime
-failure boundary. Target-state observation remains separate scope.
+Suppression/visibility mutation state receives the required final recompute and
+supported post-mutation Body validity inspection. Each deletion performs native
+removal, exact absence verification, recompute, and supported surviving-Body
+validity inspection. A deletion followed by later mutation state receives the
+required final recompute/validity pass; when deletion is the final effective
+mutation work, the runtime adds no redundant pass. Mutation-free execution
+retains its established recompute behavior without the target-mutation validity
+requirement. Required-stage failures stop later success-dependent work, and
+earlier completed operations are not generally rolled back.
 
-Engine's complete normal-CLI contract-package proof uses a controlled external
-runtime; see the [Target-Action Contract](../../../reference/target-action-contract.md)
-for its scope. It does not establish end-to-end native mutation support in real
-FreeCAD. The standalone native suppression, visibility, and deletion consumers,
-standalone native inspection infrastructure, and Engine handoff still do not
-provide target-mutation execution through the normal external FreeCAD lifecycle.
+After successful mutation processing and applicable recompute/validity, normal
+execute saves the native working document, runs exports, optional reference
+traversal, and optional observation, closes the document, then writes success.
+Requested target-state observation reads the same live post-mutation document
+after persistence and traversal when traversal is requested. It emits raw
+evidence; Engine owns comparison and verification. Focused standalone consumer
+tests remain useful isolation evidence alongside integrated lifecycle proof.
+See [Observation Contract](observation.md) and
+[Result and Failure Contracts](result-and-failure.md).
+
+Engine's controlled-runtime normal-CLI proof and FreeCAD's real-native proof are
+complementary: the former proves Engine orchestration through a controlled
+runtime, while the latter exercises real FreeCAD against exact Engine-produced
+request contracts. They do not establish one live Engine process launching
+real FreeCAD end to end.
 
 ## Native structure precedent
 

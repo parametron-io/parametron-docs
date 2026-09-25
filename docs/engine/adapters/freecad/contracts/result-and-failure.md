@@ -42,11 +42,17 @@ when a safe result path is available.
 `failure` always has `boundary`, `category`, `code`, `message`, and `stage`.
 `stage` may be `null` only where the contract explicitly allows it.
 
-Stage attribution for handled failures includes: `parameter_assignment`,
-`recompute`, `document_save` (native persistence, save error),
-`artifact_export`, `observation`, `reference_traversal`,
+Execution failure-stage attribution includes `freecad_resolution`,
+`manifest_loading`, `manifest_validation`, `source_document_resolution`,
+`document_open`, `document_close`, `parameter_assignment`, `suppression`,
+`visibility`, `deletion`, `post_mutation_validity`, `recompute`,
+`document_save`, `artifact_export`, `observation`,
+`reference_traversal_request_validation`, `reference_traversal`,
 `reference_traversal_output_containment`,
-`reference_traversal_output_write`, and `document_open`.
+`reference_traversal_output_write`, `result_write`, and `unknown`. The shared
+failure contract also defines stages for argument validation, manifest
+compatibility, and observation output. A stage may be `null` where the contract
+allows it; those stages are not all emitted by normal execute.
 
 Behavior:
 
@@ -55,7 +61,13 @@ Behavior:
 - success-path `prm.result.json` behavior is unaffected by this contract
 - CLI exit codes and single-line stderr are unaffected (see
   [runtime.md](../runtime.md#process-outcomes))
-- failure-result emission is best-effort and never masks the original failure
+- required-stage failure stops later success-dependent work; no success result
+  is emitted after a required lifecycle failure
+- document close is attempted during cleanup; if execution has already failed,
+  a close failure does not replace the primary execution failure
+- failure-result emission is best-effort and never masks the original failure;
+  a failure-result write error also does not replace the primary execution
+  failure
 - a result-write failure does not recurse into failure-result writing
 
 ## Runtime trace contract (contract shape only — not wired into execution)

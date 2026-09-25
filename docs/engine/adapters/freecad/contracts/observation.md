@@ -143,9 +143,8 @@ Under canonical schema `1.0`, Engine defines the optional raw evidence result
 contract `observation.targetState`. When target-state observation is unrequested
 or absent, `observation.targetState` is omitted.
 
-Current `parametron-freecad` normal `execute` does not yet emit this contract
-extension; the following structure is the canonical Engine-owned target-state
-result shape:
+Normal FreeCAD execute emits this contract extension when requested; the
+following structure is the canonical Engine-owned target-state result shape:
 
 ```json
 {
@@ -271,8 +270,12 @@ includes `unavailable`. Entries are ordered by destination, then object. When
 target state is unrequested, `observation.targetState` is absent and existing
 parameter, metadata, and reference behavior is unchanged.
 
-Normal `execute` does not yet apply canonical target mutations. Final placement
-of target-state observation after those mutations is issue #6 work.
+Normal `execute` applies canonical target mutations before persistence and
+observation. Target-state observation reads the same live document after
+successful mutation, persistence, and reference traversal when traversal is
+requested, then precedes document close. It reports raw native state and does
+not verify requested mutations; Engine owns expected-versus-observed comparison
+and normalization.
 
 When valid canonical target-state evidence is supplied, Engine consumes it
 through its expected-versus-observed verifier and the existing normalized

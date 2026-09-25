@@ -71,11 +71,12 @@ not real FreeCAD. It reads canonical schema `1.0` `prm.export-manifest.json` and
 unhide, deletion, combined mutation families, Part and Assembly destination
 identity, deterministic ordering and materialization, attempt-contained
 authoritative paths, and staged source use. It covers the normal CLI path,
-not HTTP API target-mutation submission. Real `parametron-freecad execute` now
-supports request-scoped native target-state observation, but the complete native
-target-mutation and post-mutation observation lifecycle is not yet integrated.
-The controlled external-runtime proof does not establish real FreeCAD target
-mutation execution. See [Target-Action Contract](../reference/target-action-contract.md)
+not HTTP API target-mutation submission. FreeCAD separately proves real-native
+target-mutation execution and requested target-state observation against exact
+Engine-production-materialized contracts. This is distinct from Engine's
+controlled-runtime orchestration proof; the shared file contract is aligned on
+both sides. No single live production Engine process invoking real FreeCAD is
+established. See [Target-Action Contract](../reference/target-action-contract.md)
 for semantic ownership and proof scope.
 
 CAD-runtime execution is composed of four decoupled layers:
@@ -124,8 +125,8 @@ Before invoking the external CAD runtime:
    `prm.verification.json` contain only the exact `(destination, object)`
    identities to observe; they do not serialize expected values. Parsing that
    request therefore cannot reconstruct or fabricate expected target state.
-   Current `parametron-freecad` normal `execute` does not yet support these
-   target-state request fields or produce the corresponding native evidence.
+   Current `parametron-freecad` normal `execute` supports these target-state
+   request fields and produces corresponding raw native evidence.
 3. **Reference Traversal Request**: If reference traversal is configured,
    `prm.reference-traversal-request.json` is materialized.
 4. **Pre-Invocation Freshness**: Stale contract-owned outputs (`prm.result.json`,
@@ -169,9 +170,9 @@ Upon subprocess completion, Engine validates raw runtime evidence:
 3. **Observed CAD State Intake**:
    - `<OutputDir>/prm.observed.json` is loaded and structurally validated.
      Engine's observed contract can structurally accept and validate
-     target-state evidence (`suppression`, `visibility`, `existence`), while
-     current `parametron-freecad` normal `execute` does not yet produce that
-     native target-state evidence.
+     target-state evidence (`suppression`, `visibility`, `existence`), and
+     `parametron-freecad` normal `execute` produces that native target-state
+     evidence when requested.
    - Observed working copy path and SHA-256 are verified against the prepared
      source model.
 4. **Raw Traversal Evidence Intake**:
@@ -283,10 +284,9 @@ record package (`<runRoot>/parametron-record-package/`):
 | Verification | Yes | Yes (`recordmap.MapVerification`, including target state) | Yes, for the Engine-owned verification result from the uniquely eligible successful CAD outcome |
 
 Target-state material uses the existing observation and verification families;
-there is no separate target-state record family. This Engine emission capability
-does not change the current FreeCAD limitation described above: normal FreeCAD
-`execute` does not yet consume target mutations or produce native target-state
-evidence.
+there is no separate target-state record family. FreeCAD supplies raw native
+target-state evidence after canonical mutations through normal `execute`, while
+Engine owns comparison, verification, and record normalization.
 
 Applicable successful controlled-runtime proof runs observe normal package
 emission of execution, artifact, observation, and verification records, rather
