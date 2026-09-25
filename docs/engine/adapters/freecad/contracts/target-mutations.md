@@ -304,9 +304,7 @@ boundary beyond the focused tests above. It does not establish arbitrary-object
 deletion, a broader deletion policy, byte-identical `.FCStd` serialization, or
 the later live Engine-to-real-FreeCAD rehearsal. FreeCAD's observed state is raw
 native evidence; Engine retains expected-state comparison, verification, and
-normalization. The proof is currently carried by an open FreeCAD source PR, so
-it is demonstrated branch evidence pending merge rather than evidence already
-on FreeCAD `main`.
+normalization.
 
 ## Ownership
 
