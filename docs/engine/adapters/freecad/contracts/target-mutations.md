@@ -285,14 +285,36 @@ structure and preconditions. None of these forms of proof establishes canonical
 schema 1.0 execute alignment, final lifecycle orchestration, target-state
 observation, or persistence through normal execute.
 
+Separate integrated lifecycle tests establish canonical schema 1.0 routing,
+operation order, recompute and validity stages, persistence, observation, and
+failure handling through normal execute. Permanent gated real-FreeCAD proof also
+runs canonical schema 1.0 manifests and observation requests through the
+production `execute` boundary against temporary native documents. It proves
+suppression and unsuppression, hide and unhide, conservative safe deletion,
+unsafe-delete rejection, required recompute and supported Body validity,
+controlled native validity failure, working-copy persistence and independent
+reopen, and requested raw suppression, visibility, and existence evidence.
+Representative failures propagate through the runtime result without false
+success or observation, and document closure is checked. Repeated runs agree on
+native state, validity, result, observation, and output names; the source
+fixture remains unchanged.
+
+This production-execute proof establishes the supported native capability
+boundary beyond the focused tests above. It does not establish arbitrary-object
+deletion, a broader deletion policy, byte-identical `.FCStd` serialization, or
+the later live Engine-to-real-FreeCAD rehearsal. FreeCAD's observed state is raw
+native evidence; Engine retains expected-state comparison, verification, and
+normalization. The proof is currently carried by an open FreeCAD source PR, so
+it is demonstrated branch evidence pending merge rather than evidence already
+on FreeCAD `main`.
+
 ## Ownership
 
 FreeCAD owns exact native object lookup, native CAD mutation including
 conservative deletion, native dependent safety at the deletion boundary,
 post-delete supported Body validity inspection, raw native dependency evidence,
-and native runtime failures at the boundary described above. When target
-mutations are integrated into execute, FreeCAD also owns its CAD lifecycle
-operations around them.
+and native runtime failures at the boundary described above. FreeCAD also owns
+its CAD lifecycle operations around target mutations in normal execute.
 Engine owns semantic intent, semantic target resolution, captured capability
 validation, lowering, routing, canonical ordering, canonical schema 1.0
 projection with optional target-mutation sections, expected-versus-observed
