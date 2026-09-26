@@ -179,10 +179,23 @@ remaining pre-release traversal schema split, and Engine #3 was reopened.
 Engine [#28](https://github.com/parametron-io/parametron-engine/issues/28)
 and FreeCAD [#39](https://github.com/parametron-io/parametron-freecad/issues/39)
 completed and merged the correction. An independent cross-repository Stage 2
-audit returned `READY FOR STAGE 3`, including a real Engine → FreeCAD → Engine
-round trip with canonical schema 1.0 traversal and exact raw-evidence digest
-linkage. This Stage 3 update synchronizes the central contract documentation.
-Engine #3 awaits final revalidation against the corrected mainline. FreeCAD #9
-remains a separate, incomplete rehearsal gate; its branch must consume the
-corrected mainline before its own Stage 2 rerun. GitHub Issues and the project
-remain the source of truth for subsequent live status changes.
+audit then returned `READY FOR STAGE 3`, including a real Engine → FreeCAD →
+Engine round trip with canonical schema 1.0 traversal and exact raw-evidence
+digest linkage. Central contract documentation was synchronized, the remaining
+Engine-local status residue was corrected, and Engine #3 was revalidated and
+closed as completed.
+
+FreeCAD #9 was subsequently rebased onto the corrected Engine mainline and its
+final independent real-native Stage 2 audit returned
+`READY TO CLOSE FREECAD #9`. That audit exercised the real Engine → FreeCAD →
+Engine path with FreeCAD 1.1.1 across suppression, unsuppression, hide, unhide,
+safe deletion, unsafe-delete rejection, representative native validity failure,
+target-state observation, runtime-result intake, rich schema-1 reference
+traversal, Engine verification, normalized record/package emission, raw-evidence
+provenance, and repeatability. It found no remaining technical gap in the
+cross-repository rehearsal and confirmed zero active schema-2 production or
+compatibility paths in the Engine and FreeCAD runtime boundary.
+
+FreeCAD #9 remains open only for final Stage 3 status synchronization and issue
+closure. GitHub Issues and the project remain the source of truth for subsequent
+live status changes.
