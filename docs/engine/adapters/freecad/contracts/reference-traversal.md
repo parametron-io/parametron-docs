@@ -29,9 +29,8 @@ request:  prm.reference-traversal-request.json
 output:   prm.reference-traversal.json
 ```
 
-**Schema `1.0`** (closed): `{"schemaVersion": "1.0"}` only.
-
-**Schema `2.0`**: `schemaVersion` plus `externalTargets[]`, where each entry
+Canonical schema `1.0` requires `schemaVersion` and `externalTargets[]` (an
+empty array is valid). Each mapping entry
 supplies Engine-owned canonical external-target identity:
 `sourceObjectName`, `sourceProperty`, `referenceMechanism`,
 `targetObjectName`, `targetDocumentPath`. FreeCAD never opens mapped
@@ -39,8 +38,12 @@ documents and never reads `Document.FileName` for matching or output — an
 approved-API probe found no mechanism that exposes stable, relocation-
 independent original target spelling (Link variants reject cross-document
 targets; XLink variants expose only a relocation-dependent absolute
-`Document.FileName`). Schema-2 external identity therefore always comes from
+`Document.FileName`). External identity therefore always comes from
 the Engine-supplied mapping, never from runtime path inspection.
+The request is closed, validates canonical relative target-document paths and
+exact mapping coordinates, rejects conflicting mappings, and serializes entries
+in deterministic order. The former pre-release schema split is retired; these
+rich mapping semantics are part of schema `1.0`.
 
 ## Supported discovery
 
@@ -59,8 +62,9 @@ No string/path heuristic is a supported mechanism.
   edges; one source keeps each distinct outgoing edge.
 - **External (mapped)**: runtime matching uses only
   `(sourceObjectName, sourceProperty, referenceMechanism, targetObjectName)`
-  against the schema-2 mapping. A unique resolved observation emits a mapped
-  external `object` node and a resolved `external_document_reference` edge.
+  against the canonical request mapping. A unique resolved observation emits a
+  mapped external `object` node and a resolved
+  `external_document_reference` edge.
   `None`/empty/partially-observed values against a mapped target emit missing
   evidence. Multiple same-name candidates for one mapped coordinate are fatal
   (`ambiguous_reference_target`) rather than guessed.
@@ -71,22 +75,18 @@ No string/path heuristic is a supported mechanism.
   read.
 
 Recursive traversal into mapped external documents is **not implemented**.
-The current object/property-mechanism raw contract also cannot distinguish
-two same-source/same-target/same-kind observations that arose through
-different `sourceProperty`/`referenceMechanism` under schema 1.0 output; only
-schema 2.0 output carries that provenance (see below). This is a known
-current contract limitation, not a bug.
+The raw canonical evidence distinguishes same-source/same-target/same-kind
+observations with different `sourceProperty` or `referenceMechanism`. Engine's
+normalized record keeps its existing coarser semantics; the raw evidence
+retains the additional provenance (see below).
 
 ## Output schema
 
-Runtime emission uses schema `2.0`. Schema `1.0`'s public models, ordering,
-and bytes remain unchanged and closed for compatibility.
-
-Schema 2.0 example (the top-level shape is shared by both schemas):
+Runtime emits one rich canonical schema `1.0` model:
 
 ```json
 {
-  "schemaVersion": "2.0",
+  "schemaVersion": "1.0",
   "kind": "raw_reference_traversal",
   "boundary": "reference_traversal_entrypoint",
   "operation": "reference_traversal",
@@ -98,7 +98,7 @@ Schema 2.0 example (the top-level shape is shared by both schemas):
 }
 ```
 
-Schema 2.0 adds nullable `objectType` on nodes (after `objectName`, before
+The model includes nullable `objectType` on nodes (after `objectName`, before
 `label`) and nullable `sourceProperty`/`referenceMechanism` on edges (after
 `kind`, before `state`). Observed values are non-empty strings; unavailable
 values are `null`; empty strings are rejected.
@@ -162,7 +162,7 @@ external_file     -> ("external_file", documentPath)
 The serialized `id` is `<node-kind>:<lowercase-sha256>` over the exact UTF-8
 bytes of the canonical JSON serialization of the identity key (including its
 trailing LF). Edge identity is `(source_key, target_key, kind, sourceProperty,
-referenceMechanism)` under schema 2.0 — both provenance values participate,
+referenceMechanism)` — both provenance values participate,
 so `null` differs from every observed value. Equal complete identities with
 equal complete raw evidence collapse to one; equal identities with
 *unequal* raw evidence are a contract conflict and cause a controlled,
@@ -170,18 +170,14 @@ chained failure rather than a silent merge.
 
 ### Ordering
 
-For schema 2.0, deterministic total order is applied before zero-based
-sequence assignment, independently for nodes, edges, and diagnostics:
+For canonical schema `1.0`, deterministic total order is applied before
+zero-based sequence assignment, independently for nodes, edges, and diagnostics:
 
 ```text
 node:       documentPath, kind, id, objectName, objectType, label, state, diagnostic
 edge:       source, target, kind, sourceProperty, referenceMechanism, state, diagnostic
 diagnostic: stage, severity, code, message
 ```
-
-The separate schema-1 node/edge ordering omits `objectType`,
-`sourceProperty`, and `referenceMechanism`; it is not the ordering used for
-runtime schema-2 emission.
 
 `None` sorts before any provided string; ordinary case-sensitive
 lexicographic comparison is used with no trimming, case folding, or path

@@ -9,15 +9,15 @@ Transport filename:
 prm.export-manifest.json
 ```
 
-The transport filename and schema versioning are separate concepts; there is
-no `export_manifest_v2.json` filename.
+The transport filename does not encode a schema generation.
 
 ## Canonical Engine-authored manifest contract (Schema 1.0)
 
 Engine authors and projects a single canonical manifest schema: `1.0`. All
 Engine-authored manifests use `schemaVersion: "1.0"`, whether mutation-free or
-mutation-bearing. Schema `2.0` is retired on the Engine side and is not an
-Engine-supported transport contract.
+mutation-bearing. FreeCAD validates and consumes the same schema in normal
+execution. The experimental pre-release schema `2.0` split is retired and is
+not an active runtime compatibility contract.
 
 Core top-level fields:
 
@@ -63,9 +63,7 @@ constraint/expression target support, or capture-backed target projection.
 
 Normal `parametron-freecad execute` validates and consumes canonical schema
 `1.0` directly, including optional mutation sections and their strict mutation
-rules. It rejects schema `2.0`. FreeCAD retains schema-2 metadata and a strict
-standalone validator from the earlier pre-release split as transitional
-validation surfaces; they are not the production mutation transport contract.
+rules. Unsupported schema versions are rejected.
 
 The legacy Engine-manifest normalization helper remains for the rehearsal /
 compatibility surface. Normal execute does not import or invoke it.
@@ -73,12 +71,10 @@ compatibility surface. Normal execute does not import or invoke it.
 ### Strict mutation validation rules
 
 FreeCAD's canonical schema 1.0 validator applies the following rules in normal
-execute. The retained standalone schema-2 validator also validates its
-transitional schema surface:
+execute:
 
-- **Exact version dispatch** — `"1.0"` and `"2.0"` are matched by exact string
-  equality in the standalone validator dispatch; no trimming, case folding, or
-  numeric coercion. Normal execute enforces schema 1.0.
+- **Exact version validation** — `"1.0"` is matched by exact string equality;
+  no trimming, case folding, or numeric coercion.
 - **Canonical schema 1.0 mutation sections** — normal execute accepts optional
   `assemblyMutations` and `partMutations`; each section is closed to
   `suppression`, `visibility`, and `deletion`.

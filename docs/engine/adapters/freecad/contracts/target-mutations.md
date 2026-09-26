@@ -30,22 +30,20 @@ Layer 4 — Lifecycle:                integrated into normal execute
 Layer 5 — Observation:              raw post-mutation target-state evidence
 ```
 
-### Layer 1 — Canonical contract and retained transitional metadata
+### Layer 1 — Canonical contract
 
 Canonical schema 1.0 defines optional `assemblyMutations` and `partMutations`
 sections with closed `suppression`, `visibility`, and `deletion` families.
-FreeCAD also retains schema-2 metadata and a strict standalone validator from
-the earlier pre-release split; these remain transitional validation surfaces,
-not the active production mutation contract. See [manifest.md](manifest.md).
+FreeCAD consumes these sections through the canonical manifest contract. See
+[manifest.md](manifest.md).
 
 ### Layer 2 — Strict manifest validation
 
 Normal execute strictly validates canonical schema `1.0` mutation manifests:
 exact version dispatch, closed mutation collections, strict entry shapes and
 JSON-boolean typing, duplicate-target rejection, within-scope and cross-scope
-conflict rejection, and deterministic diagnostic ordering. The retained
-standalone schema-2 validator is transitional; normal execute rejects schema
-`2.0`. Engine also does not author or accept schema `2.0`.
+conflict rejection, and deterministic diagnostic ordering. Unsupported schema
+versions are rejected at the runtime boundary.
 
 ### Layer 3 — Native execution
 
