@@ -242,10 +242,13 @@ create missing packages nor modify existing packages.
 
 ## Traversal normalization and bounded reference emission
 
-The pure mapper accepts supplied traversal schema `2.0` evidence and a stable
+The pure mapper accepts supplied rich traversal schema `1.0` evidence and a stable
 caller `RecordKey`. It performs no file discovery, I/O, digest computation, or
 package writing. `recordcontract.BuildReferenceRecord` owns normalized identity
 and edge order; `NormalizeProvenance` owns provenance order.
+The package preserves exact raw `prm.reference-traversal.json` bytes as
+authoritative evidence. The evidence digest is computed from those bytes, not
+from a reserialized normalized record.
 
 | Raw value | Normalized value |
 | --- | --- |

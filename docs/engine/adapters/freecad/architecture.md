@@ -46,6 +46,13 @@ executable with explicit working-copy, manifest, and result paths. FreeCAD
 validates those paths, performs FreeCAD-specific execution or observation, and
 returns raw runtime evidence through deterministic file-based contracts:
 
+All active Parametron-owned Engine ↔ CAD JSON runtime contracts on this
+boundary use canonical `schemaVersion: "1.0"`: the export manifest,
+verification request, observed result, runtime result, traversal request, and
+rich traversal evidence. Engine plans and lowers intent into the runtime
+package; FreeCAD executes and captures native evidence; Engine verifies and
+normalizes the returned evidence into records.
+
 ```text
 Engine / local caller
   -> parametron-freecad (launcher)
@@ -111,13 +118,11 @@ behind the same launcher entry point:
 Engine's canonical FreeCAD runtime manifest contract is schema `1.0`, with
 optional `assemblyMutations` and `partMutations` sections for suppression,
 visibility, and conservative deletion. Normal FreeCAD execute validates and
-consumes these sections directly. The active runtime rejects schema 2.0;
-retained schema-2 metadata and strict standalone validation are transitional
-surfaces. Native mutation and required validity work are integrated into the
-normal execution lifecycle, and requested target-state observation reads the
-live post-mutation document and returns raw evidence. Engine constructs requests
-and expected state, compares evidence, verifies outcomes, and normalizes
-records.
+consumes these sections directly. Native mutation and required validity work
+are integrated into the normal execution lifecycle, and requested target-state
+observation reads the live post-mutation document and returns raw evidence.
+Engine constructs requests and expected state, compares evidence, verifies
+outcomes, and normalizes records.
 See [contracts/target-mutations.md](contracts/target-mutations.md) for the exact
 contract, native semantics, and lifecycle, and
 [Target-Action Contract](../../reference/target-action-contract.md) for
@@ -163,3 +168,21 @@ the current FreeCAD adapter.
   families and packaging.
 - [Target-Action Contract](../../reference/target-action-contract.md) —
   Engine's semantic target-action ownership.
+
+## Corrective-work status (2026-09-26)
+
+Engine [#3](https://github.com/parametron-io/parametron-engine/issues/3)
+initially closed after the Engine-owned contract package was completed. The
+real rehearsal under FreeCAD
+[#9](https://github.com/parametron-io/parametron-freecad/issues/9) exposed a
+remaining pre-release traversal schema split, and Engine #3 was reopened.
+Engine [#28](https://github.com/parametron-io/parametron-engine/issues/28)
+and FreeCAD [#39](https://github.com/parametron-io/parametron-freecad/issues/39)
+completed and merged the correction. An independent cross-repository Stage 2
+audit returned `READY FOR STAGE 3`, including a real Engine → FreeCAD → Engine
+round trip with canonical schema 1.0 traversal and exact raw-evidence digest
+linkage. This Stage 3 update synchronizes the central contract documentation.
+Engine #3 awaits final revalidation against the corrected mainline. FreeCAD #9
+remains a separate, incomplete rehearsal gate; its branch must consume the
+corrected mainline before its own Stage 2 rerun. GitHub Issues and the project
+remain the source of truth for subsequent live status changes.

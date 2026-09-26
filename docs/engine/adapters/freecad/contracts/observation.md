@@ -17,10 +17,12 @@ Contract metadata defines top-level fields under canonical schema `1.0`:
 — Engine defaults absent parameter bindings to an empty list), `expected`
 (required), `checks` (required).
 
-These canonical Engine contract requirements are not all enforced with the same
-strictness by the current `parametron-freecad` loading and compatibility chain:
-for example, `{"observe":{"metadata":true}}` is accepted without
-`schemaVersion`, `expected`, or `checks`.
+The external runtime loads the request, validates `schemaVersion: "1.0"`
+unconditionally, validates the requested observation sections, then performs
+native observation. A missing or unsupported version is rejected regardless
+of whether `targetState`, metadata, parameters, or references are requested.
+FreeCAD's section validation is scoped to the supported native observations;
+Engine owns the complete authored request and check semantics.
 
 `observe` is a set of boolean-ish enable flags per category: `parameters`,
 `metadata`, `references`, `components`, and optional `targetState`. `expected`
