@@ -9,7 +9,7 @@
 parametron validate --file <dsl-path> [flags]
 
 # Project-based entrypoint
-parametron validate --project <project-dir | parametron.project.json> [flags]
+parametron validate --project <project-dir | prm.project.json> [flags]
 ```
 
 `--file` and `--project` are mutually exclusive; exactly one must be provided.
@@ -19,7 +19,7 @@ parametron validate --project <project-dir | parametron.project.json> [flags]
 | Flag | Short | Required | Description |
 |------|-------|----------|-------------|
 | `--file` | `-f` | One of | Path to a DSL file (standalone DSL entrypoint); mutually exclusive with `--project` |
-| `--project` | | One of | Path to a project directory or `parametron.project.json` file (project-based entrypoint); mutually exclusive with `--file` |
+| `--project` | | One of | Path to a project directory or `prm.project.json` file (project-based entrypoint); mutually exclusive with `--file` |
 | `--inputs` | | No | JSON file of parameter overrides (flat object `{key: scalar}`) |
 | `--set` | | No | Parameter override (`key=value`), repeatable |
 | `--table` | | No | Load a JSON table from disk (`logical-id=path`), repeatable |
@@ -50,13 +50,13 @@ When `--project` is provided, the CLI loads the project mapping before proceedin
 
 Project entrypoint resolution:
 
-1. The `parametron.project.json` file is read and parsed.
+1. The `prm.project.json` file is read and parsed.
 2. The project mapping is validated (schema, path safety, logical ID constraints). Failures exit immediately with a non-zero code.
 3. The DSL file declared in the project mapping is resolved relative to the project directory.
 4. The resolved DSL path is used as the parse input.
 5. Project tables declared in the `tables` field are loaded by logical ID after DSL parse and before DSL validation.
 6. Product `source_model` logical IDs are resolved against the project mapping's `resources.models` map after DSL validation and before plan generation. An unrecognized ID fails immediately.
-7. When a project-root `parametron.cad.json` is present, capture-backed authoring validation also runs before planning proceeds:
+7. When a project-root `prm.cad.json` is present, capture-backed authoring validation also runs before planning proceeds:
    - numeric manifest-bound params must resolve to exactly one captured parameter by exact name
    - zero matches and multiple exact-name matches fail deterministically
    - matching is case-sensitive
@@ -69,7 +69,7 @@ Failure boundaries when using a project entrypoint:
 
 | Condition | When it fails |
 |:----------|:-------------|
-| Missing or unreadable `parametron.project.json` | Project file load |
+| Missing or unreadable `prm.project.json` | Project file load |
 | Invalid project file schema or unknown field | Project mapping validation |
 | Model path escaping the project root | Project mapping validation |
 | Table path escaping the project root | Project mapping validation |
@@ -92,7 +92,7 @@ All project-level failures are deterministic. Identical inputs produce identical
 Directory input and direct project file input are treated identically by the CLI.
 
 See [project mapping](../authoring/project-mapping.md) for the full
-`parametron.project.json` format reference.
+`prm.project.json` format reference.
 
 ## CI Usage
 
@@ -121,4 +121,4 @@ When both `--set` and `--inputs` are provided, values from `--inputs` take prece
 
 - [Command families](command-families.md) — command routing and shared behavior
 - [CLI runtime behavior](runtime-behavior.md) — `--set` override rules and type conversion
-- [Project mapping](../authoring/project-mapping.md) — `parametron.project.json` format, path rules, and error classification
+- [Project mapping](../authoring/project-mapping.md) — `prm.project.json` format, path rules, and error classification

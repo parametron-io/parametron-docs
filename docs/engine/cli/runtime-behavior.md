@@ -9,7 +9,7 @@ runtime and evidence-processing lifecycle.
 ## Entry points and overrides
 
 Use exactly one of `--file` or `--project`. Project input is a directory
-containing `parametron.project.json` or the project file itself.
+containing `prm.project.json` or the project file itself.
 
 ```bash
 parametron --file model.dsl --set width=100 --out ./output
@@ -56,7 +56,7 @@ That profile setting takes precedence and resolves under
 │   ├── prm.export-manifest.json
 │   └── _working/<attempt-id>/
 ├── prm.report.json
-├── manifest.json
+├── prm.artifact-store-manifest.json
 ├── prm.metadata.json
 └── parametron-record-package/
 ```

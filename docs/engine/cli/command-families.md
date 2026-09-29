@@ -29,7 +29,7 @@ parametron --project my-project/ --dry-run
 - `validate` is the quickest way to check parse, validation, and planning without execution. See [Validate](validate.md).
 - Root execution mode with `--print-plan` shows the planned steps in a human-readable form.
 - Root execution mode with `--json-plan` emits the resolved execution plan JSON for tooling or inspection.
-- The `simulate` harness command runs multiple input cases through the full pipeline and writes `simulate_report.json`. See [Simulate](simulate.md).
+- The `simulate` harness command runs multiple input cases through the full pipeline and writes `prm.simulate-report.json`. See [Simulate](simulate.md).
 
 ## Root Execution Mode
 
@@ -37,12 +37,12 @@ Invoked without a recognized harness command name. Accepts either `--file` (stan
 
 ```bash
 parametron --file model.dsl [flags]
-parametron --project <project-dir | parametron.project.json> [flags]
+parametron --project <project-dir | prm.project.json> [flags]
 ```
 
 Root execution flags:
 - `--file / -f`: DSL file path (standalone DSL execution); mutually exclusive with `--project`
-- `--project`: project directory or `parametron.project.json` path (project-based execution); mutually exclusive with `--file`
+- `--project`: project directory or `prm.project.json` path (project-based execution); mutually exclusive with `--file`
 - `--set`: override a parameter value (`key=value`, repeatable)
 - `--table`: load a JSON table from disk (`logical-id=path`, repeatable)
 - `--out / -o`: base output directory (default `./output`)
@@ -65,40 +65,40 @@ Explicit named commands. They operate on the parse → validate → plan → exe
 | `sweep` | Expand Cartesian product of parameter values and validate planning for each. No execution. |
 | `snapshot` | Execute a single case and capture a deterministic snapshot package. |
 | `diff` | Compare two plan files or two snapshot directories. |
-| `sync` | Create or refresh `parametron.lock.json` for a project. Project-mode only. |
+| `sync` | Create or refresh `prm.project-lock.json` for a project. Project-mode only. |
 
 All harness commands accept `--debug / -d`. See individual command documents for their specific flags.
 
 ### Command: sync
 
-**Purpose**: Create or refresh `parametron.lock.json` from the current project mapping and captured resources.
+**Purpose**: Create or refresh `prm.project-lock.json` from the current project mapping and captured resources.
 
-**Required input**: a project entrypoint — either a project directory or a `parametron.project.json` file. Standalone DSL input is rejected.
+**Required input**: a project entrypoint — either a project directory or a `prm.project.json` file. Standalone DSL input is rejected.
 
 ```bash
 parametron sync --project <project-dir>
-parametron sync --project <project-dir>/parametron.project.json
+parametron sync --project <project-dir>/prm.project.json
 parametron sync --file <project-dir>          # compatibility form, also accepted
 ```
 
 **Supported entrypoints**:
-- `--project <path>` (preferred): accepts a project directory or a `parametron.project.json` file directly.
+- `--project <path>` (preferred): accepts a project directory or a `prm.project.json` file directly.
 - `--file <path>` (compatibility): same resolution; both forms are accepted and behave identically.
 - Standalone DSL input is rejected regardless of flag used.
 
-**Output location**: `<project-root>/parametron.lock.json`. The file is written atomically; if it already exists it is overwritten.
+**Output location**: `<project-root>/prm.project-lock.json`. The file is written atomically; if it already exists it is overwritten.
 
 **What the command does**:
 1. Loads the project mapping from the resolved entrypoint.
 2. Captures the DSL SHA-256, model resource SHA-256 hashes ordered by logical ID, and table semantic fingerprints.
 3. Builds the lock from the project mapping and captured resources.
-4. Writes the result atomically to `<project-root>/parametron.lock.json`.
+4. Writes the result atomically to `<project-root>/prm.project-lock.json`.
 
 **Deterministic behavior**: identical project mapping and identical resource content produce byte-identical lock file output on every invocation.
 
 **Failure conditions**:
 - Standalone DSL path supplied instead of a project entrypoint: rejected immediately.
-- Missing or invalid `parametron.project.json`: propagates as a deterministic project-loading error.
+- Missing or invalid `prm.project.json`: propagates as a deterministic project-loading error.
 - Missing DSL file or missing mapped model file: fails early and deterministically before any lock content is written.
 
 **Scope**:

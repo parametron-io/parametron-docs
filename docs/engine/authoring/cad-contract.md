@@ -1,6 +1,6 @@
 # CAD Capture Contract
 
-`parametron.cad.json` describes a captured CAD automation surface. Engine owns
+`prm.cad.json` describes a captured CAD automation surface. Engine owns
 the input schema and its interpretation: document identity, captured entities,
 ownership, hierarchy, values, and capabilities available to authoring. Capture
 production and CAD-native operations belong to the CAD integration.

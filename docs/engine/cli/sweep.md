@@ -9,7 +9,7 @@
 parametron sweep --file <dsl-path> --product <name> --param <spec> [--param <spec> ...] [flags]
 
 # Project-based entrypoint
-parametron sweep --project <project-dir | parametron.project.json> --product <name> --param <spec> [--param <spec> ...] [flags]
+parametron sweep --project <project-dir | prm.project.json> --product <name> --param <spec> [--param <spec> ...] [flags]
 ```
 
 `--file` and `--project` are mutually exclusive; exactly one must be provided.
@@ -19,10 +19,10 @@ parametron sweep --project <project-dir | parametron.project.json> --product <na
 | Flag | Short | Required | Description |
 |------|-------|----------|-------------|
 | `--file` | `-f` | One of | Path to a DSL file (standalone DSL entrypoint); mutually exclusive with `--project` |
-| `--project` | | One of | Path to a project directory or `parametron.project.json` file (project-based entrypoint); mutually exclusive with `--file` |
+| `--project` | | One of | Path to a project directory or `prm.project.json` file (project-based entrypoint); mutually exclusive with `--file` |
 | `--product` | | Yes | Product name to sweep |
 | `--param` | | Yes | Parameter spec, repeatable |
-| `--out` | `-o` | No | Output directory for `sweep_report.json` |
+| `--out` | `-o` | No | Output directory for `prm.sweep-report.json` |
 | `--debug` | `-d` | No | Enable debug logging |
 
 ## Parameter Spec Syntax
@@ -66,9 +66,9 @@ Sweep rejects:
 
 ## Outputs
 
-A `sweep_report.json` is written to `--out`.
+A `prm.sweep-report.json` is written to `--out`.
 
-## sweep_report.json Schema
+## prm.sweep-report.json Schema
 
 ```json
 {

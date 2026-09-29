@@ -222,15 +222,15 @@ test(cli): add project-based execution rehearsal coverage for root CLI
 - add TestCLI_ProjectBasedExecution_RehearsalPass
 - add TestCLI_ProjectBasedExecution_RehearsalFailurePath
 - prove end-to-end root CLI execution via `--project` entrypoints
-  (directory and parametron.project.json)
-- assert successful runs produce report.json, metadata.json,
-  manifest.json, and declared artifacts
+  (directory and prm.project.json)
+- assert successful runs produce prm.report.json, prm.metadata.json,
+  prm.artifact-store-manifest.json, and declared artifacts
 - verify metadata includes project-captured inputs and table participation
 - confirm deterministic cache reuse on identical runs
 - confirm cache invalidation on model and table changes
-- verify project-mode execution does not require parametron.lock.json
+- verify project-mode execution does not require prm.project-lock.json
 - assert deterministic failure reporting without requiring real FreeCAD
-- extend test-only helper to inspect run-root state and report.json
+- extend test-only helper to inspect run-root state and prm.report.json
 
 no production code changes
 #5

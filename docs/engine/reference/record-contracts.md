@@ -17,12 +17,12 @@ Registry order and filenames are:
 
 | Family | Filename under `records/` | Material |
 | --- | --- | --- |
-| execution | `parametron.execution-record.json` | Execution outcome, jobs, steps, timing and related record links |
-| artifact | `artifacts/<identityId>/parametron.artifact-record.json` | Artifact identity, inventory and content metadata |
-| observation | `parametron.observation-record.json` | Normalized observed facts and evidence |
-| reference | `parametron.reference-record.json` | Normalized reference edges, endpoints, resolution and evidence |
-| failure | `parametron.failure-record.json` | Class, message, stage, severity, code, location, retry/timeout/cancellation and evidence |
-| verification | `parametron.verification-record.json` | Engine outcome, category results, failure classes, linkage and evidence |
+| execution | `prm.execution-record.json` | Execution outcome, jobs, steps, timing and related record links |
+| artifact | `artifacts/<identityId>/prm.artifact-record.json` | Artifact identity, inventory and content metadata |
+| observation | `prm.observation-record.json` | Normalized observed facts and evidence |
+| reference | `prm.reference-record.json` | Normalized reference edges, endpoints, resolution and evidence |
+| failure | `prm.failure-record.json` | Class, message, stage, severity, code, location, retry/timeout/cancellation and evidence |
+| verification | `prm.verification-record.json` | Engine outcome, category results, failure classes, linkage and evidence |
 
 Each family has `Build…Record`, `Normalize…Record`, and `Validate…Record`
 functions. `Definitions()` returns an independent registry snapshot;
@@ -61,21 +61,21 @@ move those sources, validators, or schemas out of `parametron-engine`.
 
 ```text
 parametron-record-package/
-  parametron.record-package.json
+  prm.record-package.json
   records/
-    parametron.execution-record.json
+    prm.execution-record.json
     artifacts/
       <artifactRecordIdentity>/
-        parametron.artifact-record.json
-    parametron.observation-record.json
-    parametron.reference-record.json
-    parametron.failure-record.json
-    parametron.verification-record.json
+        prm.artifact-record.json
+    prm.observation-record.json
+    prm.reference-record.json
+    prm.failure-record.json
+    prm.verification-record.json
   artifacts/files/
   raw/
     prm.report.json
     prm.metadata.json
-    artifact-store/manifest.json
+    artifact-store/prm.artifact-store-manifest.json
     handoff/
     observed/prm.observed.json
     verification/prm.verification.json
@@ -94,7 +94,7 @@ fail rather than overwriting or collapsing records. `PackageInput` requires
 evidence files are optional. By default it writes directly to the resolved root;
 `UseCanonicalDirectoryName` selects the canonical child directory.
 
-`parametron.record-package.json` indexes records, artifacts and raw evidence and
+`prm.record-package.json` indexes records, artifacts and raw evidence and
 includes `schemaVersion`, `packageKey`, `layoutVersion`, and ownership metadata.
 Records follow registry family order. Artifact record entries sort by normalized
 record identity; packaged artifact payloads sort by contract path, and raw
@@ -136,7 +136,7 @@ error (`ErrInvalidReportMapping`, `ErrInvalidMetadataMapping`,
 | --- | --- | --- |
 | `prm.report.json` | `MapReport`: execution and optional failure record; status, timing, plan, jobs, steps, errors, retry/timeout/cancellation, deterministic linkage and outcome precedence | Execution/failure records and raw report |
 | `prm.metadata.json` | `MapMetadata`: provenance and input identities, plan and conservative runtime/toolchain enrichment | Provenance enrichment and available raw metadata |
-| Artifact store records / `manifest.json` | `MapArtifactStoreRecords` / `MapArtifactStoreManifest`: one artifact record per artifact | All applicable records are emitted at deterministic identity-addressed paths |
+| Artifact store records / `prm.artifact-store-manifest.json` | `MapArtifactStoreRecords` / `MapArtifactStoreManifest`: one artifact record per artifact | All applicable records are emitted at deterministic identity-addressed paths |
 | Typed observed-state input | `MapObserved`: observation and optional reference records, including canonical target-state facts | Applicable observation record emitted; exact `prm.observed.json` bytes remain raw evidence |
 | Engine verification-result input | `MapVerification`: summary, categories, failure classes and evidence, including target-state category/failures and observed-evidence provenance when target-state verification is enabled | Applicable verification record emitted; distinct from raw `prm.verification.json` request bytes |
 | Generic CAD runtime failure outcome | `MapCADRuntimeFailure`: adapter-neutral semantic class/stage plus native code/message, linkage, retry context and provenance | May replace the report-derived failure for one uniquely correlated terminal failed CAD outcome |

@@ -9,7 +9,7 @@
 parametron snapshot --file <dsl-path> --inputs <inputs.json> --out <dir> [flags]
 
 # Project-based entrypoint
-parametron snapshot --project <project-dir | parametron.project.json> --inputs <inputs.json> --out <dir> [flags]
+parametron snapshot --project <project-dir | prm.project.json> --inputs <inputs.json> --out <dir> [flags]
 ```
 
 `--file` and `--project` are mutually exclusive; exactly one must be provided.
@@ -19,7 +19,7 @@ parametron snapshot --project <project-dir | parametron.project.json> --inputs <
 | Flag | Short | Required | Description |
 |------|-------|----------|-------------|
 | `--file` | `-f` | One of | Path to a DSL file (standalone DSL entrypoint); mutually exclusive with `--project` |
-| `--project` | | One of | Path to a project directory or `parametron.project.json` file (project-based entrypoint); mutually exclusive with `--file` |
+| `--project` | | One of | Path to a project directory or `prm.project.json` file (project-based entrypoint); mutually exclusive with `--file` |
 | `--inputs` | | Yes | Flat JSON object of parameter overrides |
 | `--out` | `-o` | No | Output directory; defaults to `./output` (must be empty or non-existent) |
 | `--debug` | `-d` | No | Enable debug logging |
@@ -47,12 +47,12 @@ subdirectories:
 
 | File | Description |
 |------|-------------|
-| `snapshot.json` | Snapshot metadata |
-| `inputs.json` | Input parameter values used |
-| `plan.json` | Resolved execution plan |
+| `prm.snapshot.json` | Snapshot metadata |
+| `prm.inputs.json` | Input parameter values used |
+| `prm.plan.json` | Resolved execution plan |
 | `prm.report.json` | Execution report |
 | `prm.metadata.json` | Run-level metadata |
-| `manifest.json` | Artifact inventory |
+| `prm.artifact-store-manifest.json` | Artifact inventory |
 | Generated artifacts | CSV files under `products/<product-key>/`; CAD outputs in attempt workspaces below that product directory |
 
 Execution also uses the normal [record-package emission](../reference/record-contracts.md).
@@ -60,26 +60,26 @@ Execution failures may leave partial outputs. If execution returns an error,
 snapshot writes its descriptor before returning that error when file enumeration
 and descriptor writing succeed.
 
-## snapshot.json Schema
+## prm.snapshot.json Schema
 
 ```json
 {
   "schemaVersion": "1.0",
-  "dslFile": "<execution entrypoint path: DSL file path in standalone mode, project directory or parametron.project.json path in project mode>",
+  "dslFile": "<execution entrypoint path: DSL file path in standalone mode, project directory or prm.project.json path in project mode>",
   "dslHash": "<hash>",
   "planHash": "<hash>",
   "inputs": { "width": 100, "material": "Steel" },
   "runRoot": "<out dir>",
-  "generatedFiles": ["manifest.json", "products/widget/prm.export-manifest.json"]
+  "generatedFiles": ["prm.artifact-store-manifest.json", "products/widget/prm.export-manifest.json"]
 }
 ```
 
 - `profile` field is omitted when no active profile is present.
 - `generatedFiles` is a sorted list of paths relative to `runRoot`, collected
-  before `snapshot.json` is written, so it excludes the descriptor itself.
+  before `prm.snapshot.json` is written, so it excludes the descriptor itself.
 - The `products/widget/prm.export-manifest.json` example reflects active planner
   naming. FreeCAD plans use `RunCADRuntime` and the external runtime capability.
-- `snapshot.json` has stable content for equivalent inputs and the same output
+- `prm.snapshot.json` has stable content for equivalent inputs and the same output
   path; operational timestamps and raw runtime evidence are not promised to be
   byte-identical across runs.
 

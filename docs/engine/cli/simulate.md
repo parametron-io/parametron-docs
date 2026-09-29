@@ -9,7 +9,7 @@
 parametron simulate --file <dsl-path> --inputs <cases.json> [flags]
 
 # Project-based entrypoint
-parametron simulate --project <project-dir | parametron.project.json> --inputs <cases.json> [flags]
+parametron simulate --project <project-dir | prm.project.json> --inputs <cases.json> [flags]
 ```
 
 `--file` and `--project` are mutually exclusive; exactly one must be provided.
@@ -19,7 +19,7 @@ parametron simulate --project <project-dir | parametron.project.json> --inputs <
 | Flag | Short | Required | Description |
 |------|-------|----------|-------------|
 | `--file` | `-f` | One of | Path to a DSL file (standalone DSL entrypoint); mutually exclusive with `--project` |
-| `--project` | | One of | Path to a project directory or `parametron.project.json` file (project-based entrypoint); mutually exclusive with `--file` |
+| `--project` | | One of | Path to a project directory or `prm.project.json` file (project-based entrypoint); mutually exclusive with `--file` |
 | `--inputs` | | Yes | JSON array of input objects (one per case) |
 | `--out` | `-o` | No | Base output directory (default `./output`) |
 | `--table` | | No | Load a JSON table from disk (`logical-id=path`), repeatable |
@@ -55,29 +55,29 @@ error conditions.
 Each case produces a subdirectory `case-<NNN>` under `--out`, containing:
 - `prm.report.json`
 - `prm.metadata.json`
-- `manifest.json`
+- `prm.artifact-store-manifest.json`
 - Generated artifacts
 - `parametron-record-package/`
 
-After all cases complete, a `simulate_report.json` is written to `--out`.
+After all cases complete, a `prm.simulate-report.json` is written to `--out`.
 
-## simulate_report.json Schema
+## prm.simulate-report.json Schema
 
-Case `status` values in `simulate_report.json` are:
+Case `status` values in `prm.simulate-report.json` are:
 - `passed`
 - `failed`
 - `skipped`
 
 `skipped` is emitted for remaining cases that were not executed because `--fail-fast` or `--max-errors` stopped the run early.
 
-This status vocabulary is specific to `simulate_report.json`. It does not match
+This status vocabulary is specific to `prm.simulate-report.json`. It does not match
 `prm.report.json`, which uses the run-level values documented in
 [reporting](../runtime/reporting.md).
 
 ```json
 {
   "schemaVersion": "1.0",
-  "file": "<execution entrypoint path: DSL file path in standalone mode, project directory or parametron.project.json path in project mode>",
+  "file": "<execution entrypoint path: DSL file path in standalone mode, project directory or prm.project.json path in project mode>",
   "totalCases": 2,
   "passedCases": 1,
   "failedCases": 1,

@@ -264,7 +264,7 @@ A completed execution writes up to four run-level output files:
 |------|---------|
 | `prm.report.json` | Run outcome, step timing, artifact summary, and structured errors. |
 | `prm.metadata.json` | Toolchain versions, profile settings, product summaries, and table fingerprints. |
-| `manifest.json` | Deterministic artifact inventory from the artifact store. |
+| `prm.artifact-store-manifest.json` | Deterministic artifact inventory from the artifact store. |
 | `prm.export-manifest.json` | Active per-product adapter manifest. |
 
 ## Normalized Record Package Emission

@@ -139,17 +139,12 @@ Rules:
 - Schema versions MUST NOT appear in filenames. Schema versions MUST be carried
   inside the contract, for example through `schemaVersion`.
 
-Names such as `export_manifest_v1.json` are deprecated as active
-transport/configuration filenames: they encode a schema version in the filename,
-lack the canonical namespace, and use underscore-separated semantic naming.
-Generic active contract filenames such as `result.json` are migration candidates
-because they lack the Parametron contract namespace.
-
-These rules define canonical naming policy. The shared Engine–FreeCAD transport
-surfaces listed above and their newly emitted record-package evidence paths use
-the canonical names. Other implementation surfaces must be assessed in their
-owning repositories; this policy itself does not rename files, change schemas or
-runtime behavior, or revise package layouts.
+Names such as `export_manifest_v1.json` are invalid for active Parametron-owned
+contracts: they encode a schema version in the filename, lack the canonical
+namespace, and use underscore-separated semantic naming. A generic name such
+as `result.json` likewise cannot identify an active Parametron-owned contract.
+The rule applies to contract filenames; it does not rename schemas, runtime
+behavior, or package layouts.
 
 ### Active Contract Filenames and Preserved Raw-Evidence Filenames
 
@@ -168,25 +163,20 @@ evidence; calling it raw evidence does not exempt its active surface.
 | Active transport/configuration contract surface | MUST use `prm.<semantic-name>.json` as the canonical filename. |
 | Preserved historical/raw evidence | MAY retain the original filename when retaining the received/generated transport identity is necessary for provenance. |
 
-New active contract surfaces MUST use canonical naming. Once an existing
-surface's relevant migration is complete, newly produced active runtime,
-transport, or configuration contracts MUST NOT retain the old filenames.
+Active runtime, transport, and configuration contracts MUST use canonical
+filenames.
 
 Names such as `parametron.*.json`, `result.json`, and `export_manifest_v1.json`
 MUST NOT automatically be treated as globally forbidden strings. They MAY remain
-in preserved raw evidence, historical evidence, migration history, and
+in preserved raw evidence, historical material, negative examples, and
 tests/fixtures that intentionally prove compatibility or provenance, when that
-use is semantically legitimate. Preservation MUST NOT be used to justify
-continued production under an old name on a migrated active surface.
+use is semantically legitimate. Preservation does not permit an active contract
+to be produced under an old name.
 
-Migration audits MUST ask: **"Is the old filename still used by an active
-contract surface?"** They MUST NOT use **"Does the old filename exist anywhere?"**
-as the migration-completion criterion.
-
-An old contract filename is not automatically a retired planning/product term.
-Filename migration policy and [Legacy Terms](#legacy-terms) policy are separate
-concerns; preserved evidence filenames MUST NOT automatically be placed in a
-generic Legacy Terms category.
+Assess a filename by its role at the active contract surface, not by whether the
+same string appears in historical or preserved material. An old contract
+filename is not automatically a retired planning or product term; the
+[Legacy Terms](#legacy-terms) policy addresses those terms separately.
 
 ---
 
