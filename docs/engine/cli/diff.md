@@ -35,13 +35,13 @@ Parses and normalizes both plan files to canonical JSON, then compares byte-by-b
 
 ## Snapshot Mode
 
-Reads `snapshot.json` from each directory and compares:
+Reads `prm.snapshot.json` from each directory and compares:
 - `planHash`
 - `dslHash`
 - `inputs`
 - `generatedFiles`
 
-Also checks for presence of `prm.report.json`, `prm.metadata.json`, and `manifest.json` in each directory. If both directories contain a `prm.report.json`, compares the `status` field.
+Also checks for presence of `prm.report.json`, `prm.metadata.json`, and `prm.artifact-store-manifest.json` in each directory. If both directories contain a `prm.report.json`, compares the `status` field.
 
 Snapshot diff does not deep-compare artifact file contents.
 

@@ -1,4 +1,4 @@
-# Project Mapping (`parametron.project.json`)
+# Project Mapping (`prm.project.json`)
 
 The project mapping file links a DSL file and logical resource IDs to project-relative physical paths. It is the project-level input declaration contract for Parametron.
 
@@ -8,7 +8,7 @@ The project mapping file links a DSL file and logical resource IDs to project-re
 
 In project-mode flows, a DSL file's `source_model` and table references are interpreted as logical IDs by the project mapping layer, not as physical paths. The project mapping file declares where those resources live relative to the project directory. This separation keeps the DSL file free of physical path dependencies within a project.
 
-When present, a conventional project-root `parametron.cad.json` is also loaded as a capture contract for an additional project-mode authoring/planning-time validation boundary.
+When present, a conventional project-root `prm.cad.json` is also loaded as a capture contract for an additional project-mode authoring/planning-time validation boundary.
 
 When `parametron validate --project` (or any execution entrypoint with `--project`) receives a project directory or project mapping file, it loads and validates the mapping before any DSL processing begins.
 
@@ -16,9 +16,9 @@ When `parametron validate --project` (or any execution entrypoint with `--projec
 
 ## File Location and Name
 
-The file must be named exactly `parametron.project.json`. It lives at the root of the project directory.
+The file must be named exactly `prm.project.json`. It lives at the root of the project directory.
 
-When `--project` is given a directory, the CLI looks for `parametron.project.json` inside that directory. When `--project` is given the file path directly, it is used as-is.
+When `--project` is given a directory, the CLI looks for `prm.project.json` inside that directory. When `--project` is given the file path directly, it is used as-is.
 
 ---
 
@@ -180,7 +180,7 @@ The string `"box_model"` is a key in the project mapping's `resources.models`. A
 2. The DSL is parsed.
 3. Before plan generation, `source_model = "box_model"` is looked up in `resources.models`.
 4. If the key does not exist, validation fails immediately with an error identifying the unknown ID.
-5. If a project-root `parametron.cad.json` is present, `source_model` must also exactly match `capture.sourceDocument.logicalId`.
+5. If a project-root `prm.cad.json` is present, `source_model` must also exactly match `capture.sourceDocument.logicalId`.
 6. If the key exists and any capture-backed `source_model` check passes, the resolved physical path is used for execution.
 
 The DSL file itself does not contain or reference physical paths. Physical paths live only in the project mapping.
