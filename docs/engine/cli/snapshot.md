@@ -20,13 +20,18 @@ parametron snapshot --project <project-dir | prm.project.json> --inputs <inputs.
 |------|-------|----------|-------------|
 | `--file` | `-f` | One of | Path to a DSL file (standalone DSL entrypoint); mutually exclusive with `--project` |
 | `--project` | | One of | Path to a project directory or `prm.project.json` file (project-based entrypoint); mutually exclusive with `--file` |
-| `--inputs` | | Yes | Flat JSON object of parameter overrides |
+| `--inputs` | | Yes | Flat JSON object of `param` or `let` binding overrides |
 | `--out` | `-o` | No | Output directory; defaults to `./output` (must be empty or non-existent) |
 | `--debug` | `-d` | No | Enable debug logging |
 
 ## Inputs Format
 
-`--inputs` is a path to a JSON file containing a flat object:
+`--inputs` is a path to a JSON file containing a flat object. Its scalar values
+feed the planner's binding override mechanism for `param` and `let`; lets remain
+internal. See [DSL semantics](../authoring/dsl-semantics.md) for typing and
+export visibility.
+
+Example input object:
 
 ```json
 {
@@ -48,7 +53,7 @@ subdirectories:
 | File | Description |
 |------|-------------|
 | `prm.snapshot.json` | Snapshot metadata |
-| `prm.inputs.json` | Input parameter values used |
+| `prm.inputs.json` | Supplied input values used |
 | `prm.plan.json` | Resolved execution plan |
 | `prm.report.json` | Execution report |
 | `prm.metadata.json` | Run-level metadata |
@@ -74,6 +79,8 @@ and descriptor writing succeed.
 }
 ```
 
+- `inputs` and `prm.inputs.json` record supplied input values, including any let
+  overrides; they are not exported parameter-value surfaces.
 - `profile` field is omitted when no active profile is present.
 - `generatedFiles` is a sorted list of paths relative to `runRoot`, collected
   before `prm.snapshot.json` is written, so it excludes the descriptor itself.

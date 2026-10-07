@@ -11,17 +11,28 @@ binding names and collisions with file-level constants are rejected. Bindings
 may refer to other bindings in the same product, including forward references.
 Validation detects cycles across the combined binding graph.
 
-Parameters are exported product values; lets are internal computation.
-Overrides target parameters only and replace their default expressions before
-planning resolves the binding graph. Unknown override names, constant overrides,
-and let overrides fail. Override text is converted according to the declared
-parameter type; this boundary conversion does not imply implicit casts inside
-DSL expressions.
+Parameters are exported product values; lets are internal computation. Both
+`param` and `let` may be externally overridden. Overrides replace their default
+expressions before planning resolves the binding graph. Unknown binding names
+and constants are invalid override targets; overrides do not directly target
+other declarations or profile settings.
+
+Override text is converted using a parameter's declared type or a let's inferred
+binding type. Conversion supports number, string, boolean, and enum; enum-valued
+lets are validated against their actual inferred enum domain. Types are inferred
+from the binding graph, not guessed from runtime values. This boundary conversion
+does not introduce implicit casts inside DSL expressions.
 
 The planner repeatedly evaluates bindings whose dependencies are available.
-Unresolved dependencies cannot become arbitrary values. Only resolved parameters
-enter CSV values and manifest parameter surfaces; lets may influence those values
-without becoming exported bindings themselves.
+Overridden values participate in normal dependency evaluation and may feed
+another let, a parameter, table lookup, ternary evaluation, or target-action
+selection. Unresolved dependencies cannot become arbitrary values.
+
+Only resolved parameters enter CSV values, manifest exported parameter values,
+and applicable CAD parameter assignments. Lets remain internal after override
+and create no FreeCAD runtime parameter assignments of their own. They may
+influence exported values or downstream target actions without becoming exported
+parameters.
 
 ## Identifiers and constants
 
