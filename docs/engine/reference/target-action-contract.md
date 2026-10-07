@@ -88,7 +88,8 @@ or special diagnostic. Prefix-shaped names have no compatibility alias or flag.
 Semantic-model planning searches one equal-priority pool of Features and
 Components by exact case-sensitive semantic `Name`. Parameters, parameter groups,
 metadata, relationships and outputs are excluded. There is no DisplayName, label,
-alias, native-name, whitespace-trimming or case-folding fallback.
+semantic-ID, nativeRef/native-name, alias, fuzzy-matching, whitespace-trimming or
+case-folding fallback. Native identity is not an alternate DSL addressing key.
 
 Zero candidates fails as not found; one resolves; multiple candidates fail as
 ambiguous, including cross-kind matches. Ambiguity descriptors sort by semantic
@@ -143,11 +144,45 @@ uses the shared destination policy: explicit target kind `part`/`assembly` takes
 precedence; otherwise scope `part`/`assembly` supplies the destination. Missing
 destination fails. Features use scope fallback; Components route by target kind.
 
-Features resolve native object names from `Feature.Name`; Components use captured
-identity linkage and `Component.Name`. Missing entities/linkage or empty native
-names fail. Semantic IDs are lookup keys, never substitutes for native object
-names. Routed entries contain only `OperationKind` and `Object`, partitioned into
-Part and Assembly, preserving relative order within each bucket.
+Engine owns the shared semantic-to-native addressing boundary:
+
+```text
+DSL semantic Name -> exact semantic entity lookup -> stable semantic ID
+  -> captured identitySource.nativeRef -> concrete runtime Object
+```
+
+Semantic Name is the authoring lookup key; stable semantic ID identifies semantic
+intent and provenance after resolution; DisplayName is descriptive. `nativeRef`
+provides capture-backed native addressing evidence retained internally on
+Features and Components. Components also require existing capture/semantic
+identity linkage; that linkage does not supply the native selector.
+
+These values may all differ: semantic Name `mounting_bracket`, semantic ID
+`fea.mountingBracket`, nativeRef `Body01`, and DisplayName `Mounting Bracket`.
+
+```dsl
+target mounting_bracket: action = suppress
+```
+
+This projects `{"object": "Body01", "suppressed": true}`. There is no Name,
+semantic-ID, or DisplayName fallback. Equal semantic and native names are an
+explicit mapping whose values happen to match.
+
+A selected Feature or Component for any of the five executable actions must
+have a usable concrete native mapping. Missing, empty, or whitespace-only
+mappings fail deterministically as missing native target mappings; surrounding
+whitespace or NUL fails as an invalid native target mapping. Missing entities or
+required linkage also fail before runtime dispatch. Accepted selectors are
+preserved exactly; these checks are not a universal CAD-adapter selector syntax
+specification. `keep` is an explicit no-op requiring no native projection or mapping.
+
+Native routing follows semantic resolution, captured capability validation, and
+semantic mutation lowering. FreeCAD does not decide semantic capabilities.
+Destination and Object remain independent: `destination = part | assembly`
+selects the existing bucket; Object is the exact native target. Feature
+owner/scope-derived and Component kind-derived destinations remain unchanged.
+Routed entries contain only `OperationKind` and `Object`, partitioned into Part
+and Assembly, preserving relative order within each bucket.
 
 `ProjectTargetMutationRouting` maps those entries to the three families in the
 table above, preserving native objects and destinations without further lookup,
@@ -187,7 +222,14 @@ Top-level `parameterAssignments` is the sole executable scalar-write surface;
 internal parameter metadata still supports resolving `Object.Property` targets.
 Runtime entries exclude semantic IDs, target kinds, scope, force, cascade,
 recursive, and dependency policy. Native object names and Part/Assembly
-destinations are preserved.
+destinations are preserved. FreeCAD receives concrete native selectors for exact
+lookup and CAD operations; it does not resolve semantic Names or IDs or use
+DisplayName as a fallback.
+
+Native routing reuses existing capture and runtime fields. No version change is
+required for CAD capture, semantic-map, planner/export manifest, FreeCAD runtime
+manifest, verification, or observed-evidence contracts. Retained native addressing
+is internal semantic-model state, not a new public JSON field.
 
 The projector validates schemas strictly: Engine rejects schema `2.0` as
 unsupported, along with any other unsupported schema version or empty schema
@@ -209,7 +251,8 @@ then `canonicalizeRuntimeTargetMutationOrdering` sorts the final composed
 collection before mapping validation, draft hashing for `file_pattern`, final
 plan hashing, job derivation, handoff and runtime projection.
 
-Part and Assembly sort independently using Go lexical order:
+Part and Assembly sort independently using Go lexical order on final projected
+runtime Objects:
 
 | Family | Sort key |
 | --- | --- |
@@ -231,6 +274,13 @@ filenames. Repeated table-selected actions are deterministic; changed selected
 actions change identity through their payloads. Consolidating to canonical schema
 `1.0` preserves this normal serialized identity behavior without introducing a new
 hashing algorithm or hash salt.
+
+Equivalent semantic/native mappings yield equivalent resolved plan JSON and
+hashes. Changing a used nativeRef changes the projected runtime Object and
+serialized resolved intent, and therefore plan identity/hash. DisplayName-only
+changes do not retarget or change applicable plan identity; unused native mapping
+changes do not create artificial identity changes. Raw capture mapping data is
+not a separate unconditional hash input.
 
 Nil collections remain nil; empty collections need no allocation; nil target-family
 slices remain nil. Empty families are semantically empty, but individual non-nil
@@ -285,9 +335,12 @@ represent destination explicitly within each target identity:
 - `object`: exact native CAD object name (non-blank, case-sensitive, matching
   the routed native entity).
 
-This structure preserves exact native object names (`Feature.Name` /
-`Component.Name`) and destination boundaries (`assembly` vs. `part`) without
-relying on semantic IDs as runtime observation keys.
+This structure reuses the concrete native selector already resolved for mutation
+from `identitySource.nativeRef`, together with its destination. Mutation,
+observation requests, returned native evidence, and Engine expected-state
+verification correlate by the same `(destination, object)` identity. Observation
+and verification do not independently resolve semantic target Names. Semantic
+provenance remains Engine-owned.
 
 ### Raw evidence independence and limitations
 
