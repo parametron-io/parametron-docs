@@ -82,12 +82,25 @@ collisions. FreeCAD manifests use `prm.export-manifest.json`, with
 paths under `outputs/`. Explicit `outputs = ["none"]` retains the runtime
 step while declaring an empty export list.
 
+Capture-backed target planning resolves the DSL target by exact, case-sensitive
+semantic Name, retains stable semantic identity, validates captured capabilities,
+and lowers semantic mutation intent. Engine then maps the selected Feature or
+Component through captured `identitySource.nativeRef` to resolved runtime
+`Object`. Semantic Name, semantic ID, DisplayName, and native selector remain
+distinct. Executable actions require a usable native mapping before dispatch;
+`keep` contributes no native mutation. Part/Assembly destination routing remains
+independent of Object. Runtime observation and expected-state verification reuse
+the projected `(destination, object)` identity. The
+[target-action contract](../reference/target-action-contract.md) owns mapping
+validation and runtime ownership rules.
+
 ## Deterministic ordering and identity
 
 The planner resolves filenames before execution. When `file_pattern` uses
 plan identity, a draft plan supplies the naming hash; the final plan includes
 the resulting filenames. Canonical target mutation ordering occurs before
-naming and hashing, as specified by the target-action reference.
+naming and hashing and follows final projected runtime Objects, as specified
+by the target-action reference.
 
 `ComputePlanHash` hashes serialized execution-plan JSON with SHA-256. With a
 selected AST profile, it also includes the profile's resolved signature, whose
@@ -99,6 +112,14 @@ A let override changes normal plan identity when it changes serialized resolved
 plan intent. An internal override that leaves that intent unchanged does not
 change identity merely because it was supplied. Raw override history is not a
 separate identity input; equivalent override inputs remain deterministic.
+
+Equivalent semantic/native mappings yield equivalent resolved plan JSON and
+hashes. Changing a used nativeRef changes the projected runtime Object and
+serialized resolved intent, and thus plan identity/hash. DisplayName-only changes
+do not retarget or change applicable plan identity. Unused native mappings do not
+create artificial identity changes: raw capture mappings are not a separate
+unconditional hash input. Native routing uses the existing serialization and
+hashing mechanism.
 
 Identity follows serialized values, step order, and included profile settings.
 It is not a hash of DSL formatting or of every unused declaration. Host paths

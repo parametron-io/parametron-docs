@@ -113,10 +113,12 @@ field. `identitySource` and `stabilityClass` are optional.
 
 ## Identity and names
 
-`id` is the captured stable reference; `name` is the captured machine-facing
-name; `displayName` is descriptive text. Engine does not regenerate IDs from
-names or use display labels as an identity fallback. References use exact,
-case-sensitive IDs.
+`id` is the captured stable reference retained as semantic identity. For Feature
+and Component targets, `name` provides the semantic Name used for exact,
+case-sensitive DSL lookup; `displayName` is descriptive text. Engine does not
+regenerate IDs from names or use display labels as an identity fallback. Capture
+references use exact, case-sensitive IDs. Semantic Name, stable ID, display label,
+and native CAD identity may all differ.
 
 Optional `identitySource` contains a required nonblank `kind` and optional
 string fields `path`, `ownerScopedKey`, `groupScopedKey`, and `nativeRef`.
@@ -135,6 +137,28 @@ within their component scope, and group keys within their owner-component scope.
 Parameter and metadata owner keys share a uniqueness check by owner kind and ID.
 These checks validate supplied identity evidence; they do not compute an ID or
 prove identity stability across separate captures.
+
+Identity-source `kind`, `path`, and scoped keys describe identity provenance;
+those path/key values are not necessarily runtime object selectors. The existing
+`identitySource.nativeRef` provides capture-backed native addressing evidence.
+After semantic resolution and captured capability validation, Engine routes an
+executable Feature/Component target through its stable semantic ID to retained
+nativeRef and projects that exact selector as runtime `Object`.
+
+For example, `name: "mounting_bracket"`, `id: "fea.mountingBracket"`,
+`displayName: "Mounting Bracket"`, and `identitySource.nativeRef: "Body01"`
+allow `target mounting_bracket: action = suppress` to address runtime object
+`Body01`. nativeRef is not a semantic lookup alias.
+
+nativeRef is not globally mandatory for captured entities. A Feature or Component
+selected for an executable native target action must have a usable mapping;
+`keep` requires no native projection. Missing, empty, whitespace-only,
+surrounding-whitespace, or NUL-containing selected mappings fail before runtime
+dispatch. There is no Name, ID, or DisplayName fallback, and accepted selectors
+are preserved exactly. These target-routing checks are not a universal selector
+syntax specification for every CAD adapter. Capture schema `"1.0"` is unchanged;
+native addressing is retained internally without a new public semantic-model
+JSON field.
 
 Optional `stabilityClass` accepts `"stable"`, `"conditionally_stable"`,
 `"unstable"`, or an empty string.

@@ -142,8 +142,14 @@ operations. Output locations and command configuration belong to
 
 ## Authoring target actions
 
-A target declaration expresses a desired action for a named target. The action
-domain is exactly `keep`, `suppress`, `unsuppress`, `hide`, `unhide`,
+A target declaration expresses a desired action for a semantic target.
+`target mounting_bracket: action = suppress` selects a Feature or Component by
+exact, case-sensitive semantic Name, not native CAD identity. Stable semantic IDs,
+nativeRef, DisplayName, aliases, fuzzy matches, and case-insensitive matches are
+not alternate lookup keys. Authors use semantic Names; Engine maps executable
+intent to concrete native selectors, so authoring does not require knowing a CAD
+object name such as `Body01`. The action domain is exactly `keep`, `suppress`,
+`unsuppress`, `hide`, `unhide`,
 and `delete`, with case-sensitive spelling and no aliases. Direct strings or
 ordinary string/enum/number/boolean bindings do not coerce to action values.
 Canonical action literals take precedence in an action context.
