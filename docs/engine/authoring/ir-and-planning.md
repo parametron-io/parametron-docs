@@ -44,9 +44,15 @@ is defined in [target-action contract](../reference/target-action-contract.md).
 
 ## Planning inputs
 
-Planning accepts a validated AST or an IR program, plus parameter overrides. Table-aware planning also accepts tables keyed by logical ID, and semantic planning accepts a captured semantic model and its mapping.
+Planning accepts a validated AST or an IR program, plus binding overrides. Table-aware planning also accepts tables keyed by logical ID, and semantic planning accepts a captured semantic model and its mapping.
 
-Planning applies overrides, resolves binding dependencies, and exports parameter values. Lets remain internal. Table cells are resolved during evaluation. [DSL semantics](dsl-semantics.md) owns the evaluation and type rules.
+Both AST and IR planning accept overrides for `param` and `let` and resolve
+those values through the same logical binding graph. Lets remain internal;
+exported values remain parameter-only. For let overrides, planning derives the
+required inferred binding type, including enum domains, without changing the
+public/versioned IR representation: `IRLet` remains name plus expression.
+Table cells are resolved during evaluation. [DSL semantics](dsl-semantics.md)
+owns the evaluation and type rules.
 
 The IR planner builds CSV and manifest steps and can emit `RunCADRuntime` when
 its selected IR profile requests FreeCAD. Its manifest construction does not
@@ -88,6 +94,11 @@ selected AST profile, it also includes the profile's resolved signature, whose
 setting keys are sorted. Without a selected profile, it hashes plan JSON alone.
 The manifest's planning hash is populated during construction; the CLI computes
 its final run hash from the returned plan and selected profile.
+
+A let override changes normal plan identity when it changes serialized resolved
+plan intent. An internal override that leaves that intent unchanged does not
+change identity merely because it was supplied. Raw override history is not a
+separate identity input; equivalent override inputs remain deterministic.
 
 Identity follows serialized values, step order, and included profile settings.
 It is not a hash of DSL formatting or of every unused declaration. Host paths

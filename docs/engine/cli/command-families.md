@@ -43,7 +43,7 @@ parametron --project <project-dir | prm.project.json> [flags]
 Root execution flags:
 - `--file / -f`: DSL file path (standalone DSL execution); mutually exclusive with `--project`
 - `--project`: project directory or `prm.project.json` path (project-based execution); mutually exclusive with `--file`
-- `--set`: override a parameter value (`key=value`, repeatable)
+- `--set`: override a `param` or `let` binding value (`key=value`, repeatable)
 - `--table`: load a JSON table from disk (`logical-id=path`, repeatable)
 - `--out / -o`: base output directory (default `./output`)
 - `--dry-run`: run full pipeline, print plan with resolved values, skip file writing and execution

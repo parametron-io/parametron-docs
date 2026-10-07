@@ -20,8 +20,8 @@ parametron validate --project <project-dir | prm.project.json> [flags]
 |------|-------|----------|-------------|
 | `--file` | `-f` | One of | Path to a DSL file (standalone DSL entrypoint); mutually exclusive with `--project` |
 | `--project` | | One of | Path to a project directory or `prm.project.json` file (project-based entrypoint); mutually exclusive with `--file` |
-| `--inputs` | | No | JSON file of parameter overrides (flat object `{key: scalar}`) |
-| `--set` | | No | Parameter override (`key=value`), repeatable |
+| `--inputs` | | No | JSON file of `param` or `let` binding overrides (flat object `{key: scalar}`) |
+| `--set` | | No | `param` or `let` binding override (`key=value`), repeatable |
 | `--table` | | No | Load a JSON table from disk (`logical-id=path`), repeatable |
 | `--debug` | `-d` | No | Enable debug logging |
 
@@ -105,7 +105,10 @@ echo $?  # 0 = valid, non-zero = invalid
 
 ## Inputs Format
 
-When using `--inputs`, provide a flat JSON object:
+When using `--inputs`, provide a flat JSON object. Its scalar values feed the
+same binding override mechanism as `--set`, including inferred let typing and
+parameter-only export visibility. See
+[DSL semantics](../authoring/dsl-semantics.md) for the binding contract.
 
 When both `--set` and `--inputs` are provided, values from `--inputs` take precedence.
 

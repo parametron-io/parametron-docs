@@ -16,10 +16,12 @@ parametron --file model.dsl --set width=100 --out ./output
 parametron --project ./project --set width=100
 ```
 
-Repeat `--set key=value` to override exported parameters. Unknown parameter
-names, constants, and internal lets cannot be overridden. Values are converted
-to declared parameter types before planning. Repeating the same key uses the
-last supplied value. See [DSL semantics](../authoring/dsl-semantics.md).
+Repeat `--set key=value` to override product `param` or `let` bindings.
+Constants and unknown binding names fail. Parameter values use declared types;
+let values use inferred binding types. Repeating the same key uses the last
+supplied value. Overridden lets remain internal and non-exported. See
+[DSL semantics](../authoring/dsl-semantics.md) for evaluation, type conversion,
+and parameter-export rules.
 
 Project mode resolves the DSL and mapped model/table resources. When a capture
 contract is present, Engine builds a capture-backed semantic model and uses
