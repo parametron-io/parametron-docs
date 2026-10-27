@@ -93,6 +93,37 @@ CAD-runtime execution is composed of four decoupled layers:
    Manages step lifecycle, invocation retries, outcome consumption, and completion
    artifact registration.
 
+## Declared Resources and Attempt Preparation
+
+Project-mode execution carries the finite inventory and explicit selection
+defined by [project mapping](../authoring/project-mapping.md):
+
+```text
+Validated project declarations
+  -> Engine declared-resource inventory
+  -> Product-specific selected resource
+  -> Normal Engine orchestration
+  -> Isolated attempt preparation
+       +-- selected source document
+       +-- additional declared model resources
+  -> Validated attempt-relative resource bindings
+  -> External CAD runtime invocation
+```
+
+The inventory includes declared models regardless of product use or reference
+edges. Tables and the DSL file are not automatically staged as CAD documents.
+Computed/planned inventory can exist without materialization: an empty
+materialized coordinate indicates no completed preparation. Prepared attempts
+expose completed relative bindings, which downstream outcomes can retain even
+on eligible runtime failures after preparation. Successful staging alone proves
+neither successful CAD execution nor a verified engineering result.
+
+Engine stages bytes and maintains bindings. The external CAD runtime owns native
+document access and interpretation. Additional staging establishes no automatic
+opening, recursive dependency discovery, link rebinding, reference completeness,
+assembly occurrence completeness, or native relationship normalization. It
+requires no change to FreeCAD-native behavior or reference traversal.
+
 ## Attempt Identity and Layout
 
 Every CAD runtime invocation executes inside an isolated attempt workspace:
@@ -101,7 +132,11 @@ Every CAD runtime invocation executes inside an isolated attempt workspace:
   `ProductKey`, `StepID`, adapter name, `PlanHash`, source model path, declared
   output filenames, and attempt index (1-based: `1`, `2`, `3`).
 - **Workspace Isolation**: Located at `<productDir>/_working/<attemptID>/`.
-  - `source/`: Contains an atomic copy of the source CAD document.
+  - `source/<basename>`: Contains the selected primary document, copied
+    atomically per file; native manifest `sourceDocument` retains this placement.
+  - `resources/`: Contains additional declared models at distinct deterministic
+    resource-specific coordinates that distinguish logical IDs and source
+    coordinates, including aliases and equal basenames.
   - `outputs/`: Dedicated directory for external runtime outputs.
   - `prm.export-manifest.json`: Materialized native manifest.
   - `prm.verification.json`: Materialized verification request contract.
@@ -109,6 +144,39 @@ Every CAD runtime invocation executes inside an isolated attempt workspace:
 
 Attempts are completely isolated: retries use distinct attempt IDs and directories,
 preventing cross-attempt contamination.
+
+All materialized coordinates are canonical slash-separated paths relative to
+`WorkingCopyDir`, the attempt root above. They are not relative to the project,
+run root, source directory, or absolute checkout location. Engine validates
+containment and destination uniqueness. Callers consume returned bindings;
+the internal resource-directory encoding is not an authoring contract. The
+native manifest still selects one `sourceDocument`; additional staging does not
+introduce a multi-document manifest schema.
+
+Before source staging, Engine preflights the finite intended source/destination
+set. It rejects missing/nonregular or filesystem-escaping sources, destination
+collisions and ancestor conflicts, reserved manifest/result/output conflicts,
+symlink destinations or ancestors, incompatible destination types, and writes
+that would overwrite declared sources, including existing hardlinks. Contained
+source symlinks are permitted. Tested unsafe cases fail before primary staging
+or runtime invocation; original project sources remain unchanged.
+
+Attempt preparation reports these failures at `source_preparation`; normal
+runtime orchestration maps preparation failures to `request_materialization`.
+An unsafe working-copy root can fail earlier at `output_preparation`. A selected
+resource inconsistent with the manifest source fails request validation.
+Preparation is atomic per file, not a transaction across the inventory. These
+checks do not guarantee protection against concurrent adversarial filesystem
+mutation.
+
+Equivalent relocated project trees preserve logical resource bindings and
+canonical relative coordinates for equivalent selection and preparation. This
+is narrower than operational determinism: absolute source paths still
+participate in attempt identity and resolved planner/job payloads. Captured
+combined model signatures include resolved paths; raw metadata and some
+normalized provenance inputs also retain operational paths. Plan, job, cache,
+attempt, and record identities are not generally relocation-independent.
+Resource context does not change their existing algorithms.
 
 ## Request Materialization and Freshness
 

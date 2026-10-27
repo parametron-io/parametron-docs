@@ -91,8 +91,13 @@ The signature incorporates:
 - The plan identity.
 - An explicit `--model-hash`, when supplied.
 - Otherwise, in project mode, a combined signature of captured mapped-model
-  content, ordered by logical ID.
+  resources (logical IDs, resolved paths, and content signatures), ordered by logical ID.
 - Loaded table fingerprints, independent of flag ordering.
+
+The declared-resource join preserves logical IDs and canonical relative
+coordinates across equivalent relocated projects. Combined model signatures
+include absolute resolved paths, so this does not imply relocation-independent
+cache or plan hashes.
 
 Without model or table contributions, the default key is the plan hash.
 Table-content changes affect cache identity; changing a table path without

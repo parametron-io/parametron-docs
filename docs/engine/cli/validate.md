@@ -52,7 +52,7 @@ Project entrypoint resolution:
 
 1. The `prm.project.json` file is read and parsed.
 2. The project mapping is validated (schema, path safety, logical ID constraints). Failures exit immediately with a non-zero code.
-3. The DSL file declared in the project mapping is resolved relative to the project directory.
+3. The DSL file is resolved relative to the project directory, then all declared model sources are validated, including additional and unused models. Missing, nonregular, dangling, or filesystem-escaping sources fail here before DSL parsing and selection. Contained symlinks to regular files are accepted.
 4. The resolved DSL path is used as the parse input.
 5. Project tables declared in the `tables` field are loaded by logical ID after DSL parse and before DSL validation.
 6. Product `source_model` logical IDs are resolved against the project mapping's `resources.models` map after DSL validation and before plan generation. An unrecognized ID fails immediately.
@@ -76,7 +76,8 @@ Failure boundaries when using a project entrypoint:
 | `dsl` field is an absolute path | Project mapping validation |
 | `dsl` field escapes the project root or normalizes to `.` | Project mapping validation |
 | Missing DSL file declared in project | Project resolution |
-| Missing mapped model file | Project resolution |
+| Missing or nonregular declared model file, including unused models | Project resolution (`resourcebinding`, distinct from project-map schema validation) |
+| Model source symlink resolving outside the project root | Project resolution (`resourcebinding`) |
 | Missing mapped table file | Project resolution |
 | Malformed JSON in a mapped table file | Project resolution |
 | Unknown logical model ID in DSL `source_model` | Model ID resolution |

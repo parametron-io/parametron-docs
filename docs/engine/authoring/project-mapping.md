@@ -100,6 +100,49 @@ A map of logical model IDs to project-relative paths. Required; an empty map is 
 
 Optional. A map of logical table IDs to project-relative paths. When absent, no project-level tables are loaded.
 
+### Declared model identity, selection, and materialization
+
+`resources.models` supplies the existing logical model identity namespace.
+Engine binds each case-sensitive logical ID to `projectId`, resource kind
+`model`, and a canonical project-source coordinate derived from the declaration.
+Identity is project-scoped; logical IDs are not globally unique. Absolute host
+paths used to access files are operational context, separate from these bindings.
+
+- **Declaration:** every model entry belongs to the finite declared inventory,
+  including unused, standalone, and zero-reference resources. Membership requires
+  neither product selection nor a native reference edge.
+- **Selection:** each product's DSL `source_model` explicitly selects a declared
+  logical ID. Different products can select different models, subject to the
+  existing capture-backed source-model consistency rules.
+- **Materialization:** Engine stages the selected document and additional
+  declared models during isolated attempt preparation. The optional materialized
+  coordinate is relative to that attempt's `WorkingCopyDir`. An empty coordinate
+  means completed preparation has not been established. These coordinates are
+  produced by Engine, not new project mapping fields.
+
+Project-source coordinates are canonical, slash-separated, project-relative
+paths independent of absolute checkout location. Equivalent relocated projects
+retain equivalent logical bindings and source coordinates. Equivalent selection
+and preparation also preserve relative materialization coordinates. This does
+not extend to all plan, job, cache, attempt, record, or provenance identities;
+see [execution runtime](../runtime/execution-runtime.md).
+
+Multiple logical IDs may alias one physical source. Their identities remain
+distinct and explicit selection remains authoritative. A coordinate-only lookup
+must match exactly one resource; ambiguity fails rather than choosing a candidate.
+
+Model resource identity is separate from native CAD object identity and
+capture-backed semantic entity identity. The inventory is internal execution
+context, not a persisted PDM resource graph or a new normalized record family.
+A zero-reference resource does not require a fabricated `ReferenceRecord`;
+[reference normalization](../reference/record-contracts.md#traversal-normalization-and-bounded-reference-emission)
+continues to consume traversal evidence. No occurrence, quantity, BOM, or
+engineering fact observation semantics follow from inventory membership.
+
+Existing `prm.project-lock.json` model-ID/path addressing remains compatible.
+Resource binding does not enforce locked digests, source/materialized/result
+integrity, or configured-result provenance.
+
 ---
 
 ## Unknown Fields
@@ -132,6 +175,25 @@ All declared paths (`dsl`, model paths, table paths) are subject to the followin
 
 ## Error Classification
 
+Before map decoding can discard declarations, duplicate model JSON keys are
+rejected, including identical repeated bindings. Repeated `projectId`,
+`resources`, and `resources.models` declarations are also rejected rather than
+merged or overwritten. These are project-map validation errors.
+
+After mapping validation and DSL-file resolution, Engine validates all declared
+model sources in sorted logical-ID order, before DSL parsing, selection, and
+planning. Additional and unused models must exist and resolve to regular files.
+Beyond lexical containment, filesystem-aware resolution checks each source
+against the resolved project root. Symlinks to contained regular files are
+accepted; escaping, dangling, or directory-target symlinks fail. This finite
+validation does not discover native CAD dependencies.
+
+Engine `resourcebinding` validation rejects duplicate/conflicting logical
+bindings, unsupported CAD resource kinds other than `model`, and noncanonical
+relative coordinates. Inventories sort by project, kind, logical ID, source
+coordinate, then materialized coordinate. Conflict selection and project-map
+problem ordering are deterministic.
+
 The `projectmap` package exposes three sentinel errors:
 
 | Error | Type wrapper | Condition |
@@ -139,6 +201,13 @@ The `projectmap` package exposes three sentinel errors:
 | `ErrIO` | `*FileError` | File read failure (OS-level I/O error) |
 | `ErrDecode` | `*DecodeError` | JSON parse failure or trailing JSON |
 | `ErrValidation` | `*ValidationError` | Schema or path constraint violation |
+
+These classes describe project-map loading and schema/lexical validation.
+Declared-source filesystem resolution is a separate Engine `resourcebinding`
+boundary: `resourcebinding.ErrInvalid` and `*resourcebinding.Error` retain logical
+resource ID and field context. Source-resolution diagnostics retain the canonical
+source coordinate, including for missing files, and wrap the underlying cause.
+A missing or filesystem-escaping model is not a project-map schema error.
 
 Use `errors.Is` to distinguish error classes:
 

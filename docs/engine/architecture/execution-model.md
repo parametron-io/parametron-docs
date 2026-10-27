@@ -61,6 +61,16 @@ because runtime dispatch requires package context.
 
 ## Scheduling
 
+Project-mode declared-resource context travels separately from serialized
+planner payloads and `handoff.Package` JSON. It carries the complete inventory
+and each product's explicit selected model identity. Scheduler snapshots and
+executor defensive copies preserve product isolation and prevent caller mutation
+of bindings. Context reaches the generic orchestration request and prepared
+attempt outcome; retries preserve selection and inventory in fresh workspaces.
+This additional context changes neither planner/job/cache identity calculations
+nor serialized handoff schemas. See [project mapping](../authoring/project-mapping.md)
+and [attempt preparation](../runtime/execution-runtime.md#declared-resources-and-attempt-preparation).
+
 The worker pool is bounded by the smaller of the CPU count and product job
 count. `NewWithProductDirs` provisions an executor for each product directory;
 the shared-executor constructor copies executor state for each dispatched job.
