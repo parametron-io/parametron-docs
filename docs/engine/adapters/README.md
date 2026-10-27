@@ -30,6 +30,14 @@ runtime executable; and any Engine-authoritative external target identities.
 Engine validates the request and the consistency of its adapter, product, and
 manifest identities before runtime work.
 
+The request can also carry internal Engine-owned declared-resource context,
+joining explicit project resource identity to operational materialization. It is
+excluded from serialized request data and remains separate from native runtime
+wire payloads. See [attempt preparation](../runtime/execution-runtime.md#declared-resources-and-attempt-preparation).
+Native dependency discovery and CAD-specific document behavior remain adapter
+responsibilities; this context does not make every adapter process multiple
+native documents.
+
 The `runtimecap.Capability` interface is the Engine-owned external invocation
 boundary. It passes explicit working-copy, manifest, result, output, observation,
 and reference-traversal paths to a file-based runtime command and captures the
