@@ -77,8 +77,13 @@ No string/path heuristic is a supported mechanism.
 Recursive traversal into mapped external documents is **not implemented**.
 The raw canonical evidence distinguishes same-source/same-target/same-kind
 observations with different `sourceProperty` or `referenceMechanism`. Engine's
-normalized record keeps its existing coarser semantics; the raw evidence
-retains the additional provenance (see below).
+resource-qualified mapper joins accepted evidence with the completed declared-resource
+inventory and preserves accepted property and mechanism distinctions in normalized
+relationships. FreeCAD continues to emit raw schema `1.0` evidence without
+Engine logical resource IDs. Engine's `ReferenceRelationshipKey` is distinct from
+the raw node/edge identity contract below; exact raw traversal evidence remains
+separately preserved. See [Record Contracts](../../../reference/record-contracts.md#traversal-normalization-and-bounded-reference-emission)
+for the Engine-owned qualification and identity boundary.
 
 ## Output schema
 
