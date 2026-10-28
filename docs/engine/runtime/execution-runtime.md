@@ -108,6 +108,10 @@ Validated project declarations
        +-- additional declared model resources
   -> Validated attempt-relative resource bindings
   -> External CAD runtime invocation
+  -> CAD runtime outcome with completed inventory and prepared source coordinate
+  -> Raw traversal evidence from the selected verified outcome
+  -> Engine resource-qualified reference mapper
+  -> Normalized reference record + separately preserved exact raw bytes
 ```
 
 The inventory includes declared models regardless of product use or reference
@@ -121,7 +125,9 @@ neither successful CAD execution nor a verified engineering result.
 Engine stages bytes and maintains bindings. The external CAD runtime owns native
 document access and interpretation. Additional staging establishes no automatic
 opening, recursive dependency discovery, link rebinding, reference completeness,
-assembly occurrence completeness, or native relationship normalization. It
+assembly occurrence completeness, or native relationship normalization. The
+independent Engine mapping, emission, and normal-CLI contract establishes resource
+qualification of accepted traversal evidence using the completed inventory. This
 requires no change to FreeCAD-native behavior or reference traversal.
 
 ## Attempt Identity and Layout
@@ -245,7 +251,10 @@ Upon subprocess completion, Engine validates raw runtime evidence:
      source model.
 4. **Raw Traversal Evidence Intake**:
    - Raw traversal evidence at
-     `<OutputDir>/prm.reference-traversal.json` is captured if present.
+     `<OutputDir>/prm.reference-traversal.json` is captured if present, retaining
+     exact bytes. At record mapping, Engine validates native evidence and correlates
+     its `sourceDocument` with the selected prepared source-document coordinate;
+     staging alone does not establish that correlation.
 
 ## Engine-Owned Verification
 
@@ -309,6 +318,12 @@ The Executor correlates the attempt outcome against the active job request:
 - **Retry Ownership**: The Executor is the sole retry authority. Retries
   advance the attempt counter and execute in a fresh attempt workspace.
 
+Completed CAD outcomes retain the completed resource inventory, prepared
+attempt-relative source-document coordinate, raw reference traversal evidence,
+and existing job/product/step linkage. The selected verified outcome forwards
+these inputs to the Engine-owned reference mapper; FreeCAD supplies native
+evidence rather than logical resource identities.
+
 ## Completion Artifacts and Atomic Registration
 
 When execution succeeds with a passed verification outcome:
@@ -346,7 +361,7 @@ record package (`<runRoot>/parametron-record-package/`):
 |---------------|:----------------:|:------------------:|:---------------------:|
 | Execution | Yes | Yes (`recordmap.MapReport`) | Yes |
 | Failure | Yes | Yes (`recordmap.MapReport`, `recordmap.MapCADRuntimeFailure`) | One on failed runs: uniquely correlated runtime-native failure takes precedence; otherwise report-derived fallback |
-| Reference | Yes | Yes (`recordmap.MapReferenceTraversal`) | Yes (when raw traversal evidence exists) |
+| Reference | Yes | Yes (`recordmap.MapReferenceTraversal`) | For accepted traversal evidence from exactly one eligible verified CAD outcome on an overall successful run, including valid zero-edge scope |
 | Artifact | Yes | Yes (`recordmap.MapArtifactStoreRecords`, `recordmap.MapArtifactStoreManifest`) | Yes, one record per applicable artifact |
 | Observation | Yes | Yes (`recordmap.MapObserved`, including target state) | Yes, for typed observed evidence from the uniquely eligible successful CAD outcome |
 | Verification | Yes | Yes (`recordmap.MapVerification`, including target state) | Yes, for the Engine-owned verification result from the uniquely eligible successful CAD outcome |
@@ -364,13 +379,28 @@ result, verification request, and observed evidence at
 `raw/observed/prm.observed.json`. Normalized records are Engine interpretations,
 not mirrors of raw runtime vocabulary.
 
+Traversal candidate selection is bounded: zero eligible verified outcomes add
+nothing; exactly one supplies raw evidence and a normalized reference record;
+more than one omits traversal additions deterministically. Candidates require
+terminal correlated outcomes, an explicit verification pass, traversal bytes,
+and canonical job/product/step linkage. Normal execution does not aggregate all
+CAD outcomes or automatically populate all external target mappings. A valid
+zero-edge traversal retains source qualification, status, and completeness;
+pure mapper acceptance of failed traversal scope does not enable traversal
+emission from a failed overall Engine run.
+
 ### Raw Evidence Preservation
 
 The executor retains authoritative paths from each CAD attempt. Record-package
 projection uses guarded reads of those paths and supplies the resulting bytes to
 record emission; `recordemit` does not infer the attempt layout from the run root.
 The emitted package preserves available evidence, including traversal evidence
-when eligible, while normalized records maintain deterministic byte stability.
+when eligible, at `raw/runtime/prm.reference-traversal.json`. Its SHA-256 is
+computed over the original bytes, which are preserved without reserialization.
+Normalized reference relationships retain stable keys and canonical order for
+equivalent supported evidence. The containing reference record retains the
+existing evidence-sensitive identity derivation: different exact raw evidence
+bytes can change record identity despite identical relationship keys and order.
 For a failed run, exact native result bytes are preserved when a valid uniquely
 correlated runtime-native failure is selected. If native evidence is absent,
 invalid, ambiguous, or does not correlate with the authoritative terminal
@@ -380,11 +410,14 @@ canonical package layout, allowlisted raw evidence paths, cardinality rules, and
 byte-preservation semantics.
 
 Equivalent proof runs establish stable Engine-owned plan/hash, job, and attempt
-identities; canonical runtime manifests; observation-request semantics and bytes
-when execution location is equivalent; semantic verification results; normalized
-records; and package entry ordering and identities. Runtime-produced raw
-material can contain operational paths or other run-specific data, so the proof
-does not claim those raw bytes are identical across differing locations.
+identities, canonical runtime manifests, observation-request semantics and bytes,
+semantic verification results, normalized records, and package entry ordering and
+identities within their tested equivalent input and execution-location boundaries.
+For reference records, byte stability also depends on exact raw evidence provenance;
+relationship-key stability is a narrower guarantee. Runtime-produced raw material
+can contain operational paths or other run-specific data. Plan, job, cache,
+attempt, and unrelated record identities are not generally relocation-independent;
+the shared identity algorithm is unchanged.
 
 ## Layered Cache
 
