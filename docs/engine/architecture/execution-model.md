@@ -59,6 +59,14 @@ Jobs without that step use direct execution. Package execution takes a defensive
 snapshot of the supplied package; direct execution rejects CAD-runtime plans
 because runtime dispatch requires package context.
 
+Explicit occurrence intent is separately supplied to
+`ExecutePackageWithOptions(ctx, pkg, PackageExecutionOptions{...})` through its
+`OccurrenceObservation` typed request. The executor copies it through dispatch
+and per-attempt requests, retains it with accepted evidence, and clears it after
+the execution. `ExecutePackage` supplies empty options. This API does not change
+serialized handoff contracts or provide public CLI/DSL occurrence authoring;
+see [execution-scoped occurrence intent](../runtime/execution-runtime.md#execution-scoped-occurrence-intent).
+
 ## Scheduling
 
 Project-mode declared-resource context travels separately from serialized

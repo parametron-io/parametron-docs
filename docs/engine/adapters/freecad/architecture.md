@@ -31,7 +31,7 @@ owns CAD-native execution and raw evidence capture:
 | Native shape validity inspection and raw dependency evidence | — | Owns |
 | Requested observation and reference discovery | — | Owns |
 | Artifact export (STEP/CSV/PDF) | — | Owns |
-| Normalized engineering records, durable storage | Owns | — |
+| Normalized engineering records and local packages | Owns | — |
 
 FreeCAD does not own Engine planning, verification decisions, normalization,
 higher-level orchestration, or durable product storage and indexing. See the
@@ -46,8 +46,8 @@ executable with explicit working-copy, manifest, and result paths. FreeCAD
 validates those paths, performs FreeCAD-specific execution or observation, and
 returns raw runtime evidence through deterministic file-based contracts:
 
-All active Parametron-owned Engine ↔ CAD JSON runtime contracts on this
-boundary use canonical `schemaVersion: "1.0"`: the export manifest,
+The implemented FreeCAD producer contracts use canonical
+`schemaVersion: "1.0"`: the export manifest,
 verification request, observed result, runtime result, traversal request, and
 rich traversal evidence. Engine plans and lowers intent into the runtime
 package; FreeCAD executes and captures native evidence; Engine verifies and
@@ -149,6 +149,21 @@ from reference *traversal* (relationship-driven dependency-graph discovery);
 [contracts/reference-traversal.md](contracts/reference-traversal.md) are the
 canonical detailed owners of that distinction and its request/output shapes.
 
+Explicit occurrence evidence is a separate Engine-owned contract. Engine owns
+resource/native qualification, parent/context validation, completeness,
+duplicates/conflicts, deterministic quantity rollup, normalized records, and raw
+provenance. FreeCAD owns native Assembly inspection, member inventory and parent
+membership, target resolution, native status/diagnostics, and coverage evidence.
+Engine accepts controlled evidence for the bounded FreeCAD 1.1.4 direct-member
+mechanism; a production occurrence evidence producer is not implemented in
+`parametron-freecad`. It is not enabled by generic traversal or legacy component
+observation. Request/summary `1.0` and evidence `1.0`/`1.1` are independent of the
+implemented producer contracts above. See the canonical
+[occurrence contract](../../reference/record-contracts.md#explicit-occurrence-observation)
+and [runtime propagation](../../runtime/execution-runtime.md#execution-scoped-occurrence-intent).
+The mechanism's 1.1.4 qualification does not change separately established
+FreeCAD 1.1.1 generic traversal or target-mutation behavior.
+
 ## GUI and Capture Boundary
 
 GUI/capture functionality is not implemented in the current FreeCAD adapter.
@@ -168,34 +183,3 @@ the current FreeCAD adapter.
   families and packaging.
 - [Target-Action Contract](../../reference/target-action-contract.md) —
   Engine's semantic target-action ownership.
-
-## Corrective-work status (2026-09-26)
-
-Engine [#3](https://github.com/parametron-io/parametron-engine/issues/3)
-initially closed after the Engine-owned contract package was completed. The
-real rehearsal under FreeCAD
-[#9](https://github.com/parametron-io/parametron-freecad/issues/9) exposed a
-remaining pre-release traversal schema split, and Engine #3 was reopened.
-Engine [#28](https://github.com/parametron-io/parametron-engine/issues/28)
-and FreeCAD [#39](https://github.com/parametron-io/parametron-freecad/issues/39)
-completed and merged the correction. An independent cross-repository Stage 2
-audit then returned `READY FOR STAGE 3`, including a real Engine → FreeCAD →
-Engine round trip with canonical schema 1.0 traversal and exact raw-evidence
-digest linkage. Central contract documentation was synchronized, the remaining
-Engine-local status residue was corrected, and Engine #3 was revalidated and
-closed as completed.
-
-FreeCAD #9 was subsequently rebased onto the corrected Engine mainline and its
-final independent real-native Stage 2 audit returned
-`READY TO CLOSE FREECAD #9`. That audit exercised the real Engine → FreeCAD →
-Engine path with FreeCAD 1.1.1 across suppression, unsuppression, hide, unhide,
-safe deletion, unsafe-delete rejection, representative native validity failure,
-target-state observation, runtime-result intake, rich schema-1 reference
-traversal, Engine verification, normalized record/package emission, raw-evidence
-provenance, and repeatability. It found no remaining technical gap in the
-cross-repository rehearsal and confirmed zero active schema-2 production or
-compatibility paths in the Engine and FreeCAD runtime boundary.
-
-FreeCAD #9 remains open only for final Stage 3 status synchronization and issue
-closure. GitHub Issues and the project remain the source of truth for subsequent
-live status changes.

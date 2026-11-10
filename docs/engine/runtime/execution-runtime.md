@@ -130,6 +130,72 @@ independent Engine mapping, emission, and normal-CLI contract establishes resour
 qualification of accepted traversal evidence using the completed inventory. This
 requires no change to FreeCAD-native behavior or reference traversal.
 
+## Execution-scoped occurrence intent
+
+Engine's executor API accepts explicit occurrence intent through:
+
+```go
+func (e *Executor) ExecutePackageWithOptions(ctx context.Context, pkg *handoff.Package, options PackageExecutionOptions) error
+func (e *Executor) ExecutePackage(ctx context.Context, pkg *handoff.Package) error
+```
+
+`PackageExecutionOptions.OccurrenceObservation` is a
+`*recordcontract.OccurrenceRequest`. It requests one scope with requirement
+`optional` or `complete`. `ExecutePackage` delegates with empty options and
+preserves ordinary execution. Public CLI flags, DSL, and HTTP submission do not
+author this intent; generic traversal never fabricates it. The canonical
+[occurrence contract](../reference/record-contracts.md#explicit-occurrence-observation)
+owns evidence shape, identity, native eligibility, completeness, and rollup.
+
+Intent is execution-scoped rather than executor configuration or serialized
+handoff/planner data. Engine snapshots request-owned data at API entry, copies
+it through dispatch initialization and per-attempt orchestration requests, and
+clears it on return. Retries preserve accepted intent in fresh attempts; caller
+or adapter mutation cannot change later attempts, and successive default
+executions do not inherit prior intent. This establishes sequential isolation,
+not concurrent use of one executor.
+
+After preparation, Engine materializes `prm.occurrence-request.json` at the
+attempt root. It adds no process argument and implies no new FreeCAD capability.
+Only `<OutputDir>/prm.occurrence-evidence.json` is read, through confined regular
+file checks. Alternate locations and escaping symlinks cannot supply evidence.
+Occurrence output freshness checks apply when intent is present; stale request
+sidecars are removed even on the no-request path.
+
+Intake correlates evidence to explicit intent, completed resource inventory,
+and the prepared source coordinate before acceptance. Optional omitted evidence
+becomes unavailable; valid incomplete/unsupported evidence retains unavailable
+quantity. Required-complete noncomplete evidence fails with
+`ErrOccurrenceCompletenessRequired`; malformed evidence fails even when optional.
+These errors are wrapped by `FreeCADRuntimeVerificationError` at
+`occurrence_validation`, separate from ordinary requested-state comparison.
+No intent preserves ordinary behavior and does not load occurrence evidence.
+
+Outcomes retain a copy of the typed request and exact raw bytes with the
+completed inventory/source coordinate. On an overall successful run, exactly
+one terminal correlated, explicitly verified CAD outcome with canonical
+job/product/step linkage may supply occurrence material to record projection.
+Zero eligible outcomes add nothing; multiple eligible outcomes omit CAD
+additions rather than selecting or aggregating them. Optional omitted evidence
+on the selected requested outcome can emit an unavailable summary without a raw
+file. Emission validates again and adds the optional summary to the observation
+family, preserving ordinary facts and separate generic reference evidence.
+Original bytes and their SHA-256 provenance are retained at
+`raw/runtime/prm.occurrence-evidence.json`.
+
+Permanent tests cover API-to-attempt propagation, defensive copying, retries,
+successive executions, canonical intake, outcome retention, and bounded
+projection. The continuous controlled execution test invokes
+`ExecutePackageWithOptions`, materializes the sidecar, supplies controlled
+occurrence evidence alongside ordinary controlled external-runtime outputs,
+and follows normal intake, verification, projection, and package emission.
+It verifies quantity groups, noncomplete/required failures, raw provenance,
+and generic-reference independence. It proves neither public CLI authoring nor
+actual FreeCAD-native occurrence production. Production native discovery remains
+unimplemented in `parametron-freecad`; this Engine integration establishes no
+FreeCAD 1.1.1 occurrence compatibility, recursive/array quantity, or general
+multi-outcome aggregation.
+
 ## Attempt Identity and Layout
 
 Every CAD runtime invocation executes inside an isolated attempt workspace:
@@ -147,6 +213,7 @@ Every CAD runtime invocation executes inside an isolated attempt workspace:
   - `prm.export-manifest.json`: Materialized native manifest.
   - `prm.verification.json`: Materialized verification request contract.
   - `prm.reference-traversal-request.json`: Reference traversal configuration.
+  - `prm.occurrence-request.json`: Optional explicit occurrence request.
 
 Attempts are completely isolated: retries use distinct attempt IDs and directories,
 preventing cross-attempt contamination.
@@ -203,9 +270,12 @@ Before invoking the external CAD runtime:
    request fields and produces corresponding raw native evidence.
 3. **Reference Traversal Request**: If reference traversal is configured,
    `prm.reference-traversal-request.json` is materialized.
-4. **Pre-Invocation Freshness**: Stale contract-owned outputs (`prm.result.json`,
+4. **Occurrence Request**: Explicit execution intent materializes the optional
+   sidecar described above; it is separate from requested-state observation.
+5. **Pre-Invocation Freshness**: Stale contract-owned outputs (`prm.result.json`,
    `prm.observed.json`, `prm.reference-traversal.json`, and all
-   declared artifact paths) are checked. Regular files from prior runs are
+   declared artifact paths, plus `prm.occurrence-evidence.json` when requested)
+   are checked. Regular files from prior runs are
    removed; symlinks or non-regular files cause preflight rejection.
 
 ## External Runtime Invocation
@@ -363,7 +433,7 @@ record package (`<runRoot>/parametron-record-package/`):
 | Failure | Yes | Yes (`recordmap.MapReport`, `recordmap.MapCADRuntimeFailure`) | One on failed runs: uniquely correlated runtime-native failure takes precedence; otherwise report-derived fallback |
 | Reference | Yes | Yes (`recordmap.MapReferenceTraversal`) | For accepted traversal evidence from exactly one eligible verified CAD outcome on an overall successful run, including valid zero-edge scope |
 | Artifact | Yes | Yes (`recordmap.MapArtifactStoreRecords`, `recordmap.MapArtifactStoreManifest`) | Yes, one record per applicable artifact |
-| Observation | Yes | Yes (`recordmap.MapObserved`, including target state) | Yes, for typed observed evidence from the uniquely eligible successful CAD outcome |
+| Observation | Yes | Yes (`recordmap.MapObserved`, including target state), plus optional typed occurrence summary | Yes, for typed observed evidence from the uniquely eligible successful CAD outcome |
 | Verification | Yes | Yes (`recordmap.MapVerification`, including target state) | Yes, for the Engine-owned verification result from the uniquely eligible successful CAD outcome |
 
 Target-state material uses the existing observation and verification families;
@@ -395,8 +465,9 @@ The executor retains authoritative paths from each CAD attempt. Record-package
 projection uses guarded reads of those paths and supplies the resulting bytes to
 record emission; `recordemit` does not infer the attempt layout from the run root.
 The emitted package preserves available evidence, including traversal evidence
-when eligible, at `raw/runtime/prm.reference-traversal.json`. Its SHA-256 is
-computed over the original bytes, which are preserved without reserialization.
+when eligible, at `raw/runtime/prm.reference-traversal.json`, plus independently
+requested occurrence evidence at `raw/runtime/prm.occurrence-evidence.json`.
+Each evidence SHA-256 is computed over the original bytes, which are preserved without reserialization.
 Normalized reference relationships retain stable keys and canonical order for
 equivalent supported evidence. The containing reference record retains the
 existing evidence-sensitive identity derivation: different exact raw evidence
