@@ -4,6 +4,11 @@ Observation reads requested CAD-native state from an already-mutated,
 recomputed, and persisted document. It never evaluates checks or makes
 verification decisions — that is Engine's job.
 
+Engine's separate [explicit occurrence evidence contract](../../../reference/record-contracts.md#explicit-occurrence-observation)
+does not enable legacy `components` observation or imply production occurrence
+output from FreeCAD. Its Engine-side controlled-evidence support uses a separate
+request/evidence sidecar; no native occurrence producer is implemented here.
+
 ## Request: `prm.verification.json`
 
 Malformed JSON, duplicate keys, non-JSON constants, and non-object roots are

@@ -12,6 +12,13 @@ distinct from requested reference *observation*, which only checks existence
 of explicitly named objects — see
 [observation.md](observation.md#requested-reference-observation-not-graph-traversal).
 
+Generic reference != occurrence. Neither `App::PropertyXLink`, coarse
+`component` classification, repeated edges, target counts, nor traversal
+`succeeded` proves occurrence inventory or quantity. A native mechanism may
+supply both surfaces, but Engine validates them independently. See the separate
+[explicit occurrence contract](../../../reference/record-contracts.md#explicit-occurrence-observation);
+this traversal contract and its relationship identity remain unchanged.
+
 ## Traversal request
 
 Loaded strictly via `--reference-traversal-request <path>` on `execute`
