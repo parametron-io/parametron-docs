@@ -19,7 +19,7 @@ Registry order and filenames are:
 | --- | --- | --- |
 | execution | `prm.execution-record.json` | Execution outcome, jobs, steps, timing and related record links |
 | artifact | `artifacts/<identityId>/prm.artifact-record.json` | Artifact identity, inventory and content metadata |
-| observation | `prm.observation-record.json` | Normalized observed facts and evidence, with optional typed occurrence summary |
+| observation | `prm.observation-record.json` | Normalized observed facts and evidence, with optional typed occurrence summary and optional bounded engineering fact observations |
 | reference | `prm.reference-record.json` | Normalized reference edges, endpoints, resolution and evidence |
 | failure | `prm.failure-record.json` | Class, message, stage, severity, code, location, retry/timeout/cancellation and evidence |
 | verification | `prm.verification-record.json` | Engine outcome, category results, failure classes, linkage and evidence |
@@ -82,6 +82,7 @@ parametron-record-package/
     runtime/prm.result.json
     runtime/prm.reference-traversal.json
     runtime/prm.occurrence-evidence.json
+    fact/prm.fact-evidence.json
 ```
 
 This is the allowed layout, not a promise that every listed file exists per run.
@@ -118,11 +119,14 @@ performing record mapping. `EntryForContractPath` classifies static layout entri
 Raw CAD evidence uses an explicit allowlist:
 `raw/runtime/prm.result.json`, `raw/verification/prm.verification.json`,
 `raw/observed/prm.observed.json`,
-`raw/runtime/prm.reference-traversal.json`, and optional
-`raw/runtime/prm.occurrence-evidence.json`. Arbitrary descendants under
-`raw/runtime/` are not accepted automatically. Safe descendants of `raw/handoff/`
-are dynamic handoff evidence files, not normalized records or raw runtime-result
-evidence. `raw/handoff` itself is a directory, not an evidence file. Unsafe and
+`raw/runtime/prm.reference-traversal.json`, optional
+`raw/runtime/prm.occurrence-evidence.json`, and optional
+`raw/fact/prm.fact-evidence.json`. Raw fact evidence is accepted only through
+this explicit allowlist entry; the corresponding `prm.fact-request.json`
+sidecar is runtime-local attempt material and is not packaged. Arbitrary
+descendants under `raw/runtime/` are not accepted automatically. Safe
+descendants of `raw/handoff/` are dynamic handoff evidence files, not
+normalized records or raw runtime-result evidence. `raw/handoff` itself is a directory, not an evidence file. Unsafe and
 noncanonical paths are rejected.
 
 ## Operational mapping and emission
@@ -609,9 +613,145 @@ complete nested assembly rollup, flexible subassemblies, link arrays,
 `App::LinkElement` counting, unproven cyclic expansion, arbitrary auxiliary
 exclusions, automatic external dependency discovery, production FreeCAD occurrence
 emission, public CLI/DSL/HTTP occurrence authoring, CAD BOM quantity authority,
-BOM serialization, general engineering facts/units/mass/material calculations,
-PDM persistence, and general multi-outcome aggregation. Separately supported
-mutations and generic traversal retain their own contracts.
+BOM serialization, physical mass, density/material inference, material catalogs
+or an Engine material database, universal unit frameworks and unit conversion
+algebra, arbitrary or universal native property observation, FreeCAD-native
+fact production, PDM persistence, and general multi-outcome aggregation.
+Separately supported mutations and generic traversal retain their own contracts.
+
+## Bounded engineering fact observation
+
+Engine owns the requested fact scope, subject identity and resource
+qualification, accepted fact kinds, value typing, explicit unit representation,
+availability semantics, normalization into the existing observation record
+family, deterministic identity and ordering, and deterministic failure
+classification. The CAD runtime owns native property access, native value
+extraction, native unit evidence, unavailable and unsupported diagnostics, and
+raw evidence. Engine performs no heuristic property discovery and invents no
+facts the runtime did not observe. Fact observation is separate from mutation
+verification: fact observations never serve as target-state evidence, and
+target-state verification never decides fact acceptance. Quantity remains the
+occurrence-derived semantics described above; it is not a CAD fact and is not
+observed through the fact contract.
+
+### Sidecar contracts
+
+| Contract | Accepted schema versions |
+| --- | --- |
+| `FactRequest` (`prm.fact-request.json`) | `1.0` |
+| `FactRuntimeEvidence` (`prm.fact-evidence.json`) | `1.0` |
+
+Intent is opt-in and execution-scoped through
+`Executor.ExecutePackageWithOptions` with
+`PackageExecutionOptions.FactObservation`; the public CLI, DSL, and HTTP
+submission do not author fact requests. Engine materializes the versioned
+request sidecar `prm.fact-request.json` (schema `1.0`) in the prepared attempt
+working directory, and reads only the versioned evidence sidecar
+`prm.fact-evidence.json` (schema `1.0`, evidence kind
+`native_fact_evidence`) from its confined output directory. Nil intent requests
+no fact observation and forbids unsolicited fact evidence. Strict decoding
+rejects unknown fields, duplicate JSON keys, trailing JSON, invalid types, and
+contract-invalid values. A present evidence file must cover every requested
+binding; unsolicited fact evidence is rejected.
+
+The single supported fact kind is `bound_property`: one explicitly named native
+property observed under an explicitly bound, resource-qualified subject. Each
+request binding names the native property explicitly and carries a closed
+`valueKind`, an optional explicit unit token, and a `requirement` of `optional`
+or `required`. Engine never infers native facts from property names.
+
+### Resource-qualified subjects
+
+A fact subject is the occurrence entity described
+[above](#explicit-occurrence-observation): the declared resource tuple
+`(projectId, kind, logicalId)`, `nativeKind: "object"`, the exact native name,
+and an optional `semanticId` annotation. The `semanticId` is annotation-only
+and is excluded from fact identity. Occurrence context frames are carried only
+when a fact is genuinely occurrence-scoped, under the same occurrence context
+validation, including the bounded frame count and cyclicity rules; the context
+participates in fact identity only when present. Observed subjects join the
+declared logical identity with the materialized document coordinate: identity
+and coordinate must identify the same binding, and the same native name in two
+declared resources stays distinct. Operational absolute paths are not identity
+material.
+
+### Values, units, and availability
+
+Observed values are typed finite scalars: `number`, `integer`, `string`, or
+`boolean`. The value kind is cross-checked against the actual JSON scalar at
+intake and again during record validation. Numeric values canonicalize
+deterministically — `42`, `42.0`, and `4.2e1` are one observed value — while
+`NaN`, infinities, non-integral integers, and non-canonical strings are
+rejected. Zero is a valid observed value.
+
+Units are optional explicit opaque text tokens carried by both the request
+binding and the evidence; an absent unit is an explicit unitless fact, never an
+implicit unit. Unit tokens are bounded (at most 32 characters) and have no
+semantics in Engine: no unit conversion, conversion algebra, or quantity
+arithmetic exists or is implied. Units are incompatible with non-numeric
+`string` and `boolean` values.
+
+Availability is explicit: `observed`, `unavailable`, or `unsupported`. Observed
+evidence must carry a value and a value kind; `unavailable` and `unsupported`
+evidence must carry a diagnostic and no value material. Omission never
+substitutes a state. An `optional` `unavailable` or `unsupported` fact is
+retained as a normalized fact carrying its explicit state, while a `required`
+non-observed binding fails deterministically. An omitted evidence file is
+explicit unavailability for every requested binding.
+
+Invalid fact contracts and conflicting duplicates within evidence fail with
+`ErrInvalidFact`; required unavailable or unsupported bindings fail with
+`ErrRequiredFactUnavailable`; record-level conflicting facts fail under the
+existing `ErrInvalidObservationRecord`. Equivalent duplicate evidence
+canonicalizes into one fact instead of selecting a value.
+
+### Normalization, provenance, and emission
+
+Fact evidence is mapped at the CAD runtime boundary by `MapFactEvidence` in
+Engine's CAD runtime intake, not by a `recordmap` mapper: evidence subject
+joins, availability strictness, numeric canonicalization, and duplicate and
+conflict handling are decided before record construction. Normalized
+engineering facts extend the existing observation record family as
+`fact`-kind entries inside `observation.facts[]`, keyed by the fact kind; no
+separate record family exists and no new family is registered. Fact emission
+merges into the single observation record, preserving ordinary observation
+facts and the occurrence summary. Normalized fact ordering follows the
+requested bindings; raw evidence ordering does not influence acceptance or
+output, and relocation does not change normalized fact identity.
+
+Every fact carries shared provenance covering the observed resource and entity,
+the explicitly bound native property, the fact kind, and the exact raw
+evidence bytes: source kind `fact-evidence`, source reference
+`raw/fact/prm.fact-evidence.json`, and the SHA-256 digest of the exact
+evidence bytes. Raw fact evidence is preserved at
+`raw/fact/prm.fact-evidence.json`, classified as raw runtime evidence; the
+request sidecar is not packaged. The existing exactly-one-eligible-verified
+CAD-outcome projection boundary applies on an overall successful run: zero
+eligible outcomes emit no fact material, and multiple eligible outcomes omit
+fact additions rather than selecting or aggregating them. There is no general
+multi-outcome aggregation, and intake failures surface at the
+`outcome_validation` consumption stage.
+
+Permanent Engine contract/runtime tests cover finite typed values and numeric
+canonicalization, closed vocabularies, bounded binding and request validation,
+resource-qualified subject joins, availability strictness, duplicate and
+conflict semantics, deterministic identity and ordering across relocation and
+evidence-order changes, request materialization, absent/present/confined
+evidence handling, observation-family merge, optional omission versus required
+failure, and raw-evidence path classification. The committed Engine
+[test matrix](https://github.com/parametron-io/parametron-engine/blob/80d93c1d28efe6e68def896be058b7164cdf2a0c/docs/test-matrix.md#bounded-engineering-fact-observation-contract-coverage)
+identifies the permanent test responsibilities.
+
+Unsupported behavior includes physical mass, density/material inference,
+material catalogs or an Engine material database, universal unit frameworks and
+unit conversion algebra, heuristic or arbitrary/universal native property
+observation, target-scoped metadata mutation, multi-outcome fact aggregation,
+public CLI/DSL/HTTP fact authoring, and FreeCAD-native fact production: no
+native fact producer exists yet, permanent verification uses controlled Engine
+evidence rather than real FreeCAD-native property observation, and native
+runtime version tokens in evidence are provenance only. The contracts are
+intended to be sufficient for a later FreeCAD-native implementation of bounded
+fact observation without redesigning Engine normalization.
 
 Newly emitted packages use the current `prm.*` raw-evidence paths. No package
 migration walker, automatic old-name conversion, or compatibility alias exists
