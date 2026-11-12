@@ -9,6 +9,16 @@ does not enable legacy `components` observation or imply production occurrence
 output from FreeCAD. Its Engine-side controlled-evidence support uses a separate
 request/evidence sidecar; no native occurrence producer is implemented here.
 
+Similarly, bounded engineering fact observation is a separate sidecar contract
+pair (`prm.fact-request.json` / `prm.fact-evidence.json`) outside this
+observation contract; see [bounded engineering fact
+observation](../../../reference/record-contracts.md#bounded-engineering-fact-observation).
+The current FreeCAD runtime does not yet produce native fact evidence; a later
+FreeCAD phase will consume the completed Engine contract. Parameter, metadata,
+reference, and target-state behavior described here is unchanged, and no native
+fact mechanism is defined or enabled by the present observation request or
+output.
+
 ## Request: `prm.verification.json`
 
 Malformed JSON, duplicate keys, non-JSON constants, and non-object roots are
