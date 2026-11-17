@@ -80,9 +80,14 @@ failed result; success-result writing occurs only after successful execution.
 Observation produces the canonical observed file and no execution result.
 
 No Engine or runtime process environment variables are required for this
-callable; the dispatcher does not read environment configuration. External
-host selection via `PARAMETRON_FREECAD_BIN` is documented in
-[runtime.md](../runtime.md#freecad-host-resolution).
+callable; the dispatcher does not read environment configuration. The
+external executable path, in contrast, receives an Engine-published
+integrity request location through the `PARAMETRON_RUNTIME_INTEGRITY_REQUEST`
+environment variable — set only when Engine publishes an
+[integrity request](integrity-request.md), with inherited values stripped
+when it does not — and its argv is unchanged; this in-process dispatcher
+never reads it. External host selection via `PARAMETRON_FREECAD_BIN` is
+documented in [runtime.md](../runtime.md#freecad-host-resolution).
 
 ## Controlled errors
 

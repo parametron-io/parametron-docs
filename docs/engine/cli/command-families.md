@@ -104,7 +104,7 @@ parametron sync --file <project-dir>          # compatibility form, also accepte
 **Scope**:
 - The command always performs a full rebuild of the lock from current resources. No diff, partial update, or staleness detection is performed.
 - There is no automatic invocation; the user must run `parametron sync` explicitly.
-- Lock file presence is not required or enforced at execution time.
+- Lock file presence is not required at execution time; unlocked workflows record lock verification status `not_performed`. When a lock is present, the Engine enforces it at the dedicated `source_lock` dispatch stage before any orchestration or runtime invocation (see [Execution Runtime — Source Lock and Configured-Result Provenance](../runtime/execution-runtime.md#source-lock-and-configured-result-provenance)).
 
 ## Related Documents
 

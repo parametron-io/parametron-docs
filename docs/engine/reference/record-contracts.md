@@ -44,6 +44,9 @@ Shared provenance contains:
 - Linkage: product key, job ID, step reference.
 - Evidence: kind, reference, optional digest.
 - Runtime: tool ID, runtime ID, adapter.
+- Integrity: optional per-resource source, baseline, runtime-baseline, and
+  persisted-result identity chain (see
+  [integrity provenance](#integrity-provenance)).
 
 Normalization trims applicable strings, sorts collections deterministically, and
 copies caller-owned data. Present source-revision provenance requires a revision
@@ -82,6 +85,7 @@ parametron-record-package/
     runtime/prm.result.json
     runtime/prm.reference-traversal.json
     runtime/prm.occurrence-evidence.json
+    runtime/prm.integrity-evidence.json
     fact/prm.fact-evidence.json
 ```
 
@@ -120,7 +124,8 @@ Raw CAD evidence uses an explicit allowlist:
 `raw/runtime/prm.result.json`, `raw/verification/prm.verification.json`,
 `raw/observed/prm.observed.json`,
 `raw/runtime/prm.reference-traversal.json`, optional
-`raw/runtime/prm.occurrence-evidence.json`, and optional
+`raw/runtime/prm.occurrence-evidence.json`, optional
+`raw/runtime/prm.integrity-evidence.json`, and optional
 `raw/fact/prm.fact-evidence.json`. Raw fact evidence is accepted only through
 this explicit allowlist entry; the corresponding `prm.fact-request.json`
 sidecar is runtime-local attempt material and is not packaged. Arbitrary
@@ -147,6 +152,7 @@ error (`ErrInvalidReportMapping`, `ErrInvalidMetadataMapping`,
 | Engine verification-result input | `MapVerification`: summary, categories, failure classes and evidence, including target-state category/failures and observed-evidence provenance when target-state verification is enabled | Applicable verification record emitted; distinct from raw `prm.verification.json` request bytes |
 | Generic CAD runtime failure outcome | `MapCADRuntimeFailure`: adapter-neutral semantic class/stage plus native code/message, linkage, retry context and provenance | May replace the report-derived failure for one uniquely correlated terminal failed CAD outcome |
 | `prm.reference-traversal.json` | `MapReferenceTraversal`: optional reference record | Bounded verified-candidate integration described below |
+| Run integrity identity chain | `MapIntegrityProvenance`: lock verification state and the separate source, baseline, runtime-baseline, and persisted-result identities per declared resource | Optional integrity provenance block for runs that address declared CAD resources; exact `prm.integrity-evidence.json` bytes remain raw evidence |
 | Handoff package | Raw runtime/provenance evidence classification | No normalized handoff record mapping or automatic handoff collection |
 | Job status | Operational lifecycle state | Not a normalized record or durable storage contract |
 
@@ -159,7 +165,10 @@ export failure maps to `export / export`; and ordinary execution failures or
 otherwise-valid unknown native vocabulary use the deterministic
 `runtime / runtime` fallback. The exact native boundary, category, stage, code,
 and message remain in raw `prm.result.json`; normalized records contain Engine
-interpretation, with native code and message preserved.
+interpretation, with native code and message preserved. Engine-owned resource
+integrity violations are classified distinctly as failure class/stage
+`integrity` with their specific stable, path-free code preserved; see
+[integrity provenance](#integrity-provenance).
 
 Verification and CAD runtime failure mappers validate optional evidence digests,
 collapse matching evidence references, and reject conflicting digests.
@@ -757,3 +766,51 @@ Newly emitted packages use the current `prm.*` raw-evidence paths. No package
 migration walker, automatic old-name conversion, or compatibility alias exists
 for already-produced packages. Package archiving and remote publishing are not
 implemented. Normal package emission retains the overwrite behavior described above.
+
+## Integrity provenance
+
+Shared record provenance carries an optional integrity block for runs that
+address declared CAD resources. It is normalized provenance material, not a
+new record family, and it is omitted from serialized provenance entirely
+when absent, so records for runs without integrity material keep their
+existing bytes and identities. The shared `DeriveIdentity` algorithm treats
+integrity as separate provenance material; the record identity contract is
+unchanged.
+
+The block carries the run-level lock verification state — `verified`,
+`mismatch`, `missing` (a declared resource absent from the required lock
+scope), `malformed` (a non-canonical locked digest), `unavailable` (a lock
+that cannot be read or parsed), or `not_performed` for an unlocked workflow,
+which never claims lock verification — plus one entry per declared resource:
+
+| Field group | Contents |
+| --- | --- |
+| Source identity | Logical resource ID, canonical project-source coordinate, accepted source digest, per-resource lock state |
+| Materialized baseline identity | Attempt-relative materialized coordinate, materialized baseline digest, materialization status |
+| Runtime baseline identity | Runtime-reported baseline digest and status |
+| Persisted-result identity | Attempt-relative persisted-result coordinate, reported persisted-result digest, result validation status |
+
+Source, materialized baseline, runtime-baseline, and persisted-result
+content identities are separate fields and are never collapsed into one
+content identity. Per-stage statuses are `verified`, `mismatch`, `missing`,
+`malformed`, `inaccessible`, `unavailable`, and `unsupported`, plus
+`not_performed` for stages that did not run and `not_reported` for evidence
+the runtime did not provide. Entries are ordered by declared logical
+resource identity, so equivalent evidence normalizes identically regardless
+of evidence order or host paths; duplicate, contradictory, or undeclared
+provenance evidence for one resource identity fails deterministically.
+
+Integrity failures are classified distinctly: failure records for
+Engine-owned resource integrity violations carry failure class/stage
+`integrity` with their specific stable, path-free code preserved, keeping
+lock, materialization, runtime-baseline, and result-content failures
+distinguishable; non-integrity failures keep their existing classes.
+Configured-result digests never update the source lock and never replace
+source identity. Runtime integrity evidence is preserved verbatim at
+`raw/runtime/prm.integrity-evidence.json` with SHA-256 provenance over the
+exact original bytes. The enforced pipeline is documented in
+[execution runtime](../runtime/execution-runtime.md#source-lock-and-configured-result-provenance);
+the runtime-facing contract surfaces are owned by the
+[integrity request](../adapters/freecad/contracts/integrity-request.md) and
+[integrity evidence](../adapters/freecad/contracts/integrity-evidence.md)
+contracts.

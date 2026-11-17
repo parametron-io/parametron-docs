@@ -40,9 +40,10 @@ output rules. Command references cover [validate](cli/validate.md),
 ## Runtime
 
 The [API overview](runtime/api-overview.md) links the HTTP surface. The runtime
-section also covers [execution](runtime/execution-runtime.md),
-[job lifecycle](runtime/job-lifecycle.md), [artifacts](runtime/job-artifacts.md),
-and [reporting](runtime/reporting.md).
+section also covers [execution](runtime/execution-runtime.md), including the
+[source lock and configured-result provenance](runtime/execution-runtime.md#source-lock-and-configured-result-provenance)
+contract, [job lifecycle](runtime/job-lifecycle.md),
+[artifacts](runtime/job-artifacts.md), and [reporting](runtime/reporting.md).
 
 ## Reference
 

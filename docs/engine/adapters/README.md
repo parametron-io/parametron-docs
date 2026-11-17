@@ -76,6 +76,6 @@ FreeCAD is the currently implemented Engine CAD adapter. See [FreeCAD Adapter
 Architecture](freecad/architecture.md) for its role, ownership boundary, and
 capability areas, and [FreeCAD Runtime](freecad/runtime.md) for its headless
 invocation and execution lifecycle. Manifest, observation, reference-
-traversal, artifact, result/failure, target-mutation, and in-process
-invocation contracts are documented under
+traversal, artifact, result/failure, target-mutation, integrity
+request/evidence, and in-process invocation contracts are documented under
 [freecad/contracts/](freecad/contracts/).
