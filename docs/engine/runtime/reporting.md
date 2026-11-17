@@ -203,10 +203,16 @@ When execution fails, the `error` object contains detailed failure diagnostics:
 | `timeout` | boolean | `true` if failure was caused by step timeout. |
 | `canceled` | boolean | `true` if failure was caused by cancellation. |
 | `boundary` | string | Error boundary (`engine`, `runtime`). |
-| `category` | string | Error category (`verification`, `runtime`). |
+| `category` | string | Error category (`verification`, `runtime`, `integrity`). |
 | `code` | string | Machine-readable error code. |
 | `stage` | string | Specific stage where failure occurred. |
 | `attemptId` | string | Identity of the failed execution attempt. |
+
+Errors in the `integrity` category are Engine-owned resource integrity
+violations; their `classification` and `code` carry the specific stable,
+path-free integrity code, keeping lock, materialization, runtime-baseline, and
+result-content failures distinguishable. See
+[Execution Runtime — Source Lock and Configured-Result Provenance](execution-runtime.md#source-lock-and-configured-result-provenance).
 
 ## Determinism Guarantees
 

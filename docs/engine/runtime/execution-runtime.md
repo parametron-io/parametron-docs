@@ -130,6 +130,77 @@ independent Engine mapping, emission, and normal-CLI contract establishes resour
 qualification of accepted traversal evidence using the completed inventory. This
 requires no change to FreeCAD-native behavior or reference traversal.
 
+## Source Lock and Configured-Result Provenance
+
+Integrity provenance describes content identity, separate from generic
+reference, occurrence/quantity, fact, and target-state semantics. Engine owns
+the source-lock policy, per-resource source identity,
+source-to-materialized-baseline verification, validation of runtime-reported
+baseline evidence, independent persisted-result validation, normalized
+provenance, and deterministic integrity failure classification. The CAD
+runtime owns native access to the materialized resource, pre-mutation
+baseline observation, mutation/recompute/persistence, post-persistence
+result hashing, and raw integrity evidence. Engine never asks the adapter to
+decide lock policy, and the adapter never rewrites the lock.
+
+`prm.project-lock.json` (schema version `1.0`, unchanged) is the only project
+source/input lock contract: it records the accepted source identities of
+declared CAD resources and is not configured-result provenance. When a
+project lock is present, the Executor enforces it at the dedicated
+`source_lock` dispatch stage, after request validation and before any
+orchestration or runtime invocation: every declared resource's actual source
+bytes must match its locked source digest, locked digests must be canonical
+SHA-256 values, and a declared resource absent from the required lock scope
+fails deterministically. Unlocked workflows remain supported: they proceed
+normally and record lock verification status `not_performed`, making no
+lock-verification claim. Failure selection across multiple invalid resources
+is deterministic.
+
+Declared-resource source identity — logical resource ID, canonical
+project-source coordinate, the SHA-256 digest of the actual source bytes, and
+lock state — is attached to the declared-resource inventory before planning,
+through the existing declared-resource identity model. Every declared
+resource participates, including unused, zero-reference, and standalone
+declarations; a reference edge is not required for integrity addressing. The
+identity is content addressed: relocation does not change it, and host
+paths, modification times, and filenames alone are not identity material.
+
+### Materialized baseline verification
+
+Source identity and attempt-materialized baseline identity are separate. For
+byte-preserving materialization, Engine independently verifies that the
+materialized baseline digest equals the accepted source digest before any
+runtime invocation: every materialized declared resource is hashed in the
+prepared attempt workspace and compared against its captured source content
+identity. Tampered or transforming materialization fails deterministically
+with the logical resource ID, the expected and actual digests, and the
+attempt-relative coordinate — never a host absolute path.
+
+### Persisted configured-result validation
+
+The persisted configured result is validated independently of the
+runtime's report: Engine hashes the accessible persisted bytes itself and
+requires the runtime-reported result digest to agree. Missing, malformed,
+or mismatched result digests and missing or inaccessible persisted files are
+distinct deterministic failures. The configured-result digest represents
+post-persistence bytes; it is never written into the source lock and never
+replaces source identity.
+
+### Bounds
+
+Digest validity never establishes reference resolution, occurrence
+completeness, or fact availability, and a configured-result digest is never
+a semantic entity ID. Automatic recursive native dependency discovery does
+not exist, and a dependency encountered at execution is never silently added
+to the source lock. No real FreeCAD integrity execution exists yet:
+permanent verification uses controlled runtimes and stub capabilities, and
+real FreeCAD pre-mutation baseline and post-persistence result proof is a
+later adapter phase built on the [integrity request](../adapters/freecad/contracts/integrity-request.md)
+and [integrity evidence](../adapters/freecad/contracts/integrity-evidence.md)
+contracts. The committed Engine
+[test matrix](https://github.com/parametron-io/parametron-engine/blob/0d2cf34ad4f3a4eeb68ab6c76eb328b9538116b0/docs/test-matrix.md#source-lock-and-configured-result-provenance-contract-coverage)
+identifies the permanent test responsibilities.
+
 ## Execution-scoped occurrence intent
 
 Engine's executor API accepts explicit occurrence intent through:
@@ -249,7 +320,10 @@ participate in attempt identity and resolved planner/job payloads. Captured
 combined model signatures include resolved paths; raw metadata and some
 normalized provenance inputs also retain operational paths. Plan, job, cache,
 attempt, and record identities are not generally relocation-independent.
-Resource context does not change their existing algorithms.
+Resource context does not change their existing algorithms. Integrity content
+identity is separate from these operational identities: it is path free and
+relocation invariant, as described under
+[Source Lock and Configured-Result Provenance](#source-lock-and-configured-result-provenance).
 
 ## Request Materialization and Freshness
 
@@ -274,7 +348,8 @@ Before invoking the external CAD runtime:
    sidecar described above; it is separate from requested-state observation.
 5. **Pre-Invocation Freshness**: Stale contract-owned outputs (`prm.result.json`,
    `prm.observed.json`, `prm.reference-traversal.json`, and all
-   declared artifact paths, plus `prm.occurrence-evidence.json` when requested)
+   declared artifact paths, plus `prm.occurrence-evidence.json` when requested
+   and `prm.integrity-evidence.json`)
    are checked. Regular files from prior runs are
    removed; symlinks or non-regular files cause preflight rejection.
 
@@ -296,6 +371,14 @@ directly via `runtimecap.Capability`:
 - Invoked directly without an intermediate shell.
 - Process environment is filtered; timeouts and context cancellations propagate
   directly to the subprocess.
+- When the orchestrator supplies an integrity root for an attempt with
+  materialized declared resources, Engine authors the byte-deterministic
+  [integrity request](../adapters/freecad/contracts/integrity-request.md)
+  `prm.integrity-request.json` and publishes it under
+  `<runRoot>/integrity/<attemptID>/`. Its location is delivered only through
+  the `PARAMETRON_RUNTIME_INTEGRITY_REQUEST` environment variable. The
+  channel is Engine-owned: an inherited value for that variable is stripped
+  when Engine publishes no request, and the runtime argv is unchanged.
 - Process exit code, stdout, and stderr are captured.
 
 ## Raw Result and Evidence Intake Validation
@@ -325,6 +408,21 @@ Upon subprocess completion, Engine validates raw runtime evidence:
      exact bytes. At record mapping, Engine validates native evidence and correlates
      its `sourceDocument` with the selected prepared source-document coordinate;
      staging alone does not establish that correlation.
+5. **Runtime Integrity Evidence Intake**:
+   - When the attempt carries verified materialized declared-resource baselines,
+     `<OutputDir>/prm.integrity-evidence.json` is loaded; a missing file is
+     absent evidence, not a failure. Engine validates the evidence strictly
+     against its own request through the
+     [integrity evidence contract](../adapters/freecad/contracts/integrity-evidence.md):
+     malformed digests, duplicate or unordered resources, evidence for
+     unrequested coordinates, and non-observed primary resources are rejected,
+     while non-observed statuses are accepted for secondary resources.
+   - Engine then independently hashes the accessible persisted configured-result
+     bytes and requires the runtime-reported result digest to agree, as
+     described under
+     [Source Lock and Configured-Result Provenance](#source-lock-and-configured-result-provenance).
+     A runtime baseline mismatch remains distinct from source-lock,
+     materialization, and result-content failures.
 
 ## Engine-Owned Verification
 
@@ -383,6 +481,10 @@ The Executor correlates the attempt outcome against the active job request:
 - **Success**: Succeeded runtime status + passed Engine verification.
 - **Verification Failure**: Succeeded runtime status + failed verification.
   Treated as a terminal failure (not retried).
+- **Integrity Failure**: Engine-owned resource integrity violation carrying
+  class/stage `integrity`, raised at the `source_lock` dispatch stage or
+  during materialized-baseline, runtime-baseline, or persisted-result
+  validation. Terminal (not retried).
 - **Runtime Failure**: Subprocess failure or runtime-reported error.
   Eligible for retry if within max retry limit.
 - **Retry Ownership**: The Executor is the sole retry authority. Retries
@@ -441,6 +543,16 @@ there is no separate target-state record family. FreeCAD supplies raw native
 target-state evidence after canonical mutations through normal `execute`, while
 Engine owns comparison, verification, and record normalization.
 
+For runs that address declared CAD resources, shared record provenance carries
+the separate integrity identity chain — accepted source digest with lock state,
+materialized baseline digest with materialization status, runtime-reported
+baseline digest with its status, and persisted-result digest with its
+validation status — one entry per declared resource, ordered by declared
+logical resource identity. This is normalized provenance material, not a new
+record family, and record bytes are unchanged for runs without integrity
+material. See
+[record contracts — integrity provenance](../reference/record-contracts.md#integrity-provenance).
+
 Applicable successful controlled-runtime proof runs observe normal package
 emission of execution, artifact, observation, and verification records, rather
 than calling record mappers in isolation. They also preserve the raw runtime
@@ -465,8 +577,10 @@ The executor retains authoritative paths from each CAD attempt. Record-package
 projection uses guarded reads of those paths and supplies the resulting bytes to
 record emission; `recordemit` does not infer the attempt layout from the run root.
 The emitted package preserves available evidence, including traversal evidence
-when eligible, at `raw/runtime/prm.reference-traversal.json`, plus independently
-requested occurrence evidence at `raw/runtime/prm.occurrence-evidence.json`.
+when eligible, at `raw/runtime/prm.reference-traversal.json`, independently
+requested occurrence evidence at `raw/runtime/prm.occurrence-evidence.json`,
+and runtime integrity evidence, when the attempt validated it, verbatim at
+`raw/runtime/prm.integrity-evidence.json`.
 Each evidence SHA-256 is computed over the original bytes, which are preserved without reserialization.
 Normalized reference relationships retain stable keys and canonical order for
 equivalent supported evidence. The containing reference record retains the
@@ -510,6 +624,7 @@ semantic table fingerprints.
 |------------|---------|-------------|
 | `CADRuntimeDispatchError` | `executor` | Preflight, resolver, or orchestration failure before process start. |
 | `FreeCADRuntimeRunError` | `cadruntime` | Subprocess invocation, output preparation, or raw result intake failure. |
+| `*integrity.Failure` | `integrity` | Engine-owned resource integrity violation carrying a stable, path-free code, logical resource ID, attempt-relative coordinate, and digests; normalized failure records use class/stage `integrity` with the specific code preserved. |
 | `FreeCADRuntimeVerificationError` | `cadruntime` | In-memory verification mismatch or result inconsistency. |
 | `CADRuntimeConsumptionError` | `executor` | Outcome validation or correlation error during Executor intake. |
 | `ExecutionError` | `executor` | Step-level execution failure wrapper containing retry and timeout state. |

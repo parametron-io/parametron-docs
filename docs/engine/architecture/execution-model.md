@@ -100,7 +100,9 @@ start/end timestamps. Step IDs are zero-based decimal positions in the job.
 
 Before executing any step of a CAD-runtime package, preflight checks package
 and plan agreement, the product directory, executable resolver, orchestration
-capability, and request validity. Outcome-consuming executors also require a
+capability, and request validity. Project-mode packages with a present
+`prm.project-lock.json` additionally pass source-lock verification at the
+dedicated `source_lock` dispatch stage. Outcome-consuming executors also require a
 verified-run provider. A preflight failure starts no steps or runtime attempts.
 The executable is selected once for the package and reused across attempts.
 
@@ -123,7 +125,10 @@ checks the caller context before starting each step.
 Timeout and cancellation are terminal. Other step errors can retry until the
 attempt limit. On the normal CAD-runtime consumption path, process-invocation
 and runtime-reported failures can retry; preparation, contract validation,
-evidence correlation, and verification failures are terminal. The orchestration
+evidence correlation, and verification failures are terminal, as are
+Engine-owned resource integrity failures (see
+[execution runtime](../runtime/execution-runtime.md#source-lock-and-configured-result-provenance)).
+The orchestration
 wrapper executes once per attempt; the executor owns retries. Earlier successful
 steps are not rerun when a later step retries.
 

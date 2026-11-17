@@ -140,8 +140,11 @@ continues to consume traversal evidence. No occurrence, quantity, BOM, or
 engineering fact observation semantics follow from inventory membership.
 
 Existing `prm.project-lock.json` model-ID/path addressing remains compatible.
-Resource binding does not enforce locked digests, source/materialized/result
-integrity, or configured-result provenance.
+Resource binding itself does not enforce the lock; source-lock,
+source/materialized-baseline, and configured-result integrity are enforced by
+the execution-time integrity boundary in
+[execution runtime](../runtime/execution-runtime.md#source-lock-and-configured-result-provenance),
+which attaches source identity to this inventory before planning.
 
 ---
 
