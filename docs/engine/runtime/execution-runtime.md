@@ -198,7 +198,7 @@ real FreeCAD pre-mutation baseline and post-persistence result proof is a
 later adapter phase built on the [integrity request](../adapters/freecad/contracts/integrity-request.md)
 and [integrity evidence](../adapters/freecad/contracts/integrity-evidence.md)
 contracts. The committed Engine
-[test matrix](https://github.com/parametron-io/parametron-engine/blob/0d2cf34ad4f3a4eeb68ab6c76eb328b9538116b0/docs/test-matrix.md#source-lock-and-configured-result-provenance-contract-coverage)
+[test matrix](https://github.com/parametron-io/parametron-engine/blob/76b70c02e8165650a1126d7c1f0157e456d4b2fd/docs/test-matrix.md#source-lock-and-configured-result-provenance-contract-coverage)
 identifies the permanent test responsibilities.
 
 ## Execution-scoped occurrence intent
