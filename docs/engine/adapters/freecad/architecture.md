@@ -51,7 +51,9 @@ The implemented FreeCAD producer contracts use canonical
 verification request, observed result, runtime result, traversal request, and
 rich traversal evidence. Engine plans and lowers intent into the runtime
 package; FreeCAD executes and captures native evidence; Engine verifies and
-normalizes the returned evidence into records.
+normalizes the returned evidence into records. The following FreeCAD phase also
+implements the Engine-owned occurrence, bounded-fact, and integrity evidence
+contracts; see the [FreeCAD handoff](handoff.md).
 
 ```text
 Engine / local caller
@@ -114,6 +116,16 @@ behind the same launcher entry point:
   references and Engine-mapped external targets, returned as raw dependency-
   graph evidence. See
   [contracts/reference-traversal.md](contracts/reference-traversal.md).
+- **Occurrence evidence**: explicit Assembly Group direct-member inventory,
+  member classification, completeness, and raw occurrence evidence. See
+  [contracts/occurrence-evidence.md](contracts/occurrence-evidence.md).
+- **Bounded fact evidence**: explicitly bound native property observation with
+  typed values, explicit unit tokens, and availability. See
+  [contracts/fact-evidence.md](contracts/fact-evidence.md).
+- **Integrity evidence**: pre-mutation baseline and post-persistence
+  configured-result identity against the Engine integrity request. See
+  [contracts/integrity-request.md](contracts/integrity-request.md) and
+  [contracts/integrity-evidence.md](contracts/integrity-evidence.md).
 
 Engine's canonical FreeCAD runtime manifest contract is schema `1.0`, with
 optional `assemblyMutations` and `partMutations` sections for suppression,

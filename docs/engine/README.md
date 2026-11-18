@@ -56,7 +56,9 @@ Current contracts cover [JSON table resources](reference/json-table-resources.md
 Adapter documentation belongs to the Engine adapter domain. See the
 [Adapter Domain](adapters/README.md) for the current Engine-owned boundary
 between planning and CAD-native execution. FreeCAD is the currently implemented
-Engine CAD adapter.
+Engine CAD adapter. The [FreeCAD handoff](adapters/freecad/handoff.md) states the
+remaining native implementation responsibilities for the observation and
+provenance phase.
 
 Centralizing engineering documentation does not transfer implementation
 ownership. Implementation repositories remain authoritative for their source
