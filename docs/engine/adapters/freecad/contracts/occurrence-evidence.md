@@ -72,7 +72,7 @@ handoff; the current FreeCAD runtime does not yet emit this sidecar.
       "elementCount": 0,
       "membershipCorroborated": true,
       "classification": "occurrence | unresolved | unsupported | auxiliary",
-      "resolution": "resolved | unresolved | missing | skipped | failed",
+      "resolution": "resolved | unresolved | unsupported | unavailable",
       "nativeStateValid": true,
       "target": {
         "entity": {"resource": {}, "nativeKind": "object", "name": "...", "semanticId": "..."},
@@ -93,6 +93,14 @@ handoff; the current FreeCAD runtime does not yet emit this sidecar.
 - `members[].target` is required where a native target is resolved and carries
   both explicit logical resource identity and the attempt-relative materialized
   coordinate. Both must join the same declared inventory binding.
+- `resolution` is a closed vocabulary of `resolved`, `unresolved`,
+  `unsupported`, and `unavailable`. It is not the generic reference-traversal
+  resolution vocabulary; native states such as absent, skipped, or failed are
+  not passed through. `classification: "occurrence"` and
+  `classification: "auxiliary"` require `resolution: "resolved"`;
+  `classification: "unresolved"` requires `unresolved` or `unavailable`; and
+  `classification: "unsupported"` requires `unsupported`. Every unresolved or
+  unsupported member carries a diagnostic.
 - `completeness` is independent of resolution states. Complete zero-member scope
   is a valid inspected empty scope; incomplete, unsupported, or unavailable
   scope must not claim quantity.
@@ -118,8 +126,9 @@ The adapter does not write normalized records.
 
 Engine rejects unsupported versions, unknown fields, duplicate JSON keys,
 trailing content, scope mismatch, undeclared document coordinates, missing
-parent evidence, incomplete member coverage, contradictory state, unproven
-mechanisms, and complete-request noncompleteness deterministically. These
+parent evidence, incomplete member coverage, unsupported member resolution
+states, contradictory classification/resolution state, unproven mechanisms,
+and complete-request noncompleteness deterministically. These
 failures carry the occurrence contract classification rather than becoming
 generic runtime failures.
 
