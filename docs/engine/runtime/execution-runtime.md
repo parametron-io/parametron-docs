@@ -51,8 +51,8 @@ Atomic Batch Registration                    Structured Error Reporting
                                 |
                                 v
            Local Record Package Emission (recordemit)
-        successful eligible CAD outcome: artifacts / observation /
-                                      verification / raw evidence
+     successful eligible CAD outcomes: artifacts / observation / reference /
+                 verification / occurrence / fact / integrity / raw evidence
         failed authoritative CAD outcome: native failure when uniquely
                                       correlated, otherwise report fallback
 ```
@@ -243,16 +243,19 @@ These errors are wrapped by `FreeCADRuntimeVerificationError` at
 No intent preserves ordinary behavior and does not load occurrence evidence.
 
 Outcomes retain a copy of the typed request and exact raw bytes with the
-completed inventory/source coordinate. On an overall successful run, exactly
-one terminal correlated, explicitly verified CAD outcome with canonical
-job/product/step linkage may supply occurrence material to record projection.
-Zero eligible outcomes add nothing; multiple eligible outcomes omit CAD
-additions rather than selecting or aggregating them. Optional omitted evidence
-on the selected requested outcome can emit an unavailable summary without a raw
-file. Emission validates again and adds the optional summary to the observation
-family, preserving ordinary facts and separate generic reference evidence.
-Original bytes and their SHA-256 provenance are retained at
-`raw/runtime/prm.occurrence-evidence.json`.
+completed inventory/source coordinate. Every terminal correlated, explicitly
+verified CAD outcome with canonical job/product/step linkage retains its own
+occurrence material in record projection. Zero eligible outcomes add nothing.
+Multiple eligible outcomes each emit an outcome-scoped observation summary;
+quantity remains scoped to each outcome's complete occurrence scope and is never
+aggregated across outcomes. Optional omitted evidence on an eligible requested
+outcome can emit an unavailable summary without a raw file. Emission validates
+again and adds the optional summary to that outcome's observation family,
+preserving ordinary facts and separate generic reference evidence. Original
+bytes and their SHA-256 provenance are retained at
+`raw/runtime/prm.occurrence-evidence.json` for single-outcome packages and under
+`raw/outcomes/<outcomeKey>/runtime/prm.occurrence-evidence.json` for
+multi-outcome packages.
 
 Permanent tests cover API-to-attempt propagation, defensive copying, retries,
 successive executions, canonical intake, outcome retention, and bounded
@@ -533,10 +536,16 @@ record package (`<runRoot>/parametron-record-package/`):
 |---------------|:----------------:|:------------------:|:---------------------:|
 | Execution | Yes | Yes (`recordmap.MapReport`) | Yes |
 | Failure | Yes | Yes (`recordmap.MapReport`, `recordmap.MapCADRuntimeFailure`) | One on failed runs: uniquely correlated runtime-native failure takes precedence; otherwise report-derived fallback |
-| Reference | Yes | Yes (`recordmap.MapReferenceTraversal`) | For accepted traversal evidence from exactly one eligible verified CAD outcome on an overall successful run, including valid zero-edge scope |
+| Reference | Yes | Yes (`recordmap.MapReferenceTraversal`) | For accepted traversal evidence from every eligible verified CAD outcome, including valid zero-edge scope; outcome-scoped when multiple outcomes emit |
 | Artifact | Yes | Yes (`recordmap.MapArtifactStoreRecords`, `recordmap.MapArtifactStoreManifest`) | Yes, one record per applicable artifact |
-| Observation | Yes | Yes (`recordmap.MapObserved`, including target state), plus optional typed occurrence summary | Yes, for typed observed evidence from the uniquely eligible successful CAD outcome |
-| Verification | Yes | Yes (`recordmap.MapVerification`, including target state) | Yes, for the Engine-owned verification result from the uniquely eligible successful CAD outcome |
+| Observation | Yes | Yes (`recordmap.MapObserved`, including target state), plus optional typed occurrence and fact summary | Yes, for typed observed evidence from every eligible verified CAD outcome; outcome-scoped when multiple outcomes emit |
+| Verification | Yes | Yes (`recordmap.MapVerification`, including target state) | Yes, for the Engine-owned verification result from every eligible verified CAD outcome; outcome-scoped when multiple outcomes emit |
+
+The former single-eligible-outcome boundary is removed for these
+engineering-observation families. Record cardinality follows eligible outcomes:
+one outcome keeps the established singular paths, while multiple outcomes emit
+separate outcome-scoped groups. Execution and failure record cardinality are
+unchanged.
 
 Target-state material uses the existing observation and verification families;
 there is no separate target-state record family. FreeCAD supplies raw native
@@ -554,22 +563,28 @@ material. See
 [record contracts — integrity provenance](../reference/record-contracts.md#integrity-provenance).
 
 Applicable successful controlled-runtime proof runs observe normal package
-emission of execution, artifact, observation, and verification records, rather
-than calling record mappers in isolation. They also preserve the raw runtime
-result, verification request, and observed evidence at
-`raw/runtime/prm.result.json`, `raw/verification/prm.verification.json`, and
-`raw/observed/prm.observed.json`. Normalized records are Engine interpretations,
-not mirrors of raw runtime vocabulary.
+emission of execution, artifact, observation, reference, verification,
+occurrence, fact, and integrity records, rather than calling record mappers in
+isolation. They also preserve the raw runtime result, verification request, and
+observed evidence at `raw/runtime/prm.result.json`,
+`raw/verification/prm.verification.json`, and `raw/observed/prm.observed.json`.
+Multi-outcome proof runs preserve the same attempt-scoped evidence under
+`raw/outcomes/<outcomeKey>/` and prove that each eligible product retains its own
+outcome-scoped records. Normalized records are Engine interpretations, not
+mirrors of raw runtime vocabulary.
 
-Traversal candidate selection is bounded: zero eligible verified outcomes add
-nothing; exactly one supplies raw evidence and a normalized reference record;
-more than one omits traversal additions deterministically. Candidates require
-terminal correlated outcomes, an explicit verification pass, traversal bytes,
-and canonical job/product/step linkage. Normal execution does not aggregate all
-CAD outcomes or automatically populate all external target mappings. A valid
+Traversal candidate selection is plural and bounded: zero eligible verified
+outcomes add nothing; each eligible outcome supplies its own raw evidence and
+normalized reference record. Candidates require terminal correlated outcomes,
+an explicit verification pass, traversal bytes, and canonical job/product/step
+linkage. When more than one outcome emits, records use
+`records/outcomes/<outcomeKey>/` and raw traversal bytes use
+`raw/outcomes/<outcomeKey>/runtime/`; no outcome is selected arbitrarily and no
+eligible outcome is silently dropped. Normal execution does not aggregate CAD
+outcomes or automatically populate all external target mappings. A valid
 zero-edge traversal retains source qualification, status, and completeness;
 pure mapper acceptance of failed traversal scope does not enable traversal
-emission from a failed overall Engine run.
+emission for that outcome.
 
 ### Raw Evidence Preservation
 
@@ -580,7 +595,11 @@ The emitted package preserves available evidence, including traversal evidence
 when eligible, at `raw/runtime/prm.reference-traversal.json`, independently
 requested occurrence evidence at `raw/runtime/prm.occurrence-evidence.json`,
 and runtime integrity evidence, when the attempt validated it, verbatim at
-`raw/runtime/prm.integrity-evidence.json`.
+`raw/runtime/prm.integrity-evidence.json`. For multi-outcome packages these
+attempt-scoped files are preserved under `raw/outcomes/<outcomeKey>/` with their
+family-relative paths; run-level report, metadata, and artifact-store evidence
+keep their established canonical paths, and a selected failure keeps canonical
+raw failure paths.
 Each evidence SHA-256 is computed over the original bytes, which are preserved without reserialization.
 Normalized reference relationships retain stable keys and canonical order for
 equivalent supported evidence. The containing reference record retains the
@@ -589,7 +608,10 @@ bytes can change record identity despite identical relationship keys and order.
 Generic observed-reference endpoint paths and runtime-reported working-copy
 digests remain in the normalized payload and raw evidence but do not participate
 in reference identity; native traversal identity keeps its accepted
-contract-relative fallback coordinates.
+contract-relative fallback coordinates. Multiple eligible outcomes keep distinct
+reference records and raw traversal files; equivalent relationships are not
+merged across outcomes merely because their coordinates are equal. Successful
+outcomes remain eligible observation evidence even when the overall run fails.
 For a failed run, exact native result bytes are preserved when a valid uniquely
 correlated runtime-native failure is selected. If native evidence is absent,
 invalid, ambiguous, or does not correlate with the authoritative terminal

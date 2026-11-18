@@ -74,6 +74,11 @@ parametron-record-package/
     prm.reference-record.json
     prm.failure-record.json
     prm.verification-record.json
+    outcomes/
+      <outcomeKey>/
+        prm.observation-record.json
+        prm.reference-record.json
+        prm.verification-record.json
   artifacts/files/
   raw/
     prm.report.json
@@ -87,24 +92,41 @@ parametron-record-package/
     runtime/prm.occurrence-evidence.json
     runtime/prm.integrity-evidence.json
     fact/prm.fact-evidence.json
+    outcomes/
+      <outcomeKey>/
+        observed/prm.observed.json
+        verification/prm.verification.json
+        runtime/prm.result.json
+        runtime/prm.reference-traversal.json
+        runtime/prm.occurrence-evidence.json
+        runtime/prm.integrity-evidence.json
+        fact/prm.fact-evidence.json
 ```
 
 This is the allowed layout, not a promise that every listed file exists per run.
-The artifact family is the bounded exception to the otherwise-singular family
-model: a package may contain zero, one, or multiple artifact records, with one
-record per artifact. The identity-addressed path applies even when exactly one
-artifact record exists. Execution, observation, reference, failure, and
-verification remain singular. Duplicate artifact identities or resolved paths
-fail rather than overwriting or collapsing records. `PackageInput` requires
-`PackageRoot`, `PackageKey`, and one or more validated records; artifact and raw
-evidence files are optional. By default it writes directly to the resolved root;
+Artifact records are plural: a package may contain zero, one, or multiple
+artifact records, with one identity-addressed record per artifact even when only
+one exists. Engineering-observation families are outcome-scoped when a run has
+more than one eligible verified CAD outcome: observation, reference, and
+verification records are written under
+`records/outcomes/<outcomeKey>/<family file>`, and their attempt-scoped raw
+evidence is written under `raw/outcomes/<outcomeKey>/<family-relative path>`.
+A single eligible outcome keeps the established singular record and raw-evidence
+paths. Execution and failure records remain singular. Duplicate artifact
+identities, duplicate family/outcome scopes, or resolved paths fail rather than
+overwriting or collapsing records. `PackageInput` requires `PackageRoot`,
+`PackageKey`, and one or more validated records; artifact and raw evidence files
+are optional. By default it writes directly to the resolved root;
 `UseCanonicalDirectoryName` selects the canonical child directory.
 
 `prm.record-package.json` indexes records, artifacts and raw evidence and
 includes `schemaVersion`, `packageKey`, `layoutVersion`, and ownership metadata.
-Records follow registry family order. Artifact record entries sort by normalized
-record identity; packaged artifact payloads sort by contract path, and raw
-evidence follows layout order. Safe `raw/handoff/...` files sort lexically at the
+Records follow registry family order. Within a family, outcome-scoped entries
+sort by normalized outcome key and then canonical record path; singleton entries
+keep their established path order. Artifact record entries sort by normalized
+record identity; packaged artifact payloads sort by contract path. Raw evidence
+follows layout order, with canonical attempt-scoped paths before deterministically
+ordered outcome-scoped paths. Safe `raw/handoff/...` files sort lexically at the
 handoff layout slot. Writer-owned JSON uses two-space indentation and a trailing
 newline. Input payload buffers are copied.
 
@@ -117,8 +139,10 @@ Sentinels include `ErrInvalidPackageInput`, `ErrInvalidRecord`,
 
 `Entries`, `RecordEntries`, `RawEvidenceEntries`, `ValidateContractPath`,
 `JoinContractPath`, and the write-free `Layout` resolver define paths without
-performing record mapping. `EntryForContractPath` classifies static layout entries.
-`IsNormalizedRecordContractPath` recognizes only registered record paths.
+performing record mapping. `EntryForContractPath` classifies static layout
+entries and dynamic identity- or outcome-addressed record/raw paths.
+`IsNormalizedRecordContractPath` recognizes registered singleton paths and
+outcome-scoped record paths.
 
 Raw CAD evidence uses an explicit allowlist:
 `raw/runtime/prm.result.json`, `raw/verification/prm.verification.json`,
@@ -126,10 +150,16 @@ Raw CAD evidence uses an explicit allowlist:
 `raw/runtime/prm.reference-traversal.json`, optional
 `raw/runtime/prm.occurrence-evidence.json`, optional
 `raw/runtime/prm.integrity-evidence.json`, and optional
-`raw/fact/prm.fact-evidence.json`. Raw fact evidence is accepted only through
-this explicit allowlist entry; the corresponding `prm.fact-request.json`
-sidecar is runtime-local attempt material and is not packaged. Arbitrary
-descendants under `raw/runtime/` are not accepted automatically. Safe
+`raw/fact/prm.fact-evidence.json`. Each attempt-scoped entry also accepts its
+safe outcome-scoped form under `raw/outcomes/<outcomeKey>/`, preserving the
+family-relative path (for example
+`raw/outcomes/<outcomeKey>/runtime/prm.result.json`). The outcome key must be a
+single safe path segment; escaping, empty, or multi-segment keys are rejected.
+Run-level report, metadata, artifact-store manifest, and handoff evidence do not
+have outcome-scoped forms. Raw fact evidence is accepted only through this
+explicit allowlist entry; the corresponding `prm.fact-request.json` sidecar is
+runtime-local attempt material and is not packaged. Arbitrary descendants under
+`raw/runtime/` are not accepted automatically. Safe
 descendants of `raw/handoff/` are dynamic handoff evidence files, not
 normalized records or raw runtime-result evidence. `raw/handoff` itself is a directory, not an evidence file. Unsafe and
 noncanonical paths are rejected.
@@ -213,11 +243,15 @@ artifact inventory use their run-level sources. CAD result, verification-request
 and observed evidence comes from authoritative paths retained from actual CAD
 attempts rather than guessed run-root locations.
 
-For successful result, verification-request, and observed projection, the
-overall execution must succeed and exactly one CAD outcome must have completed
-without a job error and passed Engine verification. Zero eligible outcomes omit
-the projection; multiple eligible outcomes also omit it rather than selecting an
-attempt arbitrarily. Exact `prm.result.json`, `prm.verification.json`, and
+For successful result, verification-request, and observed projection, every
+terminal CAD outcome that completed without a job error and passed Engine
+verification is eligible. Zero eligible outcomes omit the projection. Multiple
+eligible outcomes each retain their own outcome-scoped observation,
+verification, reference, occurrence, fact, integrity, and raw evidence; no
+attempt is selected arbitrarily and no eligible outcome is silently dropped.
+Successful outcomes remain eligible observation evidence even when another
+product makes the overall run fail; failure-record selection and projection are
+unchanged. Exact `prm.result.json`, `prm.verification.json`, and
 `prm.observed.json` bytes are preserved where available. Typed observed evidence
 is supplied to `MapObserved`, while the Engine-owned in-memory verification
 result is supplied to `MapVerification`; raw bytes are provenance material, not
@@ -366,6 +400,13 @@ relationship keys and order are identical. Determinism is relative to the actual
 accepted identity material; this is not a promise of identical record bytes
 across different raw evidence or provenance.
 
+With multiple eligible verified CAD outcomes, each outcome emits its own
+reference record under `records/outcomes/<outcomeKey>/` and its own exact raw
+traversal bytes under `raw/outcomes/<outcomeKey>/runtime/`. Reference records
+from distinct outcomes are never merged merely because their resource or native
+coordinates are equal; the outcome record key, linkage, and evidence provenance
+keep them distinct. Zero eligible outcomes add no reference material.
+
 ### Resolution, traversal scope, and empty records
 
 Native endpoint and relationship resolution preserves all five states:
@@ -419,29 +460,32 @@ Mapper linkage and provenance linkage reconcile independently for `JobID`,
 `ProductKey`, and `StepRef`, after trimming: empty plus a value adopts that value,
 equal values converge, and conflicting non-empty values fail. The resolved
 linkage populates both edge and provenance linkage. Canonical evidence is
-`kind = reference-traversal`, `ref = raw/runtime/prm.reference-traversal.json`.
-Caller and provenance digests reconcile the same way; duplicate canonical evidence
-collapses to one entry and unrelated provenance is preserved. Context validation
-also applies to zero-edge records.
+`kind = reference-traversal` with `ref = raw/runtime/prm.reference-traversal.json`
+or its safe outcome-scoped form. Caller and provenance digests reconcile the same
+way; duplicate canonical evidence collapses to one entry and unrelated
+provenance is preserved. Context validation also applies to zero-edge records.
 
-For normal-run emission, only an overall successful run is eligible. Each candidate
-must be a terminal correlated CAD outcome with an explicit verification pass,
-traversal bytes, and canonical Engine job/product/step linkage:
+For normal-run emission, every terminal correlated CAD outcome with an explicit
+verification pass, traversal bytes, and canonical Engine job/product/step
+linkage is eligible, regardless of whether another product makes the overall run
+fail:
 
 | Eligible verified CAD outcomes | Traversal additions |
 | --- | --- |
 | Zero | None |
-| Exactly one | Accepted exact raw traversal evidence and normalized reference record, including zero-edge scope |
-| More than one | Omitted deterministically |
+| One | Accepted exact raw traversal evidence and normalized reference record at established singular paths, including zero-edge scope |
+| More than one | One exact raw traversal evidence file and normalized reference record per outcome under `raw/outcomes/<outcomeKey>/` and `records/outcomes/<outcomeKey>/`, including zero-edge scope |
 
-The selected outcome supplies its completed inventory and prepared source-document
-coordinate for Engine-owned correlation and qualification. `recordemit` strictly
-decodes JSON, rejecting unknown fields and trailing values; computes SHA-256 over
-exact bytes; supplies `engine-run:<planHash>:reference` and metadata-derived
-provenance; and calls the mapper. The writer emits the registry-backed reference
-file and separately indexes the unchanged raw bytes. Invalid JSON, mapping,
-linkage, provenance, or evidence fails package emission closed. No first/last
-candidate selection, concatenated JSON, or general multi-outcome aggregation occurs.
+Each eligible outcome supplies its completed inventory and prepared
+source-document coordinate for Engine-owned correlation and qualification.
+`recordemit` strictly decodes JSON, rejecting unknown fields and trailing values;
+computes SHA-256 over exact bytes; supplies the established reference record key
+(singular or outcome-scoped) and metadata-derived provenance; and calls the
+mapper. The writer emits the registry-backed reference file and separately
+indexes the unchanged raw bytes. Invalid JSON, mapping, linkage, provenance, or
+evidence fails package emission closed. No first/last candidate selection or
+concatenated JSON occurs, and equivalent relationships are not aggregated across
+outcomes.
 
 Normal-planner production coverage remains internal/component references;
 accepting supplied external target evidence does not establish automatic
@@ -599,16 +643,20 @@ The optional typed summary is `ObservationRecord.observation.occurrences`,
 containing `schemaVersion`, `scope`, `completeness`, `occurrences` (`member`,
 `target`), `quantities` (`target`, `quantity`), and `evidence`. It extends the
 existing observation family while preserving ordinary facts and independent
-reference records; there is no seventh record family. Runtime projection uses
-exactly one eligible verified CAD outcome on an overall successful run. Zero
-eligible outcomes produce no occurrence material; multiple eligible outcomes
-omit additions rather than choosing or merging. See
+reference records; there is no seventh record family. Every eligible verified
+CAD outcome retains its own occurrence summary and quantity, scoped to that
+outcome's complete occurrence scope. Zero eligible outcomes produce no
+occurrence material. Quantity is never aggregated across independent CAD
+outcomes, and incomplete occurrence state in one outcome does not affect
+another. See
 [execution runtime](../runtime/execution-runtime.md#execution-scoped-occurrence-intent).
 
 Original evidence bytes are retained exactly at
-`raw/runtime/prm.occurrence-evidence.json`, classified as raw runtime evidence.
-SHA-256 of those original bytes supplies summary evidence and record provenance
-with kind `occurrence-evidence`. Conflicting linkage/digests fail emission.
+`raw/runtime/prm.occurrence-evidence.json` for single-outcome packages and under
+`raw/outcomes/<outcomeKey>/runtime/prm.occurrence-evidence.json` for
+multi-outcome packages, classified as raw runtime evidence. SHA-256 of those
+original bytes supplies summary evidence and record provenance with kind
+`occurrence-evidence`. Conflicting linkage/digests fail emission.
 Equivalent accepted semantics preserve occurrence keys, ordering, and rollup;
 different raw bytes can change evidence digest and containing observation record
 identity. Shared `DeriveIdentity` is unchanged. Stable semantic identity does not
@@ -619,7 +667,7 @@ resource joins, identity/context bounds, verified auxiliary exclusion, scope
 availability, quantity, duplicates/conflicts, and semantic ordering. Executor
 tests cover request copies, retries, successive execution isolation, and outcome
 retention. Emission/projection tests cover exact bytes/digests, independent generic
-references, and eligible-outcome cardinality. The continuous controlled proof
+references, and plural eligible-outcome emission. The continuous controlled proof
 calls `ExecutePackageWithOptions` through materialization, runtime invocation,
 intake, verification, retention, projection, and package emission; it does not
 prove native FreeCAD occurrence production. The committed Engine
@@ -634,7 +682,7 @@ emission, public CLI/DSL/HTTP occurrence authoring, CAD BOM quantity authority,
 BOM serialization, physical mass, density/material inference, material catalogs
 or an Engine material database, universal unit frameworks and unit conversion
 algebra, arbitrary or universal native property observation, FreeCAD-native
-fact production, PDM persistence, and general multi-outcome aggregation.
+fact production, PDM persistence, and cross-outcome quantity aggregation.
 Separately supported mutations and generic traversal retain their own contracts.
 
 ## Bounded engineering fact observation
@@ -732,7 +780,7 @@ conflict handling are decided before record construction. Normalized
 engineering facts extend the existing observation record family as
 `fact`-kind entries inside `observation.facts[]`, keyed by the fact kind; no
 separate record family exists and no new family is registered. Fact emission
-merges into the single observation record, preserving ordinary observation
+merges into that outcome's observation record, preserving ordinary observation
 facts and the occurrence summary. Normalized fact ordering follows the
 requested bindings; raw evidence ordering does not influence acceptance or
 output, and relocation does not change normalized fact identity.
@@ -740,14 +788,15 @@ output, and relocation does not change normalized fact identity.
 Every fact carries shared provenance covering the observed resource and entity,
 the explicitly bound native property, the fact kind, and the exact raw
 evidence bytes: source kind `fact-evidence`, source reference
-`raw/fact/prm.fact-evidence.json`, and the SHA-256 digest of the exact
-evidence bytes. Raw fact evidence is preserved at
-`raw/fact/prm.fact-evidence.json`, classified as raw runtime evidence; the
-request sidecar is not packaged. The existing exactly-one-eligible-verified
-CAD-outcome projection boundary applies on an overall successful run: zero
-eligible outcomes emit no fact material, and multiple eligible outcomes omit
-fact additions rather than selecting or aggregating them. There is no general
-multi-outcome aggregation, and intake failures surface at the
+`raw/fact/prm.fact-evidence.json` or its
+`raw/outcomes/<outcomeKey>/fact/prm.fact-evidence.json` form, and the SHA-256
+digest of the exact evidence bytes. Raw fact evidence is preserved at the
+corresponding path, classified as raw runtime evidence; the request sidecar is
+not packaged. Every eligible verified CAD outcome retains its own fact material:
+equal fact subjects with different observed values remain distinct
+outcome-scoped observations, and unavailable or unsupported state remains
+outcome-specific. Zero eligible outcomes emit no fact material. Facts are never
+merged or aggregated across CAD outcomes, and intake failures surface at the
 `outcome_validation` consumption stage.
 
 Permanent Engine contract/runtime tests cover finite typed values and numeric
@@ -815,9 +864,15 @@ Engine-owned resource integrity violations carry failure class/stage
 lock, materialization, runtime-baseline, and result-content failures
 distinguishable; non-integrity failures keep their existing classes.
 Configured-result digests never update the source lock and never replace
-source identity. Runtime integrity evidence is preserved verbatim at
-`raw/runtime/prm.integrity-evidence.json` with SHA-256 provenance over the
-exact original bytes. The enforced pipeline is documented in
+source identity. In multi-outcome packages the run-level execution record keeps
+source/lock identity only, while each outcome's engineering-observation records
+retain that outcome's full configured-result chain; separate outcomes may share
+source identity while carrying different persisted-result digests. Runtime
+integrity evidence is preserved verbatim at
+`raw/runtime/prm.integrity-evidence.json` for single-outcome packages and under
+`raw/outcomes/<outcomeKey>/runtime/prm.integrity-evidence.json` for
+multi-outcome packages, with SHA-256 provenance over the exact original bytes.
+The enforced pipeline is documented in
 [execution runtime](../runtime/execution-runtime.md#source-lock-and-configured-result-provenance);
 the runtime-facing contract surfaces are owned by the
 [integrity request](../adapters/freecad/contracts/integrity-request.md) and
