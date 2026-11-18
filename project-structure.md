@@ -18,10 +18,15 @@ This is a structural index. For conceptual guidance and reading order, see
 | [docs/engine/adapters/README.md](docs/engine/adapters/README.md) | Current Engine adapter-domain contracts and ownership |
 | [docs/engine/adapters/freecad/architecture.md](docs/engine/adapters/freecad/architecture.md) | FreeCAD adapter architecture, ownership boundary, and capability areas |
 | [docs/engine/adapters/freecad/runtime.md](docs/engine/adapters/freecad/runtime.md) | FreeCAD headless runtime invocation and execution lifecycle |
+| [docs/engine/adapters/freecad/handoff.md](docs/engine/adapters/freecad/handoff.md) | Engine observation/provenance handoff and required FreeCAD native responsibilities |
 | [docs/engine/adapters/freecad/contracts/artifacts.md](docs/engine/adapters/freecad/contracts/artifacts.md) | FreeCAD STEP/CSV/PDF artifact export contract |
 | [docs/engine/adapters/freecad/contracts/engine-invocation.md](docs/engine/adapters/freecad/contracts/engine-invocation.md) | FreeCAD in-process Engine invocation contract |
+| [docs/engine/adapters/freecad/contracts/fact-evidence.md](docs/engine/adapters/freecad/contracts/fact-evidence.md) | FreeCAD bounded engineering-fact request/evidence contract |
+| [docs/engine/adapters/freecad/contracts/integrity-request.md](docs/engine/adapters/freecad/contracts/integrity-request.md) | FreeCAD per-resource baseline/configured-result integrity request |
+| [docs/engine/adapters/freecad/contracts/integrity-evidence.md](docs/engine/adapters/freecad/contracts/integrity-evidence.md) | FreeCAD per-resource baseline/configured-result integrity evidence |
 | [docs/engine/adapters/freecad/contracts/manifest.md](docs/engine/adapters/freecad/contracts/manifest.md) | FreeCAD manifest transport and schema contract |
 | [docs/engine/adapters/freecad/contracts/observation.md](docs/engine/adapters/freecad/contracts/observation.md) | FreeCAD observation request/response contract |
+| [docs/engine/adapters/freecad/contracts/occurrence-evidence.md](docs/engine/adapters/freecad/contracts/occurrence-evidence.md) | FreeCAD explicit occurrence request/evidence contract |
 | [docs/engine/adapters/freecad/contracts/reference-traversal.md](docs/engine/adapters/freecad/contracts/reference-traversal.md) | FreeCAD reference-traversal request/output contract |
 | [docs/engine/adapters/freecad/contracts/result-and-failure.md](docs/engine/adapters/freecad/contracts/result-and-failure.md) | FreeCAD result, failure, and trace contracts |
 | [docs/engine/adapters/freecad/contracts/target-mutations.md](docs/engine/adapters/freecad/contracts/target-mutations.md) | FreeCAD target-mutation transport/native-capability boundary |
@@ -81,12 +86,17 @@ This is a structural index. For conceptual guidance and reading order, see
 │       │   │   ├── contracts
 │       │   │   │   ├── artifacts.md
 │       │   │   │   ├── engine-invocation.md
+│       │   │   │   ├── fact-evidence.md
+│       │   │   │   ├── integrity-evidence.md
+│       │   │   │   ├── integrity-request.md
 │       │   │   │   ├── manifest.md
 │       │   │   │   ├── observation.md
+│       │   │   │   ├── occurrence-evidence.md
 │       │   │   │   ├── reference-traversal.md
 │       │   │   │   ├── result-and-failure.md
 │       │   │   │   └── target-mutations.md
 │       │   │   ├── architecture.md
+│       │   │   ├── handoff.md
 │       │   │   └── runtime.md
 │       │   └── README.md
 │       ├── architecture

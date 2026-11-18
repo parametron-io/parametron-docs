@@ -149,6 +149,26 @@ Ownership:
 - A standalone `observe` command is not supported and is rejected as an
   unknown command.
 
+### Observation and provenance sidecars (handoff)
+
+The following FreeCAD phase additionally consumes Engine-authored sidecars in
+the prepared working copy and writes evidence under `--output-dir`; no new
+command-line argument is introduced:
+
+- `prm.occurrence-request.json` -> optional `prm.occurrence-evidence.json`;
+- `prm.fact-request.json` -> optional `prm.fact-evidence.json`;
+- the Engine integrity request transported through
+  `PARAMETRON_RUNTIME_INTEGRITY_REQUEST` -> optional
+  `prm.integrity-evidence.json`.
+
+These surfaces are not yet emitted by the current FreeCAD runtime. Their
+required native behavior, timing, raw evidence paths, and ownership boundary are
+defined by the [FreeCAD handoff](handoff.md), the
+[occurrence evidence contract](contracts/occurrence-evidence.md), the
+[fact evidence contract](contracts/fact-evidence.md), and the
+[integrity request](contracts/integrity-request.md) /
+[integrity evidence](contracts/integrity-evidence.md) contracts.
+
 ## Execution lifecycle
 
 For one `execute` call, in order:
