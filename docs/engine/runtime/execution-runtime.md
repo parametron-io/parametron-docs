@@ -586,6 +586,10 @@ Normalized reference relationships retain stable keys and canonical order for
 equivalent supported evidence. The containing reference record retains the
 existing evidence-sensitive identity derivation: different exact raw evidence
 bytes can change record identity despite identical relationship keys and order.
+Generic observed-reference endpoint paths and runtime-reported working-copy
+digests remain in the normalized payload and raw evidence but do not participate
+in reference identity; native traversal identity keeps its accepted
+contract-relative fallback coordinates.
 For a failed run, exact native result bytes are preserved when a valid uniquely
 correlated runtime-native failure is selected. If native evidence is absent,
 invalid, ambiguous, or does not correlate with the authoritative terminal

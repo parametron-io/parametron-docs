@@ -345,17 +345,26 @@ an arbitrary value. Raw node state, object type, labels, and diagnostic material
 remain relevant to evidence comparison before projection; contradictory native
 node evidence or reused lookup IDs also fail. The record validator rejects
 remaining duplicate relationship keys. Legacy generic reference records retain
-their existing identity, ordering, and duplicate rules; they do not all require
-native resource fields or traversal scope.
+their existing ordering and duplicate rules; they do not all require native
+resource fields or traversal scope. Their endpoint operational paths and
+runtime-reported working-copy digests remain in the normalized payload and raw
+evidence but do not participate in record identity. Endpoint qualification is
+unchanged: the generic mapper does not invent resource identity where none is
+declared.
 
 `ReferenceRecord.Identity` serves a different purpose from the relationship key.
 It retains the existing evidence-sensitive derivation through the unchanged
 shared `DeriveIdentity` algorithm: caller record key, normalized reference
-payload, provenance, linkage, and supplied evidence digest participate. Different
-exact raw evidence bytes can therefore change record identity even when
-normalized relationship keys and order are identical. Determinism is relative
-to the actual accepted identity material; this is not a promise of identical
-record bytes across different raw evidence or provenance.
+payload, provenance, linkage, and supplied evidence digest participate. Generic
+endpoint paths and runtime-reported endpoint digests are excluded from that
+identity material, so relocating a working copy or re-reporting its digest does
+not change reference-record identity when the remaining reference material is
+equal. Accepted contract-relative native traversal coordinates remain identity
+material, and the native traversal record path is unchanged. Different exact
+raw evidence bytes can still change record identity even when normalized
+relationship keys and order are identical. Determinism is relative to the actual
+accepted identity material; this is not a promise of identical record bytes
+across different raw evidence or provenance.
 
 ### Resolution, traversal scope, and empty records
 
