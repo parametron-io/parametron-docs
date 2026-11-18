@@ -90,4 +90,5 @@ post-persistence hashing, and raw diagnostics. Engine owns joining reports to
 declared resource identity, strict validation, independent persisted-result
 validation, deterministic failure classification, normalized provenance, and
 byte-preserving raw evidence storage at
-`raw/runtime/prm.integrity-evidence.json`.
+`raw/runtime/prm.integrity-evidence.json` or its safe outcome-scoped form under
+`raw/outcomes/<outcomeKey>/runtime/` for multi-outcome packages.
