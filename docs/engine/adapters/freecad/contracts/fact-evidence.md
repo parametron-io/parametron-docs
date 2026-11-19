@@ -1,9 +1,9 @@
 # Fact Evidence Contract
 
 This contract defines the Engine-owned bounded engineering-fact request and raw
-fact evidence consumed by Engine normalization. It is part of the FreeCAD
-observation handoff; the current FreeCAD runtime does not yet emit this
-sidecar.
+fact evidence consumed by Engine normalization. `parametron-freecad` implements
+the producer described below; Engine remains the owner of the contract and of
+all normalized fact semantics.
 
 ## Transport
 
@@ -97,6 +97,78 @@ sidecar.
   coordinate and must join the same resource identity as `subject.entity`.
 - Equivalent duplicate evidence canonicalizes; conflicting evidence for one
   binding fails deterministically.
+
+## FreeCAD runtime support
+
+The runtime consumes the request and emits the evidence without a new CLI
+argument:
+
+- `prm.fact-request.json` is discovered only at the working-copy root as a
+  plain, non-symlink regular file and is strictly decoded before the document
+  is opened. The request is bounded to 32 bindings, property names up to 128
+  characters, and unit tokens up to 32 characters.
+- `prm.fact-evidence.json` is written atomically under the validated
+  `--output-dir`, which is required and must resolve inside the working copy.
+  A stale sidecar for an enabled fact request is removed before request
+  loading.
+- Observation runs on the same open document that was mutated, recomputed, and
+  persisted, after optional observation and before document close. Emission
+  failures use runtime failure stage `fact_evidence`; request-discovery and
+  decoding failures use `fact_request` and occur before document open. A
+  `required` binding that is not observed fails deterministically at
+  `fact_evidence`.
+
+Evidence is canonical schema `1.0`. Entries are ordered deterministically by
+binding identity, so equivalent requests produce byte-identical evidence
+regardless of request ordering.
+
+### Subject and document access
+
+The subject resource is joined to the attempt's integrity inventory by declared
+`logicalId` and `kind`. With no integrity request, or when the subject resource
+is not declared, every binding is reported as `unavailable` with an explicit
+diagnostic; the runtime does not guess a resource.
+
+A subject in the selected source document is read from the already-open
+document. A subject in another declared resource is read from that resource's
+declared materialized coordinate: the runtime opens that document read-only,
+verifies that its native `FileName` resolves to exactly the declared path, and
+closes it before the selected source document closes. It never mutates, saves,
+rebinds, or recursively discovers another document.
+
+### Typed values and explicit units
+
+The runtime observes exactly the named native property; it does not enumerate
+properties or infer a property from names.
+
+| Requested `valueKind` | Accepted native value | Observed material |
+| --- | --- | --- |
+| `boolean` | Native boolean | Boolean, no unit |
+| `string` | Native canonical UTF-8 string | String, no unit |
+| `number` | Finite native number or unit-bearing quantity | Numeric value plus the matching explicit unit token, if declared |
+| `integer` | Finite native number with no fractional part | Integer value plus the matching explicit unit token, if declared |
+
+Unit handling is deliberately opaque and exact:
+
+- a FreeCAD quantity's `Unit` is read as the bounded token in its `Unit: <token>`
+  textual form;
+- a declared request unit must equal the native unit token exactly, otherwise the
+  fact is `unsupported`;
+- a declared request unit combined with a unitless native value is `unsupported`;
+- a unitless request combined with a unit-bearing native value is `unsupported`;
+- no conversion, normalization, or unit algebra is performed.
+
+Non-finite numeric values, boolean native values requested as numeric facts,
+non-exact integers, non-canonical strings, and unsupported native shapes are
+reported as `unsupported` rather than being coerced. A missing property, a
+missing value, or a missing subject object is `unavailable`. Unobserved entries
+never carry `value` or `valueKind` material and never become zero, empty, or
+false.
+
+The runtime implements no material database, material inference, density, or
+physical mass. It never derives mass from geometry, density, or material
+metadata. If Engine binds an existing native property that happens to represent
+mass, the emitted fact is raw native property evidence only.
 
 ## Engine-derived facts and boundaries
 

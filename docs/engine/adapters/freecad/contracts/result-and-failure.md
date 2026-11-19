@@ -44,11 +44,13 @@ when a safe result path is available.
 
 Execution failure-stage attribution includes `freecad_resolution`,
 `manifest_loading`, `manifest_validation`, `source_document_resolution`,
-`document_open`, `document_close`, `parameter_assignment`, `suppression`,
-`visibility`, `deletion`, `post_mutation_validity`, `recompute`,
-`document_save`, `artifact_export`, `observation`,
-`reference_traversal_request_validation`, `reference_traversal`,
-`reference_traversal_output_containment`,
+`resource_inventory`, `integrity_baseline`, `integrity_result`,
+`integrity_evidence`, `occurrence_request`, `occurrence_evidence`,
+`fact_request`, `fact_evidence`, `document_open`, `document_close`,
+`parameter_assignment`, `suppression`, `visibility`, `deletion`,
+`post_mutation_validity`, `recompute`, `document_save`, `artifact_export`,
+`observation`, `reference_traversal_request_validation`,
+`reference_traversal`, `reference_traversal_output_containment`,
 `reference_traversal_output_write`, `result_write`, and `unknown`. The shared
 failure contract also defines stages for argument validation, manifest
 compatibility, and observation output. A stage may be `null` where the contract
