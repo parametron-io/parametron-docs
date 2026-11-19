@@ -10,7 +10,9 @@ contract answers each adapter implementation question.
 The Engine-owned contracts for declared resources, generic references,
 explicit occurrences and quantity, bounded engineering facts, source lock and
 configured-result provenance, and outcome-scoped package emission are complete.
-The following FreeCAD capabilities remain to be implemented by that repository:
+The bounded FreeCAD capabilities they authorize are implemented in
+`parametron-freecad` and covered by permanent focused, fake-FreeCAD, and
+real-FreeCAD evidence:
 
 - occurrence evidence for the supported direct-member mechanism;
 - bounded engineering fact evidence;
@@ -18,9 +20,12 @@ The following FreeCAD capabilities remain to be implemented by that repository:
   the Engine integrity request.
 
 Generic reference traversal, observation, target mutations, artifacts, and
-runtime result/failure already have implemented FreeCAD contracts under
-[contracts/](contracts/). The new capabilities consume the same working-copy and
-raw-evidence boundary.
+runtime result/failure keep their implemented FreeCAD contracts under
+[contracts/](contracts/). The engineering-evidence surfaces consume the same
+working-copy and raw-evidence boundary, introduce no command-line argument, and
+do not create a second execution lifecycle. Their implemented transport and
+timing are described by [runtime.md](runtime.md) and the contract documents
+below.
 
 ## Adapter readiness questions
 
@@ -43,7 +48,7 @@ raw-evidence boundary.
 
 ## Required FreeCAD responsibilities
 
-The FreeCAD phase implements bounded native work only:
+The FreeCAD runtime implements bounded native work only:
 
 1. **Declared resource access.** Use only Engine-provided attempt-relative
    coordinates. Report missing, unavailable, unsupported, or undeclared native
@@ -89,15 +94,41 @@ The FreeCAD phase must not:
 | Capability | Engine input | FreeCAD output | Timing |
 | --- | --- | --- | --- |
 | Generic references | `prm.reference-traversal-request.json` | `prm.reference-traversal.json` | After mutation/recompute/persistence, before close |
-| Occurrences | `prm.occurrence-request.json` in the working copy | `prm.occurrence-evidence.json` under `--output-dir` | On the same open, mutated, recomputed, persisted document |
-| Facts | `prm.fact-request.json` in the working copy | `prm.fact-evidence.json` under `--output-dir` | On the same open, mutated, recomputed, persisted document |
-| Integrity baseline | `PARAMETRON_RUNTIME_INTEGRITY_REQUEST` request document | `prm.integrity-evidence.json` under `--output-dir` | Hash baseline before native mutation |
-| Configured result | Persisted native document | `persistedResult` in the integrity evidence | Hash after persistence |
+| Occurrences | `prm.occurrence-request.json` at the working-copy root | `prm.occurrence-evidence.json` under `--output-dir` | On the same open, mutated, recomputed, persisted document, after observation and before close |
+| Facts | `prm.fact-request.json` at the working-copy root | `prm.fact-evidence.json` under `--output-dir` | On the same open, mutated, recomputed, persisted document, after observation and before close |
+| Integrity baseline | `PARAMETRON_RUNTIME_INTEGRITY_REQUEST` request document | `prm.integrity-evidence.json` under `--output-dir` | Hash every declared baseline before document open and before native mutation |
+| Configured result | Persisted native document | `persistedResult` in the integrity evidence | Hash the post-save bytes immediately after persistence, before exports and observation |
 
 All attempt-scoped paths are contained by the supplied `--working-copy` root or
 the validated output directory. Host absolute paths and raw lookup identifiers
 are not normalized identity material. Engine preserves returned raw bytes
 verbatim and keeps them separate from normalized records.
+
+## Current limitations
+
+The implemented FreeCAD surfaces are deliberately bounded:
+
+- The supported occurrence scope is the direct
+  `Assembly::AssemblyObject.Group` member mechanism
+  (`freecad-1.1.4-assembly-group-individual-link`).
+- Nested assemblies, `Assembly::AssemblyLink`, `LinkArray`/`ElementCount`
+  arrays, and non-empty `Assembly::JointGroup` are unsupported or incomplete.
+- Non-empty occurrence context is unsupported in this phase; the runtime reports
+  an unsupported scope instead of expanding it.
+- Generic references are not occurrences and do not imply quantity.
+- Facts are bounded to `bound_property`; there is no material database, unit
+  algebra, or physical mass.
+- Unit tokens are opaque; no conversion is performed.
+- The baseline digest is the pre-mutation materialized input identity; the
+  persisted-result digest is the post-save configured output identity.
+- A baseline mismatch fails before mutation.
+- No resource manifest is passed to the adapter; declared coordinates come from
+  the integrity request channel.
+- FreeCAD never reads, enforces, or rewrites `prm.project-lock.json`.
+- In-process `run_engine_invocation` behavior is unchanged: it does not read the
+  environment integrity channel and provides no evidence output directory. The
+  external `execute` entry point is the supported engineering-evidence
+  transport.
 
 ## Out of scope
 

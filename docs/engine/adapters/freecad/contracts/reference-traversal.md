@@ -81,6 +81,18 @@ No string/path heuristic is a supported mechanism.
   evidence. Non-allowlisted properties are ignored before their value is even
   read.
 
+### External binding verification
+
+The mapping-driven contract above is the only source of external identity for
+traversal. The runtime never verifies a stored target by inspecting native
+absolute paths and never rewrites a native link to match a mapping. The
+engineering-evidence surfaces use a separate declared-inventory binding rule: an
+occurrence target or fact subject document joins only when its absolute native
+`FileName` resolves to exactly one declared materialized coordinate and that
+file exists as a regular file. Successful binding qualifies raw evidence; it
+does not mint logical identity, and it does not extend traversal into external
+documents.
+
 Recursive traversal into mapped external documents is **not implemented**.
 The raw canonical evidence distinguishes same-source/same-target/same-kind
 observations with different `sourceProperty` or `referenceMechanism`. Engine's

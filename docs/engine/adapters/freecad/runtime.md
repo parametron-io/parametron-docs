@@ -23,13 +23,17 @@ state after deletion receives its required final pass, while a final deletion
 does not receive a redundant pass. See [Target
 Mutations](contracts/target-mutations.md) for the detailed composition.
 
-After successful mutation processing and applicable recompute/validity, the
-runtime saves the native working document, runs declared exports, optional
-reference traversal, and optional observation on the same live document, then
-closes it before writing the success result. Observation emits raw live
-post-mutation target state when requested; Engine alone compares that evidence
-with expected state and normalizes records. See [Observation
-Contract](contracts/observation.md) for request and evidence shapes.
+Before opening the document, the runtime can hash Engine-declared baseline
+resources and consume occurrence and fact request sidecars. After successful
+mutation processing and applicable recompute/validity, it saves the native
+working document, hashes the persisted configured-result bytes when integrity
+is enabled, runs declared exports, optional reference traversal, optional
+observation, and optional occurrence and bounded fact inspection on the same
+live document, then closes it, writes integrity evidence, and writes the success
+result. Observation emits raw live post-mutation target state when requested;
+Engine alone compares that evidence with expected state and normalizes records.
+See [Observation Contract](contracts/observation.md) for request and evidence
+shapes.
 
 ## Invocation
 
@@ -136,7 +140,9 @@ Ownership:
 ## Execute argument contract
 
 - `--working-copy`, `--manifest`, and `--result` are required.
-- `--output-dir` is optional for execution-only calls.
+- `--output-dir` is optional for execution-only calls, but required whenever an
+  evidence surface is enabled: reference traversal, observation, an environment
+  integrity request, or an occurrence/fact request sidecar.
 - `--observation-request` enables CAD-native observation on the same execute
   call and requires `--output-dir`.
 - `--reference-traversal-request` enables reference traversal on the same
@@ -149,21 +155,31 @@ Ownership:
 - A standalone `observe` command is not supported and is rejected as an
   unknown command.
 
-### Observation and provenance sidecars (handoff)
+### Engineering-evidence sidecars
 
-The following FreeCAD phase additionally consumes Engine-authored sidecars in
-the prepared working copy and writes evidence under `--output-dir`; no new
-command-line argument is introduced:
+The runtime consumes three Engine-authored inputs and writes their evidence
+under `--output-dir`; no new command-line argument is introduced:
 
-- `prm.occurrence-request.json` -> optional `prm.occurrence-evidence.json`;
-- `prm.fact-request.json` -> optional `prm.fact-evidence.json`;
-- the Engine integrity request transported through
+- `prm.occurrence-request.json` at the working-copy root -> optional
+  `<output-dir>/prm.occurrence-evidence.json`;
+- `prm.fact-request.json` at the working-copy root -> optional
+  `<output-dir>/prm.fact-evidence.json`;
+- the Engine integrity request named by
   `PARAMETRON_RUNTIME_INTEGRITY_REQUEST` -> optional
-  `prm.integrity-evidence.json`.
+  `<output-dir>/prm.integrity-evidence.json`.
 
-These surfaces are not yet emitted by the current FreeCAD runtime. Their
-required native behavior, timing, raw evidence paths, and ownership boundary are
-defined by the [FreeCAD handoff](handoff.md), the
+Occurrence and fact requests are discovered only as plain, non-symlink regular
+files at the exact working-copy root. A directory, symbolic link, or other
+non-regular candidate fails deterministically instead of being followed or
+ignored. The integrity request is read only from the environment channel named
+by Engine; there is no CLI flag and no in-file discovery for it, and an
+invocation without that variable reports no integrity evidence.
+
+Enabling any evidence surface requires an existing `--output-dir` inside the
+working copy. Stale sidecars for enabled surfaces are removed before request
+loading, and each evidence file is written atomically as canonical UTF-8 JSON
+with one trailing newline. Requests and evidence shapes remain Engine-owned and
+are defined by the [FreeCAD handoff](handoff.md), the
 [occurrence evidence contract](contracts/occurrence-evidence.md), the
 [fact evidence contract](contracts/fact-evidence.md), and the
 [integrity request](contracts/integrity-request.md) /
@@ -178,31 +194,56 @@ For one `execute` call, in order:
 3. Load and validate the manifest (see
    [contracts/manifest.md](contracts/manifest.md)).
 4. Resolve `sourceDocument` inside the working copy.
-5. If a reference-traversal request is present, load it exactly once (see
+5. Determine the enabled evidence surfaces, require `--output-dir`, and remove
+   stale sidecars for those surfaces.
+6. If a reference-traversal request is present, load it exactly once (see
    [contracts/reference-traversal.md](contracts/reference-traversal.md)).
-6. If an observation request is present, load it and compute the
-   source-document SHA-256 digest before the document is opened (see
+7. If an observation request is present, load it (see
    [contracts/observation.md](contracts/observation.md)).
-7. Open the FreeCAD document.
-8. Apply parameter assignments in manifest order.
-9. Apply target mutations in deterministic section/family order when present.
-10. Perform applicable recompute and native validity checks (see
+8. If `PARAMETRON_RUNTIME_INTEGRITY_REQUEST` names a request, load the declared
+   resource inventory and hash every declared baseline before the document is
+   opened or mutated (see
+   [contracts/integrity-request.md](contracts/integrity-request.md)).
+9. If an occurrence request is present at the working-copy root, load it (see
+   [contracts/occurrence-evidence.md](contracts/occurrence-evidence.md)).
+10. If a fact request is present at the working-copy root, load it (see
+    [contracts/fact-evidence.md](contracts/fact-evidence.md)).
+11. If observation or integrity is enabled, compute the source-document
+    SHA-256 digest before the document is opened (observation reuses the
+    integrity baseline digest when both are enabled).
+12. Open the FreeCAD document.
+13. Apply parameter assignments in manifest order.
+14. Apply target mutations in deterministic section/family order when present.
+15. Perform applicable recompute and native validity checks (see
     [contracts/target-mutations.md](contracts/target-mutations.md)).
-11. Persist the configured native working document with `document.save()`.
-12. Export declared STEP/CSV/PDF artifacts (see
+16. Persist the configured native working document with `document.save()`.
+17. If integrity is enabled, hash the post-save bytes of the resource with the
+    persisted-result obligation and verify that the saved document still
+    matches its declared coordinate.
+18. Export declared STEP/CSV/PDF artifacts (see
     [contracts/artifacts.md](contracts/artifacts.md)).
-13. If reference traversal is enabled, run it on the recomputed, persisted
+19. If reference traversal is enabled, run it on the recomputed, persisted
     live document and emit the canonical raw traversal output.
-14. If observation is enabled, observe the same open live document — after
+20. If observation is enabled, observe the same open live document — after
     persistence, exports, and traversal, before document close.
-15. Close the document.
-16. Write deterministic success `prm.result.json` (see
+21. If occurrence evidence is requested, inspect the requested Assembly Group
+    and write `prm.occurrence-evidence.json`.
+22. If fact evidence is requested, observe every bound property and write
+    `prm.fact-evidence.json`.
+23. Close the document; any secondary documents opened only for declared fact
+    subjects are closed first.
+24. If integrity is enabled, write `prm.integrity-evidence.json` for the
+    completed run.
+25. Write deterministic success `prm.result.json` (see
     [contracts/result-and-failure.md](contracts/result-and-failure.md)).
 
-Live-document observation and traversal both operate on the same open FreeCAD
-document instance that received mutation, applicable recompute/validity, and
-persistence; the document is not reopened. The original external/project
-source document remains outside the mutation target.
+Live-document observation, traversal, occurrence inspection, and fact inspection
+all operate on the same open FreeCAD document instance that received mutation,
+applicable recompute/validity, and persistence; the document is not reopened.
+The original external/project source document remains outside the mutation
+target. Declared secondary fact subjects may be opened read-only from their
+declared materialized coordinates; those documents are closed before the
+selected source document closes.
 
 ### Native persistence vs. derived artifacts
 
@@ -235,8 +276,10 @@ Handled failures produce deterministic single-line stderr with no traceback.
 
 FreeCAD owns: runtime bootstrapping, the launcher transport, headless
 execution, CAD document lifecycle, requested mutation, recompute, requested
-observation, export execution, raw runtime result capture, and raw reference
-traversal evidence.
+observation, export execution, raw runtime result capture, raw reference
+traversal evidence, native occurrence and bounded fact inspection, pre-mutation
+baseline hashing, post-save configured-result hashing, and raw integrity
+evidence.
 
 FreeCAD does not own Engine planning, verification decisions, normalization,
 durable product storage/indexing, or higher-level orchestration.

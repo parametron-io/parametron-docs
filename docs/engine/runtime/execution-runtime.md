@@ -192,10 +192,13 @@ Digest validity never establishes reference resolution, occurrence
 completeness, or fact availability, and a configured-result digest is never
 a semantic entity ID. Automatic recursive native dependency discovery does
 not exist, and a dependency encountered at execution is never silently added
-to the source lock. No real FreeCAD integrity execution exists yet:
-permanent verification uses controlled runtimes and stub capabilities, and
-real FreeCAD pre-mutation baseline and post-persistence result proof is a
-later adapter phase built on the [integrity request](../adapters/freecad/contracts/integrity-request.md)
+to the source lock. Real FreeCAD integrity execution is implemented in
+`parametron-freecad` for the declared resource inventory: every materialized
+baseline is hashed before mutation, and the persisted configured result is
+hashed after save. Permanent Engine verification also retains controlled-runtime
+and stub coverage; the real FreeCAD participant is exercised through that
+repository's real-FreeCAD tests and the cross-repository evidence proof, built
+on the [integrity request](../adapters/freecad/contracts/integrity-request.md)
 and [integrity evidence](../adapters/freecad/contracts/integrity-evidence.md)
 contracts. The committed Engine
 [test matrix](https://github.com/parametron-io/parametron-engine/blob/76b70c02e8165650a1126d7c1f0157e456d4b2fd/docs/test-matrix.md#source-lock-and-configured-result-provenance-contract-coverage)
@@ -265,9 +268,11 @@ occurrence evidence alongside ordinary controlled external-runtime outputs,
 and follows normal intake, verification, projection, and package emission.
 It verifies quantity groups, noncomplete/required failures, raw provenance,
 and generic-reference independence. It proves neither public CLI authoring nor
-actual FreeCAD-native occurrence production. Production native discovery remains
-unimplemented in `parametron-freecad`; this Engine integration establishes no
-FreeCAD 1.1.1 occurrence compatibility, recursive/array quantity, or general
+actual FreeCAD-native occurrence production. Production native discovery is
+implemented in `parametron-freecad` for the bounded FreeCAD 1.1.4 direct-member
+mechanism and is exercised by that repository's real-FreeCAD coverage and the
+cross-repository evidence proof. This Engine integration establishes no FreeCAD
+1.1.1 occurrence compatibility, recursive/array quantity, or general
 multi-outcome aggregation.
 
 ## Attempt Identity and Layout

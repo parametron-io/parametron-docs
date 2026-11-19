@@ -512,8 +512,9 @@ actual native Assembly inspection, member inventory discovery, parent-membership
 observation, link-target resolution, native status/diagnostics, coverage evidence,
 and production occurrence evidence generation. Engine does not inspect native
 FreeCAD objects. FreeCAD does not derive Engine logical-resource identity or
-quantity. The Engine contract accepts controlled evidence; a production native
-occurrence evidence producer is not implemented in `parametron-freecad`.
+quantity. The Engine contract accepts controlled evidence, and
+`parametron-freecad` implements the bounded production producer for the
+direct-member mechanism.
 
 ### Versions and evidence validation
 
@@ -677,12 +678,13 @@ identifies the permanent test responsibilities.
 Unsupported behavior includes general recursive occurrence discovery/quantity,
 complete nested assembly rollup, flexible subassemblies, link arrays,
 `App::LinkElement` counting, unproven cyclic expansion, arbitrary auxiliary
-exclusions, automatic external dependency discovery, production FreeCAD occurrence
-emission, public CLI/DSL/HTTP occurrence authoring, CAD BOM quantity authority,
-BOM serialization, physical mass, density/material inference, material catalogs
-or an Engine material database, universal unit frameworks and unit conversion
-algebra, arbitrary or universal native property observation, FreeCAD-native
-fact production, PDM persistence, and cross-outcome quantity aggregation.
+exclusions, automatic external dependency discovery, public CLI/DSL/HTTP
+occurrence authoring, CAD BOM quantity authority, BOM serialization, physical
+mass, density/material inference, material catalogs or an Engine material
+database, universal unit frameworks and unit conversion algebra, arbitrary or
+universal native property observation, PDM persistence, and cross-outcome
+quantity aggregation. Bounded native occurrence emission and bounded
+`bound_property` fact observation are implemented by `parametron-freecad`.
 Separately supported mutations and generic traversal retain their own contracts.
 
 ## Bounded engineering fact observation
@@ -813,12 +815,10 @@ Unsupported behavior includes physical mass, density/material inference,
 material catalogs or an Engine material database, universal unit frameworks and
 unit conversion algebra, heuristic or arbitrary/universal native property
 observation, target-scoped metadata mutation, multi-outcome fact aggregation,
-public CLI/DSL/HTTP fact authoring, and FreeCAD-native fact production: no
-native fact producer exists yet, permanent verification uses controlled Engine
-evidence rather than real FreeCAD-native property observation, and native
-runtime version tokens in evidence are provenance only. The contracts are
-intended to be sufficient for a later FreeCAD-native implementation of bounded
-fact observation without redesigning Engine normalization.
+and public CLI/DSL/HTTP fact authoring. Native fact production is implemented by
+`parametron-freecad` for explicit `bound_property` bindings; permanent Engine
+verification additionally retains controlled-evidence coverage, and native
+runtime version tokens in evidence are provenance only.
 
 Newly emitted packages use the current `prm.*` raw-evidence paths. No package
 migration walker, automatic old-name conversion, or compatibility alias exists

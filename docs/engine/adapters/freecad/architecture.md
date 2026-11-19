@@ -30,6 +30,8 @@ owns CAD-native execution and raw evidence capture:
 | Conservative native deletion and its dependent-safety boundary | — | Owns |
 | Native shape validity inspection and raw dependency evidence | — | Owns |
 | Requested observation and reference discovery | — | Owns |
+| Native occurrence inspection and bounded fact observation | — | Owns |
+| Pre-mutation baseline and post-save configured-result hashing | — | Owns |
 | Artifact export (STEP/CSV/PDF) | — | Owns |
 | Normalized engineering records and local packages | Owns | — |
 
@@ -51,9 +53,9 @@ The implemented FreeCAD producer contracts use canonical
 verification request, observed result, runtime result, traversal request, and
 rich traversal evidence. Engine plans and lowers intent into the runtime
 package; FreeCAD executes and captures native evidence; Engine verifies and
-normalizes the returned evidence into records. The following FreeCAD phase also
-implements the Engine-owned occurrence, bounded-fact, and integrity evidence
-contracts; see the [FreeCAD handoff](handoff.md).
+normalizes the returned evidence into records. The runtime also implements the
+Engine-owned occurrence, bounded-fact, and integrity evidence contracts; see the
+[FreeCAD handoff](handoff.md).
 
 ```text
 Engine / local caller
@@ -166,15 +168,35 @@ resource/native qualification, parent/context validation, completeness,
 duplicates/conflicts, deterministic quantity rollup, normalized records, and raw
 provenance. FreeCAD owns native Assembly inspection, member inventory and parent
 membership, target resolution, native status/diagnostics, and coverage evidence.
-Engine accepts controlled evidence for the bounded FreeCAD 1.1.4 direct-member
-mechanism; a production occurrence evidence producer is not implemented in
-`parametron-freecad`. It is not enabled by generic traversal or legacy component
-observation. Request/summary `1.0` and evidence `1.0`/`1.1` are independent of the
-implemented producer contracts above. See the canonical
+The runtime implements the bounded FreeCAD 1.1.4 direct-member mechanism
+(`freecad-1.1.4-assembly-group-individual-link`) on the mutated, recomputed, and
+persisted document. It emits the complete native `Group` inventory, one
+classified entry per member, explicit completeness, and the raw
+`prm.occurrence-evidence.json` sidecar; it never emits normalized quantity. The
+supported scope, member classification, and declared-resource binding rules are
+owned by [contracts/occurrence-evidence.md](contracts/occurrence-evidence.md).
+Nested assemblies, `Assembly::AssemblyLink`, `LinkArray`/`ElementCount` arrays,
+non-empty `Assembly::JointGroup`, and non-empty occurrence context remain
+unsupported or incomplete. It is not enabled by generic traversal or legacy
+component observation. Request/summary `1.0` and evidence `1.0`/`1.1` are
+independent of the implemented producer contracts above. See the canonical
 [occurrence contract](../../reference/record-contracts.md#explicit-occurrence-observation)
 and [runtime propagation](../../runtime/execution-runtime.md#execution-scoped-occurrence-intent).
 The mechanism's 1.1.4 qualification does not change separately established
 FreeCAD 1.1.1 generic traversal or target-mutation behavior.
+
+Bounded engineering facts use a second Engine-owned sidecar pair. FreeCAD reads
+only explicitly bound native properties and emits typed values with explicit
+opaque unit tokens and availability. It performs no unit conversion and never
+infers material, mass, or unrequested facts. Integrity evidence uses the
+Engine-published request channel: FreeCAD hashes every declared materialized
+baseline before open and mutation, fails before mutation on a digest mismatch,
+and hashes the persisted configured result after a successful save. FreeCAD
+never reads, enforces, or rewrites `prm.project-lock.json`, and it never
+publishes a resource manifest of its own. See
+[contracts/fact-evidence.md](contracts/fact-evidence.md),
+[contracts/integrity-request.md](contracts/integrity-request.md), and
+[contracts/integrity-evidence.md](contracts/integrity-evidence.md).
 
 ## GUI and Capture Boundary
 

@@ -77,11 +77,42 @@ and [record contracts](../../../reference/record-contracts.md#integrity-provenan
 
 ## Current FreeCAD support
 
-No native FreeCAD integrity producer exists yet. Permanent Engine
-verification uses controlled runtimes and stub capability responses for this
-contract. Real FreeCAD pre-mutation baseline observation and post-persistence
-result hashing are a later adapter phase to be built against this contract;
-they are not implemented.
+`parametron-freecad` emits this evidence for a run whose
+[integrity request](integrity-request.md) was received through
+`PARAMETRON_RUNTIME_INTEGRITY_REQUEST`. It writes
+`<output-dir>/prm.integrity-evidence.json` atomically as canonical schema `1.0`
+after the selected document closes and before the success result is written.
+The file is not written for a failed run.
+
+The emitted `resources` array covers every requested resource exactly once and
+preserves the request order. Each entry carries:
+
+- the request's `logicalId` and `materializedCoordinate`;
+- status `observed` with the digest actually computed over the pre-mutation
+  bytes when the declared file existed, was a regular readable file, and
+  matched `baselineSha256`;
+- status `missing` or `unavailable` with `baselineSha256: ""` and
+  `persistedResult: null` for a missing, non-regular, or unreadable secondary
+  resource;
+- `persistedResult` only for the resource whose request entry has
+  `expectsPersistedResult: true`.
+
+The primary resource is never permitted to be non-observed. A missing,
+non-regular, unreadable, or digest-mismatched primary resource fails the run
+before mutation at stage `integrity_baseline`; a digest mismatch on any declared
+resource also fails before mutation.
+
+After `document.save()`, the runtime hashes the actual post-save bytes of the
+primary resource, confirms that the saved native document still resolves to the
+declared coordinate, and reports the distinct `persistedResult` identity. A
+save failure, a coordinate mismatch, a missing persisted file, or a hash read
+failure fails at stage `integrity_result` and produces no success evidence. The
+result digest is never copied from the baseline and never written into a
+project lock.
+
+Permanent Engine verification also retains controlled-runtime and stub coverage
+for this contract; the real FreeCAD participant is exercised through the
+repository-local real-FreeCAD tests and the cross-repository evidence proof.
 
 ## Ownership
 

@@ -1,8 +1,9 @@
 # Occurrence Evidence Contract
 
 This contract defines the Engine-owned occurrence request and raw occurrence
-evidence consumed by Engine normalization. It is part of the FreeCAD observation
-handoff; the current FreeCAD runtime does not yet emit this sidecar.
+evidence consumed by Engine normalization. `parametron-freecad` implements the
+producer described below for the bounded mechanism; Engine remains the owner of
+the contract and of all derived occurrence identity and quantity.
 
 ## Transport
 
@@ -106,6 +107,90 @@ handoff; the current FreeCAD runtime does not yet emit this sidecar.
   scope must not claim quantity.
 - Evidence schema `1.1` adds optional `contents` for an explicitly inspected
   auxiliary empty joint group. Schema `1.0` rejects that field.
+
+## FreeCAD runtime support
+
+The runtime consumes the request and emits the evidence without a new CLI
+argument:
+
+- `prm.occurrence-request.json` is discovered only at the working-copy root as a
+  plain, non-symlink regular file. The request is strictly decoded before the
+  document is opened.
+- `prm.occurrence-evidence.json` is written atomically under the validated
+  `--output-dir`, which is required and must resolve inside the working copy.
+  A stale sidecar for an enabled occurrence request is removed before request
+  loading.
+- Inspection runs on the same open document that was mutated, recomputed, and
+  persisted, after optional observation and before document close. Emission
+  failures use runtime failure stage `occurrence_evidence`; request-discovery
+  and decoding failures use `occurrence_request` and occur before document
+  open.
+
+The runtime always emits evidence schema `1.1`, using `contents` only for an
+inspected auxiliary empty joint group. It does not emit a quantity, an
+Engine-normalized record, or a generic reference count.
+
+### Supported scope
+
+Inspection is `complete`-capable only when all of the following hold:
+
+- the requested mechanism is
+  `freecad-1.1.4-assembly-group-individual-link`;
+- the running FreeCAD version token is exactly `1.1.4`;
+- the requested occurrence context is empty.
+
+Otherwise the runtime emits `completeness: "unsupported"` with
+`inspectionCompleted: false`, empty `group` and `members`, and an explicit
+diagnostic; it does not expand a non-empty context or degrade to reference
+counting. The request `requirement` is enforced by Engine intake, not by the
+adapter.
+
+The parent is resolved by exact native object name. A missing parent yields an
+`unavailable` observation; a resolved parent that is not an
+`Assembly::AssemblyObject` is reported as `unsupported`. When a declared
+resource inventory is present, the requested parent must be the selected source
+resource of the attempt.
+
+### Group inventory and member classification
+
+The runtime reads the complete native `Assembly::AssemblyObject.Group`
+inventory, orders it by exact native object name, rejects duplicate native names
+in one group, and requires each entry to corroborate parent membership through
+both `Group` and `InList`. A dangling entry, duplicate identity, or
+uncorroborated membership is a native access failure, not a silently omitted
+member.
+
+Every member is classified with the bounded rules below:
+
+| Native member state | Classification | Resolution |
+| --- | --- | --- |
+| `App::Link` with `ElementCount` 0 and a target resolved through a declared resource to `PartDesign::Body`, `Part::Feature`, or `App::Part` | `occurrence` | `resolved` |
+| `App::Link` whose target document or object cannot be resolved | `unresolved` | `unresolved` or `unavailable` |
+| Empty `Assembly::JointGroup` with inspected empty contents | `auxiliary` | `resolved` |
+| Non-empty `Assembly::JointGroup` | `unsupported` | `unsupported` |
+| Nested `Assembly::AssemblyObject` or `Assembly::AssemblyLink` | `unsupported` | `unsupported` |
+| `App::LinkElement` or `App::Link` with non-zero `ElementCount` | `unsupported` | `unsupported` |
+| Unsupported target or member native type | `unsupported` | `unsupported` |
+
+`completeness` is `complete` when every inventory entry is handled and
+`incomplete` when any entry is `unresolved` or `unsupported`. A complete
+zero-member scope is a valid inspected empty scope. Unhandled members retain an
+explicit diagnostic and never become fabricated occurrences.
+
+### Declared target binding
+
+Occurrence targets are joined to declared resource identity through the attempt's
+integrity inventory. A native target document joins only when its resolved
+`FileName` is absolute, matches exactly one declared materialized coordinate,
+and exists as a regular file. A declared file that is missing produces member
+`resolution: "unresolved"`; undeclared, ambiguous, or otherwise unavailable
+native documents produce `resolution: "unavailable"`. Every such member carries
+a diagnostic and classification `unresolved`. The runtime never guesses a
+logical ID, rewrites a native link, or derives identity from a path spelling.
+
+Without an integrity request, only the selected source coordinate is known. A
+member pointing at any other document is reported as unresolved with the
+diagnostic that the declared resource inventory is unavailable.
 
 ## Engine-derived quantity
 

@@ -62,13 +62,44 @@ environment configuration (see
 
 ## Current FreeCAD support
 
-No native FreeCAD integrity producer exists yet. Permanent Engine
-verification covers this contract through controlled runtimes and stub
-capabilities: the runtime participant reads the published request, reports
-[evidence](integrity-evidence.md) against it, and Engine validates that
-evidence strictly. Real FreeCAD pre-mutation baseline observation and
-post-persistence result hashing are a later adapter phase to be built against
-this contract and the evidence contract; they are not implemented.
+`parametron-freecad` implements the runtime participant. The external `execute`
+entry point reads the request only from the
+`PARAMETRON_RUNTIME_INTEGRITY_REQUEST` environment variable; there is no CLI
+flag and no in-file discovery. When the variable is absent, the runtime reads no
+request and reports no integrity evidence; Engine's dispatcher strips inherited
+values when it publishes no request.
+
+The request is strictly decoded into the attempt's declared resource inventory:
+closed fields, schema `1.0`, canonical coordinates and digests, unique declared
+resources, and exactly one persisted-result resource. The manifest
+`sourceDocument` must resolve to the resource carrying
+`expectsPersistedResult: true`. The runtime never reads a separate resource
+manifest; declared coordinates come only from this channel.
+
+Before the document is opened or mutated, the runtime resolves every declared
+materialized coordinate inside the supplied working copy, hashes each one, and
+compares the observed digest with `baselineSha256`:
+
+- any observed digest that differs from `baselineSha256` fails the run at
+  failure stage `integrity_baseline` before mutation, for primary and secondary
+  resources alike;
+- a missing, non-regular, or unreadable primary resource also fails at
+  `integrity_baseline`;
+- a missing secondary resource is reported with status `missing`, and a
+  non-regular or unreadable secondary resource with status `unavailable`,
+  without content identity.
+
+After a successful save, the runtime hashes the persisted bytes of the resource
+carrying the persisted-result obligation and verifies that the saved document
+still resolves to that declared coordinate; failures use stage
+`integrity_result`. The evidence file is written only after the document closes
+and only for a successful run. See
+[integrity evidence](integrity-evidence.md) for the runtime-reported result and
+failure behavior.
+
+Permanent Engine verification also retains controlled-runtime and stub coverage
+for this contract; the real FreeCAD participant is exercised through the
+repository-local real-FreeCAD tests and the cross-repository evidence proof.
 
 ## Ownership
 

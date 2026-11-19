@@ -5,19 +5,26 @@ recomputed, and persisted document. It never evaluates checks or makes
 verification decisions — that is Engine's job.
 
 Engine's separate [explicit occurrence evidence contract](../../../reference/record-contracts.md#explicit-occurrence-observation)
-does not enable legacy `components` observation or imply production occurrence
-output from FreeCAD. Its Engine-side controlled-evidence support uses a separate
-request/evidence sidecar; no native occurrence producer is implemented here.
+does not enable legacy `components` observation and does not share transport
+with this contract. `parametron-freecad` produces native occurrence evidence
+only through the separate
+[occurrence sidecar](occurrence-evidence.md); `components` remains recognized
+contract shape only and is not populated here.
 
 Similarly, bounded engineering fact observation is a separate sidecar contract
 pair (`prm.fact-request.json` / `prm.fact-evidence.json`) outside this
 observation contract; see [bounded engineering fact
-observation](../../../reference/record-contracts.md#bounded-engineering-fact-observation).
-The current FreeCAD runtime does not yet produce native fact evidence; a later
-FreeCAD phase will consume the completed Engine contract. Parameter, metadata,
-reference, and target-state behavior described here is unchanged, and no native
-fact mechanism is defined or enabled by the present observation request or
-output.
+observation](../../../reference/record-contracts.md#bounded-engineering-fact-observation)
+and the [fact evidence contract](fact-evidence.md). The runtime produces native
+fact evidence only through that pair. Parameter, metadata, reference, and
+target-state behavior described here is unchanged, and no fact mechanism is
+defined or enabled by the present observation request or output.
+
+Occurrence and fact sidecars are inspected on the same open document, after
+`prm.observed.json` is produced and before the document closes. Each sidecar is
+enabled independently by the presence of its own request file (occurrence,
+fact) or by the Engine integrity request channel; none of them changes the
+observation request or output described here.
 
 ## Request: `prm.verification.json`
 
@@ -149,7 +156,8 @@ The current FreeCAD runtime output emitted by `parametron-freecad` execute is:
   cannot override this digest, and unrelated output-directory contents do not
   participate in it.
 - Only enabled, supported categories appear under `observation`; `components`
-  is defined in the contract but not currently populated.
+  is defined in the contract shape but is rejected when enabled and never
+  populated by the runtime.
 - Output is canonical UTF-8 JSON with deterministic requested-item ordering,
   canonical key ordering, and one trailing newline. Writing is atomic and
   never leaves a partial file after a failed write.
