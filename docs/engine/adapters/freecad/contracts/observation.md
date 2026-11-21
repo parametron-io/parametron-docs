@@ -39,6 +39,27 @@ Contract metadata defines top-level fields under canonical schema `1.0`:
 — Engine defaults absent parameter bindings to an empty list), `expected`
 (required), `checks` (required).
 
+Authored metadata expectations appear under `expected.metadata[]`:
+
+```json
+{
+  "id": "meta.bracket.material",
+  "key": "material",
+  "ownerId": "Body01",
+  "value": "S235JR",
+  "valueKind": "string"
+}
+```
+
+- `id` is the semantic metadata ID; `key` is the exact native property key;
+  `ownerId` is the exact native owner object selector.
+- `value` is the expected typed JSON scalar and `valueKind` is `string`,
+  `boolean`, `number`, or `integer`.
+- The working-copy digest expectation remains a string-valued entry with
+  `key: "working_copy_sha256"` and no `id`.
+- Metadata expectations never carry display labels, semantic target names, or
+  mutation policy.
+
 The external runtime loads the request, validates `schemaVersion: "1.0"`
 unconditionally, validates the requested observation sections, then performs
 native observation. A missing or unsupported version is rejected regardless
@@ -148,6 +169,13 @@ The current FreeCAD runtime output emitted by `parametron-freecad` execute is:
   }
 }
 ```
+
+Observed metadata entries echo the exact native `ownerId` and property `key` for
+authored expectations and the semantic `id` from the request. `value` is a
+canonical JSON scalar and `valueKind` is one of `string`, `boolean`, `number`, or
+`integer`. The working-copy digest entry remains a string value. Engine compares
+semantic ID, native owner/property, value kind, and typed value against its
+expected metadata; the runtime does not evaluate those checks.
 
 - `workingCopy.sha256` is the lowercase SHA-256 of the source `.FCStd` file's
   bytes, computed before any in-memory mutation. The field name is
@@ -259,9 +287,15 @@ responsibility.
 
 ### Requested parameter and metadata observation
 
-Both resolve exact requested items only (owner/key or object/property reads);
-neither infers, enumerates, or guesses values that were not explicitly
-requested.
+Both resolve exact requested items only; neither infers, enumerates, or guesses
+values that were not explicitly requested.
+
+Parameter observation resolves by the requested parameter identity and binding
+context. Metadata observation resolves the exact `{ownerId, key}` pair from
+`expected.metadata[]`, echoes the semantic `id`, and returns the typed native
+value. For the `working_copy_sha256` entry it returns the prepared-source digest.
+The runtime never synthesizes metadata that was not requested and never creates
+native metadata.
 
 ### Requested reference observation (not graph traversal)
 

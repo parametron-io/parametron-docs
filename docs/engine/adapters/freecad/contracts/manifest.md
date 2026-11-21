@@ -31,16 +31,20 @@ Optional top-level target-mutation fields:
 - `assemblyMutations`
 - `partMutations`
 
-Both optional mutation sections use the same target-mutation structure, with
-closed collections `suppression`, `visibility`, and `deletion`:
+Both optional mutation sections use the same runtime mutation structure, with
+closed collections `metadata`, `suppression`, `visibility`, and `deletion`:
 
+- `metadata[]` → `{object, property, value, valueKind}`
 - `suppression[]` → `{object, suppressed}`
 - `visibility[]` → `{object, visible}`
 - `deletion[]` → `{object}`
 
-Mutation sections never contain `parameters` or `properties`; scalar property
-writes remain exclusively the job of `parameterAssignments`. Absent or empty
-mutation sections and families are omitted in Engine projection.
+`metadata[]` carries explicit authored metadata mutations: `object` is the exact
+native owner selector, `property` is the exact native property key, `value` is
+the typed resolved value, and `valueKind` is `string`, `boolean`, `number`, or
+`integer`. Mutation sections never contain `parameters`; scalar parameter writes
+remain exclusively the job of `parameterAssignments`. Absent or empty mutation
+sections and families are omitted in Engine projection.
 
 Parameter assignment entry fields: `target`, `value`, `valueKind`.
 
@@ -76,19 +80,26 @@ execute:
 - **Exact version validation** — `"1.0"` is matched by exact string equality;
   no trimming, case folding, or numeric coercion.
 - **Canonical schema 1.0 mutation sections** — normal execute accepts optional
-  `assemblyMutations` and `partMutations`; each section is closed to
+  `assemblyMutations` and `partMutations`; each section is closed to `metadata`,
   `suppression`, `visibility`, and `deletion`.
 - **Optional mutation sections** — absent, `{}`, or sparse valid collections
   are accepted.
-- **Closed mutation collections** — only `suppression`, `visibility`,
-  `deletion` are recognized; anything else (`parameters`, `keep`, `actions`,
-  `targets`, …) is rejected.
+- **Closed mutation collections** — only `metadata`, `suppression`,
+  `visibility`, and `deletion` are recognized; anything else (`parameters`,
+  `properties`, `keep`, `actions`, `targets`, …) is rejected.
 - **Strict entry shape** — unknown/extra entry fields (`force`, `cascade`,
   `recursive`, `dependencyPolicy`, `repair`, `action`, `targetKind`, …) are
   rejected.
 - **Strict JSON booleans** — `suppressed`/`visible` must satisfy
   `type(value) is bool`; numeric or string coercions (`0`, `1`, `"true"`) are
   rejected.
+- **Metadata entry validation** — `metadata[]` requires an exact non-empty
+  native `object` selector and `property` key without surrounding whitespace or
+  NUL, a supported `valueKind`, and a canonical JSON scalar compatible with that
+  kind. Numbers must be finite; `integer` requires an exact integral value.
+  Duplicate `{object, property}` pairs within one section are rejected. Semantic
+  metadata IDs, target names, display labels, and policy fields are not part of
+  this runtime entry.
 - **Duplicate rejection** — the same object twice within one scope/family
   (e.g. `Pad` twice in `partMutations.suppression`) is rejected.
 - **Deletion conflicts** — suppression+deletion or visibility+deletion on the
@@ -106,8 +117,8 @@ execute:
 ## Ownership
 
 Engine owns manifest authoring and canonical schema `1.0` projection, including
-the semantic intent behind optional target mutations — see [Target-Action
-Contract](../../../reference/target-action-contract.md).
+the semantic intent behind optional metadata and target mutations — see
+[Target-Action Contract](../../../reference/target-action-contract.md).
 
 FreeCAD owns manifest loading, strict validation, and native execution. Normal
 execute consumes schema 1.0 parameter assignments, outputs, and optional

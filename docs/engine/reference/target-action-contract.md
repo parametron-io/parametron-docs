@@ -79,9 +79,10 @@ identify target, table, row, column, value and allowed actions. This contextual
 lookup does not allow general string-to-action coercion.
 
 Parameter names such as `suppress_Pad` and `unsuppress_Pad` are ordinary names.
-They never trigger target lookup or lifecycle actions. An exact captured metadata
-key can map them to ordinary `set_property`; an unmapped name produces no mutation
-or special diagnostic. Prefix-shaped names have no compatibility alias or flag.
+They never trigger target lookup, lifecycle actions, or metadata mutations. The
+retired implicit parameter-to-property path is not available; metadata mutations
+are authored explicitly with `metadata <key> = <expression>`. Prefix-shaped names
+have no compatibility alias or flag.
 
 ## Resolution and capability validation
 
@@ -131,7 +132,8 @@ ID and scope; `TargetField` is empty. `ValueSource.Kind = "target_action"` is
 provenance only: parameter names/IDs and scalar fields are zero and `BooleanState`
 is nil. Action meaning resides in the distinct `OperationKind`, never an inverse
 action encoded as a boolean. Lowering does not repeat resolution or capability
-checks. Existing `set_parameter`/`set_property` paths remain separate.
+checks. Existing `set_parameter` lowering and the explicit target-metadata
+lowering path remain separate.
 
 Lowered intents are private planner state, not direct plan JSON, IR or runtime
 payloads, and are not appended to `ProductIntent.Mutations`. Their final projection
@@ -191,14 +193,16 @@ Suppression and visibility are independent axes; same-object entries in differen
 families coexist. Deletion has only `Object`, without force/cascade/recursive or
 dependency policy. Private projection preserves encounter order and duplicates.
 
-The broader internal `ManifestMutationCollection` retains Parameters, Properties,
+The broader internal mutation collection retains Parameters, Metadata,
 Suppression, Visibility and Deletion, including through reduction and defensive
-handoff cloning. Visibility mappings require `targetField = object`,
-`valueField = visible`, and a boolean value, and forbid `propertyField`. Deletion
-mappings require `targetField = object` and forbid value/property fields. The
-operation registry includes suppress, unsuppress, hide, unhide, delete,
-write_parameter and write_metadata. Destination routing does not derive policy
-from that registry or semantic-map family capability metadata.
+handoff cloning. `Metadata` is the explicit target-metadata family; the retired
+`Properties` family and its `set_property` operation are not part of the active
+contract. Visibility mappings require `targetField = object`, `valueField =
+visible`, and a boolean value, and forbid `propertyField`. Deletion mappings
+require `targetField = object` and forbid value/property fields. The operation
+registry includes suppress, unsuppress, hide, unhide, delete, write_parameter and
+write_metadata. Destination routing does not derive policy from that registry or
+semantic-map family capability metadata.
 
 ## Aligned runtime manifest
 
@@ -206,22 +210,25 @@ The canonical active filename is `prm.export-manifest.json` across all
 Engine-authored FreeCAD manifests. All Engine-authored FreeCAD runtime manifests
 select canonical schema `1.0`, whether mutation-free or mutation-bearing.
 Mutation-less, keep-only, scalar-assignment-only, and internal
-Parameters/Properties-only plans emit schema `1.0`. Any Suppression,
-Visibility, or Deletion in either Part or Assembly destination also emits schema
-`1.0`.
+Parameters/Metadata-only plans emit schema `1.0`. Any Suppression, Visibility,
+Deletion, or metadata mutation in either Part or Assembly destination also emits
+schema `1.0`.
 
 Core top-level fields under schema `1.0` are `schemaVersion`, `sourceDocument`,
 `parameterAssignments`, and `outputs`. When target mutations are present, the
 manifest additionally carries optional `assemblyMutations` and/or
 `partMutations`. Absent or empty mutation sections and families are omitted.
-Runtime mutation entries have closed key sets: `{object, suppressed}`,
-`{object, visible}`, and `{object}`. Booleans, including false, are explicit.
+Runtime mutation entries have closed key sets: `metadata[]` uses `{object,
+property, value, valueKind}`, `suppression[]` uses `{object, suppressed}`,
+`visibility[]` uses `{object, visible}`, and `deletion[]` uses `{object}`.
+Booleans, including false, are explicit.
 
-Nested Parameters and Properties are filtered from runtime mutation sections.
-Top-level `parameterAssignments` is the sole executable scalar-write surface;
-internal parameter metadata still supports resolving `Object.Property` targets.
-Runtime entries exclude semantic IDs, target kinds, scope, force, cascade,
-recursive, and dependency policy. Native object names and Part/Assembly
+Nested Parameters are filtered from runtime mutation sections. Target metadata is
+projected into the runtime `metadata` family; top-level `parameterAssignments`
+remains the sole executable scalar-write surface for parameters. Internal
+parameter metadata still supports resolving `Object.Property` targets. Runtime
+entries exclude semantic IDs, target kinds, scope, force, cascade, recursive, and
+dependency policy. Native object names and Part/Assembly
 destinations are preserved. FreeCAD receives concrete native selectors for exact
 lookup and CAD operations; it does not resolve semantic Names or IDs or use
 DisplayName as a fallback.
@@ -244,6 +251,93 @@ assignments, canonical schema `1.0`, mutation families, and outputs; only
 `--json-plan` exposes the same normal planner `WriteExportManifestPayload`, not
 private lowered intents or a separate serializer.
 
+## Target-scoped metadata mutations
+
+Target metadata is a dedicated runtime mutation family for exact native property
+values. It is independent of target actions, ordinary parameter assignments, and
+the retired implicit parameter-to-property path.
+
+Authoring and evaluation:
+
+- A `target <name>:` block may carry one optional action and multiple metadata
+  entries: `metadata <key> = <expression>`.
+- The target is resolved by exact, case-sensitive semantic Feature/Component
+  Name. The key is resolved only among captured metadata owned by that exact
+  target; there is no cross-target, native-name, DisplayName, alias, or case
+  fallback.
+- Values are evaluated with normal scalar expression semantics after binding and
+  override resolution: `let`, `param`, constants, `table_cell`, typed ternaries,
+  and literals.
+- Omitted and empty metadata settings blocks are equivalent. Non-empty settings
+  blocks are rejected under DSL version `1.0`.
+
+Resolution and validation:
+
+- Captured metadata must be writable and observable.
+- Captured `valueType` must be `string`, `boolean`, or `number`. The semantic map
+  maps the captured native `cadType` through `nativeValueKinds` to the runtime
+  value kind: `string`, `boolean`, `number`, or `integer`.
+- Integer kind requires an exact integral finite number. Number kind requires a
+  finite number.
+- The runtime owner selector is the resolved target's captured
+  `identitySource.nativeRef`; the runtime property is the captured metadata
+  `key`.
+- Missing, empty, whitespace-surrounded, or NUL-containing native selectors fail
+  deterministically. There is no semantic Name, stable ID, or DisplayName
+  fallback.
+- Duplicate declarations that resolve to the same semantic target and metadata
+  key, or to the same native owner and property, are rejected. There is no
+  last-write-wins behavior.
+
+Lowering and runtime projection:
+
+- Lowered metadata intent retains semantic provenance (semantic target and
+  metadata ID) plus the exact native object, native property, typed value, and
+  value kind.
+- Part and Assembly destinations follow the resolved semantic target scope.
+- Runtime manifest entries are exactly:
+
+```json
+{"object": "Body01", "property": "material", "value": "S235JR", "valueKind": "string"}
+```
+
+- `object` is the exact native owner selector; `property` is the exact native
+  property key; `value` is the typed resolved value; `valueKind` is `string`,
+  `boolean`, `number`, or `integer`.
+- Semantic target names, semantic metadata IDs, display labels, and mutation
+  policy never reach the runtime manifest.
+- Engine sorts metadata entries by native object, native property, and value kind.
+  Adapter, job, handoff, and record emission preserve that order without
+  independently sorting.
+
+Verification and observed evidence:
+
+- Engine derives expected metadata in `prm.verification.json` from the same
+  lowered mutation identity:
+
+```json
+{"id": "meta.bracket.material", "key": "material", "ownerId": "Body01", "value": "S235JR", "valueKind": "string"}
+```
+
+- `id` is the semantic metadata ID, while `key` and `ownerId` are the exact
+  native property and owner selector used by the mutation. The typed `value` is
+  a canonical JSON scalar.
+- The working-copy digest expectation remains a separate string-valued
+  `expected.metadata[]` entry with `key: "working_copy_sha256"` and no `id`.
+- Observed metadata is correlated by semantic ID plus exact native
+  owner/property, value kind, and typed value. Missing observation, value
+  mismatch, value-kind mismatch, owner/key mismatch, and kind-inconsistent values
+  are verification failures.
+- Normalized observation records retain the semantic metadata ID in
+  `subject.id`, the native owner in `subject.ownerId`, the native property in
+  `subject.name`/`key`, and the typed observed value. Raw `prm.observed.json`
+  remains the authoritative evidence; the normalized record is not a second
+  metadata store.
+
+No metadata creation is defined. Native FreeCAD metadata mutation and
+observation are owned by the FreeCAD adapter (`parametron-freecad#45`); this
+contract defines the Engine-authored request and evidence shapes.
+
 ## Canonical ordering and identity
 
 The planner composes mature base mutations first and target-action entries second,
@@ -261,9 +355,11 @@ runtime Objects:
 | Deletion | Object |
 
 Sorting does not merge, deduplicate, reject conflicts, apply first/last-write-wins,
-flatten families or move entries between destinations. Parameters/Properties are
-untouched. Upstream private stages preserve encounter order; adapter, job, handoff
-and record emission preserve final planner order without independently sorting.
+flatten families or move entries between destinations. Parameters and target
+metadata are ordered by their own planner rules; target-action canonicalization
+does not touch them. Upstream private stages preserve encounter order; adapter,
+job, handoff and record emission preserve final planner order without
+independently sorting.
 
 For otherwise equivalent inputs, explicit `keep` and omission produce identical
 plan JSON/hash, job and handoff identity, runtime manifest bytes, and record package

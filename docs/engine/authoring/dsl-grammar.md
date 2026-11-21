@@ -9,6 +9,7 @@ Inside a `product { ... }` block, the DSL currently supports:
 - `let <name> = <expression>`
 - `param <name>: <type> = <expression>`
 - `target <semantic-target>: action = <expression>`
+- `metadata <key> = <expression>` (inside a target declaration block)
 - `adapter = <expression>`
 - `source_model = <expression>`
 - `outputs = <expression>`
@@ -26,6 +27,39 @@ When `outputs = ["none"]` is declared:
 - `"none"` is an authoring-only sentinel representing native-only CAD execution (execute aligned CAD runtime, apply configuration and parameter mutations, recompute, persist native working document via runtime lifecycle, and request zero derived exports).
 - `"none"` is an authoring-only sentinel, **not** an export format, filename, extension, or artifact type.
 - `"none"` is **mutually exclusive** with all other output declarations: `outputs = ["none"]` is valid, while combinations such as `["none", "step"]`, `["step", "none"]`, `["none", "pdf"]`, `["pdf", "none"]`, `["none", "csv"]`, `["csv", "none"]`, or `["none", "none"]` are validation errors.
+
+## Target Metadata Declarations
+
+A target declaration block may contain one optional `action` and zero or more
+`metadata` entries:
+
+```dsl
+target mounting_bracket:
+    action = suppress
+    metadata material = "S235JR"
+    metadata revision = 7 { }
+```
+
+Rules:
+
+- Each `metadata <key> = <expression>` line and each `action = <expression>`
+  line belongs to one `target <semantic-target>:` block.
+- The `metadata` keyword is contextual. It is recognized only inside a target
+  declaration block, so ordinary identifiers and `let`/`param` names may still
+  be called `metadata`.
+- Duplicate target declarations within one product are rejected. Duplicate
+  metadata keys within one target declaration are also rejected.
+- The value expression must resolve, without a captured model, to `number`,
+  `string`, or `boolean`. `let`/`param`/constant references, ternaries, and
+  `table_cell(...)` expressions follow normal scalar expression rules.
+- An omitted settings block and an empty `{ }` block are equivalent. DSL version
+  `1.0` defines no supported metadata settings, so a non-empty settings block is
+  a validation error.
+- DSL validation does not know captured metadata types or capabilities. Exact
+  captured `valueType`, writability, observability, native owner/property
+  resolution, and value-kind compatibility are enforced during planning.
+- Target metadata is independent of ordinary parameter names. It does not
+  create an implicit `param` to property mutation.
 
 ## Expression Parser
 

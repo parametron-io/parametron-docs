@@ -178,7 +178,7 @@ error (`ErrInvalidReportMapping`, `ErrInvalidMetadataMapping`,
 | `prm.report.json` | `MapReport`: execution and optional failure record; status, timing, plan, jobs, steps, errors, retry/timeout/cancellation, deterministic linkage and outcome precedence | Execution/failure records and raw report |
 | `prm.metadata.json` | `MapMetadata`: provenance and input identities, plan and conservative runtime/toolchain enrichment | Provenance enrichment and available raw metadata |
 | Artifact store records / `prm.artifact-store-manifest.json` | `MapArtifactStoreRecords` / `MapArtifactStoreManifest`: one artifact record per artifact | All applicable records are emitted at deterministic identity-addressed paths |
-| Typed observed-state input | `MapObserved`: observation and optional reference records, including canonical target-state facts | Applicable observation record emitted; exact `prm.observed.json` bytes remain raw evidence |
+| Typed observed-state input | `MapObserved`: observation and optional reference records, including canonical target-state facts and metadata facts carrying semantic and native identity | Applicable observation record emitted; exact `prm.observed.json` bytes remain raw evidence |
 | Engine verification-result input | `MapVerification`: summary, categories, failure classes and evidence, including target-state category/failures and observed-evidence provenance when target-state verification is enabled | Applicable verification record emitted; distinct from raw `prm.verification.json` request bytes |
 | Generic CAD runtime failure outcome | `MapCADRuntimeFailure`: adapter-neutral semantic class/stage plus native code/message, linkage, retry context and provenance | May replace the report-derived failure for one uniquely correlated terminal failed CAD outcome |
 | `prm.reference-traversal.json` | `MapReferenceTraversal`: optional reference record | Bounded verified-candidate integration described below |
@@ -206,6 +206,27 @@ Verification category order is `components`, `metadata`,
 `parameters`, `references`, `target_state` under record normalization. This is
 normalized-record ordering, not the semantic verifier's first-failure evaluation
 order.
+
+### Metadata observation mapping
+
+`MapObserved` maps each observed metadata entry into the existing observation
+family with `kind = metadata`. It does not introduce a separate metadata record
+family or store.
+
+The normalized fact preserves both identity axes:
+
+- `subject.id` — the semantic metadata ID;
+- `subject.ownerId` — the exact native owner object selector;
+- `subject.name` and `key` — the exact native property key;
+- `value.kind` / `value.raw` — the typed observed value and kind;
+- `evidence` — the exact `raw/observed/prm.observed.json` reference and digest.
+
+The semantic metadata ID and the native owner/property identity remain distinct
+and correlated. Normalization orders facts deterministically, including native
+owner as a tie-breaker for otherwise equal metadata facts, so input order does
+not change normalized facts or observation identity. Raw `prm.observed.json`
+remains the authoritative evidence; the normalized record is not a second
+metadata store.
 
 ### Target-state observation and verification mapping
 
