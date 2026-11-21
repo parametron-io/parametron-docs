@@ -169,6 +169,37 @@ The [target-action contract](../reference/target-action-contract.md) is the
 complete specification for resolution, capability rules, lowering, routing,
 identity, and runtime handoff. Those details are not redefined here.
 
+## Authoring target metadata
+
+A metadata declaration attaches an exact native property value to a semantic
+target inside the same target block:
+
+```dsl
+target mounting_bracket:
+    action = suppress
+    metadata material = "S235JR"
+    metadata revision = 7 { }
+```
+
+The target name is resolved by exact, case-sensitive semantic Name. The metadata
+key is resolved only among captured metadata entries owned by that exact target;
+there is no cross-target, native-name, display-label, alias, or case fallback.
+The declaration does not identify a runtime object directly. Engine projects the
+exact captured native owner selector and property key.
+
+Metadata value expressions use normal scalar evaluation after overrides and
+binding resolution: `let`, `param`, constants, `table_cell`, typed ternaries, and
+literal values are supported. DSL validation proves that the expression is a
+well-formed scalar expression; it does not know the captured metadata type.
+Planning enforces the captured type and value kind and rejects mismatches,
+unsupported captured types, non-writable or non-observable metadata, invalid
+native owner/property identity, and duplicate or conflicting declarations.
+
+Omitted and empty metadata settings blocks are equivalent. Non-empty settings
+blocks are rejected under DSL version `1.0`. Target metadata does not revive the
+retired implicit `param` to property mutation: a string or boolean parameter that
+happens to share a metadata key produces no metadata mutation by itself.
+
 ## Planning boundary
 
 Validated expressions describe engineering intent. The

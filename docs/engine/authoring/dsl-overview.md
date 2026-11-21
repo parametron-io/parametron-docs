@@ -82,7 +82,9 @@ product <name> {
     let <name> = <expression>
     param <name>: <type> = <expression>
 
-    target <semantic-target>: action = <expression>
+    target <semantic-target>:
+        action = <expression>
+        metadata <key> = <expression>
 }
 ```
 
@@ -128,6 +130,33 @@ Syntax and authoring rules:
 - **Ordinary parameters**: Prefix-shaped parameter names (such as `suppress_Pad`) remain ordinary parameters; only `target <name>: action = <expr>` authors target actions. Action-valued `let` bindings and `param ...: action` parameter types are unsupported.
 
 For the authoritative specification of semantic target resolution, targetability capability gating, mutation lowering, destination routing, canonical ordering, and manifest projection, see the [Target-Action Contract](../reference/target-action-contract.md).
+
+## Target Metadata Declarations
+
+```dsl
+target <semantic-target>:
+    metadata <key> = <expression>
+```
+
+Target metadata declares an exact native property value for a named semantic
+target. The `<semantic-target>` is the same exact, case-sensitive semantic Name
+used by target actions; the `<key>` is the exact native property key owned by that
+target. Engine resolves the semantic target and metadata key against the captured
+model, validates writability, observability, captured value type, native owner
+identity, native property identity, and the native value-kind mapping.
+
+Supported resolved value kinds are `string`, `boolean`, `number`, and `integer`.
+The expected DSL scalar type follows the captured metadata `valueType`
+(`string`, `boolean`, or `number`); integer kind additionally requires an exact
+integral finite number. `metadata` is a contextual keyword inside target blocks,
+not a globally reserved identifier.
+
+Metadata settings blocks are parsed structurally but DSL version `1.0` defines no
+supported settings: omitted and empty blocks are equivalent, and a non-empty
+block is rejected. The captured metadata contract, native owner/property
+selection, runtime manifest projection, and verification behavior are specified
+in the [Target-Action Contract](../reference/target-action-contract.md) and the
+[CAD capture contract](cad-contract.md).
 
 ## Supported Parameter Types
 

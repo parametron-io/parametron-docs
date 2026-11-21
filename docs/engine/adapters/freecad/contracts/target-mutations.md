@@ -28,24 +28,46 @@ Layer 2 — Validation:               strict canonical schema 1.0 validation
 Layer 3 — Native execution:         suppression, visibility, deletion, validity
 Layer 4 — Lifecycle:                integrated into normal execute
 Layer 5 — Observation:              raw post-mutation target-state evidence
+Metadata:                           contract + validation consumed; native write
+                                    and observation owned by parametron-freecad#45
 ```
 
 ### Layer 1 — Canonical contract
 
 Canonical schema 1.0 defines optional `assemblyMutations` and `partMutations`
-sections with closed `suppression`, `visibility`, and `deletion` families.
-FreeCAD consumes these sections through the canonical manifest contract. See
-[manifest.md](manifest.md).
+sections with closed `metadata`, `suppression`, `visibility`, and `deletion`
+families. FreeCAD consumes these sections through the canonical manifest
+contract. See [manifest.md](manifest.md).
+
+`metadata[]` entries carry explicit authored metadata mutations:
+
+```json
+{"object": "Body01", "property": "material", "value": "S235JR", "valueKind": "string"}
+```
+
+Engine resolves semantic targets to exact native owners and property keys,
+validates captured writability, observability, type, value kind, and native
+identity, and projects only native fields. Semantic metadata IDs and display
+labels never enter the runtime manifest.
 
 ### Layer 2 — Strict manifest validation
 
 Normal execute strictly validates canonical schema `1.0` mutation manifests:
 exact version dispatch, closed mutation collections, strict entry shapes and
-JSON-boolean typing, duplicate-target rejection, within-scope and cross-scope
-conflict rejection, and deterministic diagnostic ordering. Unsupported schema
-versions are rejected at the runtime boundary.
+JSON-boolean typing, metadata value-kind compatibility, duplicate-target
+rejection, within-scope and cross-scope conflict rejection, and deterministic
+diagnostic ordering. Unsupported schema versions are rejected at the runtime
+boundary.
 
 ### Layer 3 — Native execution
+
+#### Metadata mutations (contract and validation consumed here)
+
+The canonical `metadata[]` family is part of the schema 1.0 contract and strict
+validation. Engine authors exact native owner/property/value/value-kind entries
+from semantic metadata intent. Native FreeCAD metadata writes and metadata
+observation are owned by `parametron-freecad#45`; Engine's controlled rehearsal
+uses scripted observed evidence for verification and record proofs.
 
 #### Suppression and unsuppression (integrated and tested)
 

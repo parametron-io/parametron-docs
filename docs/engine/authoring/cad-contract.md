@@ -107,9 +107,24 @@ Required fields: `id`, `ownerKind`, `ownerId`, `componentId`, `key`,
 
 `ownerKind` is `"component"`, `"feature"`, or `"relationship"`.
 `ownerId` must resolve, and `componentId` must agree with that owner.
-`key` is nonblank; `displayName` may be empty. The scalar type and optional
-`currentValue` rules match parameters. Metadata has no `unit` or `name`
-field. `identitySource` and `stabilityClass` are optional.
+`key` is nonblank and is the exact native property key used for authored
+metadata mutations and observation; `displayName` may be empty. The scalar type
+and optional `currentValue` rules match parameters. Metadata has no `unit` or
+`name` field. `identitySource` and `stabilityClass` are optional.
+
+Authored target metadata uses the semantic-map metadata mapping's
+`nativeValueKinds` table to map each captured `cadType` to a runtime value kind:
+`string`, `boolean`, `number`, or `integer`. The captured `valueType` must be
+compatible with that value kind (`string` with string, `boolean` with boolean,
+`number` with number or integer). Authored metadata must be both observable and
+writable.
+
+The runtime owner selector comes from the semantic target's captured
+`identitySource.nativeRef`. The runtime property key is the captured metadata
+`key`. Semantic metadata `id`, semantic Name, and DisplayName are not runtime
+addresses. The `key` and native owner selector are shared by the runtime manifest
+metadata mutation, the verification request's expected metadata, and observed
+metadata correlation.
 
 ## Identity and names
 

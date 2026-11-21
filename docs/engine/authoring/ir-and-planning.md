@@ -90,9 +90,20 @@ Component through captured `identitySource.nativeRef` to resolved runtime
 distinct. Executable actions require a usable native mapping before dispatch;
 `keep` contributes no native mutation. Part/Assembly destination routing remains
 independent of Object. Runtime observation and expected-state verification reuse
-the projected `(destination, object)` identity. The
+the projected `(destination, object)` identity. Target metadata mutations are
+ordered by native object, native property, and value kind before naming and
+hashing. The
 [target-action contract](../reference/target-action-contract.md) owns mapping
 validation and runtime ownership rules.
+
+Capture-backed target metadata planning resolves the exact semantic target and
+captured metadata key, validates captured type, value kind, writability,
+observability, and native owner/property identity, evaluates normal scalar
+expressions, and lowers native metadata mutations. The runtime manifest metadata
+family and the verification request's expected metadata reuse the same native
+owner/property identity while retaining the semantic metadata ID separately.
+Semantic target names, metadata IDs, and display labels do not reach the runtime
+manifest. The retired implicit parameter-to-property path is not used.
 
 ## Deterministic ordering and identity
 
