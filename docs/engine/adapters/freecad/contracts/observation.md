@@ -59,6 +59,10 @@ Authored metadata expectations appear under `expected.metadata[]`:
   `key: "working_copy_sha256"` and no `id`.
 - Metadata expectations never carry display labels, semantic target names, or
   mutation policy.
+- Metadata expectations refer to existing native properties. The runtime
+  requires exact `{ownerId, key}` native `PropertiesList` membership and
+  inspects the native property type; unsupported Quantity-family types are not
+  observable.
 
 The external runtime loads the request, validates `schemaVersion: "1.0"`
 unconditionally, validates the requested observation sections, then performs
@@ -187,8 +191,9 @@ expected metadata; the runtime does not evaluate those checks.
   is defined in the contract shape but is rejected when enabled and never
   populated by the runtime.
 - Output is canonical UTF-8 JSON with deterministic requested-item ordering,
-  canonical key ordering, and one trailing newline. Writing is atomic and
-  never leaves a partial file after a failed write.
+  canonical key ordering, and one trailing newline. Requested metadata
+  preserves request order, and the working-copy digest expectation remains
+  first. Writing is atomic and never leaves a partial file after a failed write.
 
 ### Target-state raw evidence contract extension
 
@@ -291,11 +296,23 @@ Both resolve exact requested items only; neither infers, enumerates, or guesses
 values that were not explicitly requested.
 
 Parameter observation resolves by the requested parameter identity and binding
-context. Metadata observation resolves the exact `{ownerId, key}` pair from
-`expected.metadata[]`, echoes the semantic `id`, and returns the typed native
-value. For the `working_copy_sha256` entry it returns the prepared-source digest.
-The runtime never synthesizes metadata that was not requested and never creates
-native metadata.
+context. It supports scalar boolean, integer, finite float, and string values;
+native `Quantity` values are not observed. Metadata observation resolves the
+exact `{ownerId, key}` pair from `expected.metadata[]`, echoes the semantic
+`id`, and returns the typed native value. For the `working_copy_sha256` entry it
+returns the prepared-source digest. The runtime never synthesizes metadata that
+was not requested and never creates native metadata.
+
+Exact-native metadata observation requires `{ownerId, key}` to be present in the
+native `PropertiesList` and inspects the native property type with the FreeCAD
+native type API. The supported native types are exactly `App::PropertyString`,
+`App::PropertyBool`, `App::PropertyFloat`, `App::PropertyFloatConstraint`,
+`App::PropertyInteger`, and `App::PropertyIntegerConstraint`.
+`App::PropertyLength`, `App::PropertyDistance`, `App::PropertyAngle`, and
+`App::PropertyQuantity` are unsupported for metadata observation. Observed
+output reports the actual native `value` and `valueKind`; an observed value kind
+that disagrees with the native type is a deterministic observation failure, not
+a coercion.
 
 ### Requested reference observation (not graph traversal)
 
@@ -357,9 +374,12 @@ Specifically:
 
 Request loading, source hashing, observation generation, serialization, and
 output-writing failures all use structured-failure stage `observation` (see
-[result-and-failure.md](result-and-failure.md)). The document is still closed
-through the normal lifecycle; no success `prm.result.json` is written after an
-observation failure; a failed `prm.result.json` is written when its path is safe.
+[result-and-failure.md](result-and-failure.md)). Metadata mutation failures are
+execution failures at stage `metadata`; they stop later mutation stages and
+prevent observation rather than being reported as observation failures. The
+document is still closed through the normal lifecycle; no success
+`prm.result.json` is written after an observation failure; a failed
+`prm.result.json` is written when its path is safe.
 
 ## Ownership
 

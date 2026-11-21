@@ -99,7 +99,10 @@ execute:
   kind. Numbers must be finite; `integer` requires an exact integral value.
   Duplicate `{object, property}` pairs within one section are rejected. Semantic
   metadata IDs, target names, display labels, and policy fields are not part of
-  this runtime entry.
+  this runtime entry. Validation checks the declared value kind and value shape
+  only; native property existence, native type compatibility, and writability
+  are checked during execution, and missing properties are never created. See
+  [target-mutations.md](target-mutations.md).
 - **Duplicate rejection** — the same object twice within one scope/family
   (e.g. `Pad` twice in `partMutations.suppression`) is rejected.
 - **Deletion conflicts** — suppression+deletion or visibility+deletion on the
@@ -111,8 +114,8 @@ execute:
 - **No string normalization** — object-name comparisons are exact string
   equality; no trimming, case folding, or CAD lookup.
 - **Deterministic diagnostics** — diagnostics sort assembly before part, then
-  suppression → visibility → deletion, preserving array order; input is never
-  mutated.
+  `metadata` → `suppression` → `visibility` → `deletion`, preserving array
+  order; input is never mutated.
 
 ## Ownership
 

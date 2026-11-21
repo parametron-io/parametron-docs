@@ -17,7 +17,9 @@ real-FreeCAD evidence:
 - occurrence evidence for the supported direct-member mechanism;
 - bounded engineering fact evidence;
 - pre-mutation baseline and post-persistence configured-result evidence against
-  the Engine integrity request.
+  the Engine integrity request;
+- mutation of existing native metadata properties and exact-native metadata
+  observation.
 
 Generic reference traversal, observation, target mutations, artifacts, and
 runtime result/failure keep their implemented FreeCAD contracts under
@@ -125,6 +127,14 @@ The implemented FreeCAD surfaces are deliberately bounded:
 - No resource manifest is passed to the adapter; declared coordinates come from
   the integrity request channel.
 - FreeCAD never reads, enforces, or rewrites `prm.project-lock.json`.
+- Metadata must already exist in the source document. FreeCAD does not create
+  missing metadata, property groups, aliases, or fallback properties, and
+  metadata authoring policy remains Engine-owned.
+- Read-only metadata properties fail at the metadata stage. Unsupported
+  Quantity-family native types (`App::PropertyLength`, `App::PropertyDistance`,
+  `App::PropertyAngle`, `App::PropertyQuantity`) fail deterministically.
+- Parameter observation supports scalar boolean, integer, finite float, and
+  string values; native `Quantity` values are not observed.
 - In-process `run_engine_invocation` behavior is unchanged: it does not read the
   environment integrity channel and provides no evidence output directory. The
   external `execute` entry point is the supported engineering-evidence
@@ -138,7 +148,8 @@ This handoff does not require or authorize:
 - BOM serialization or adapter-reported quantity authority;
 - physical mass, density, material inference, or a material database;
 - universal unit algebra or conversion;
-- metadata mutation;
+- metadata creation, property groups, templates, BOM semantics, metadata
+  deletion, or GUI authoring;
 - technical drawing or derived export semantics;
 - PDM storage or query models;
 - a second schema for any semantic surface already owned by Engine.

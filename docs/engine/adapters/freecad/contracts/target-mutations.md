@@ -1,9 +1,9 @@
 # Target Mutations
 
-"Target mutation" means suppressing/unsuppressing, changing visibility of, or
-deleting a named CAD feature or object, as opposed to the scalar property
-writes already handled by `parameterAssignments` (see
-[manifest.md](manifest.md)).
+"Target mutation" means mutating an existing native metadata property,
+suppressing/unsuppressing, changing visibility of, or deleting a named CAD
+feature or object, as opposed to the scalar property writes already handled by
+`parameterAssignments` (see [manifest.md](manifest.md)).
 
 ## Ownership split
 
@@ -25,11 +25,13 @@ implemented:
 ```text
 Layer 1 — Contract:                 canonical schema 1.0 mutation sections
 Layer 2 — Validation:               strict canonical schema 1.0 validation
-Layer 3 — Native execution:         suppression, visibility, deletion, validity
+Layer 3 — Native execution:         metadata, suppression, visibility,
+                                    deletion, validity
 Layer 4 — Lifecycle:                integrated into normal execute
-Layer 5 — Observation:              raw post-mutation target-state evidence
-Metadata:                           contract + validation consumed; native write
-                                    and observation owned by parametron-freecad#45
+Layer 5 — Observation:              raw post-mutation metadata and target-state
+                                    evidence
+Metadata:                           implemented for existing native properties;
+                                    no metadata creation
 ```
 
 ### Layer 1 — Canonical contract
@@ -61,13 +63,47 @@ boundary.
 
 ### Layer 3 — Native execution
 
-#### Metadata mutations (contract and validation consumed here)
+#### Metadata mutation (implemented and tested)
 
-The canonical `metadata[]` family is part of the schema 1.0 contract and strict
-validation. Engine authors exact native owner/property/value/value-kind entries
-from semantic metadata intent. Native FreeCAD metadata writes and metadata
-observation are owned by `parametron-freecad#45`; Engine's controlled rehearsal
-uses scripted observed evidence for verification and record proofs.
+FreeCAD mutates existing native metadata properties; it does not create them.
+Engine authors exact native owner/property/value/value-kind entries from
+semantic metadata intent and retains metadata authoring policy. The runtime
+resolves the exact `object` through `document.getObject(object)` and requires
+exact `PropertiesList` membership for `property`. It never creates a property,
+property group, alias, or fallback property, and it never redirects to a Label
+or another property.
+
+The supported `valueKind` / native property type mapping is exactly:
+
+| `valueKind` | Supported native property types |
+| --- | --- |
+| `string` | `App::PropertyString` |
+| `boolean` | `App::PropertyBool` |
+| `number` | `App::PropertyFloat`, `App::PropertyFloatConstraint` |
+| `integer` | `App::PropertyInteger`, `App::PropertyIntegerConstraint` |
+
+`App::PropertyLength`, `App::PropertyDistance`, `App::PropertyAngle`, and
+`App::PropertyQuantity` are not native metadata mutation types in this phase
+and fail deterministically.
+
+For each supplied entry, in supplied order, the consumer:
+
+1. resolves the exact native owner and requires the exact native property;
+2. requires a supported native type compatible with `valueKind`;
+3. validates and normalizes the value (`string`, strict boolean, finite
+   `float` for `number`, signed 64-bit integral `int` for `integer`);
+4. writes the normalized value directly to the native property; and
+5. reads the property back and verifies the stored native value kind and value.
+
+Missing object or property, unsupported native type, value-kind mismatch,
+invalid value, read-only property, other native write failure, and post-write
+mismatch each produce a typed deterministic metadata failure. Earlier
+successful writes remain applied and later entries are not applied. Read-only
+properties fail at the metadata stage rather than being skipped or coerced.
+
+No property groups, templates, BOM semantics, metadata deletion, or GUI
+authoring are added. FreeCAD does not own metadata authoring semantics or
+policy.
 
 #### Suppression and unsuppression (integrated and tested)
 
@@ -214,12 +250,14 @@ pass when later mutation state requires it.
 #### Production execute lifecycle
 
 Normal execute validates and consumes canonical schema 1.0 mutation sections
-directly. Mutation ordering is deterministic: Assembly suppression, visibility,
-deletion, then Part suppression, visibility, deletion; entries in each supplied
-collection preserve caller order. FreeCAD performs exact native `Name` lookup.
+directly. Mutation ordering is deterministic: parameter assignments first, then
+Assembly before Part; within each section `metadata`, `suppression`,
+`visibility`, and `deletion` run in that order. Entries in each supplied
+collection preserve caller order, and a metadata write therefore precedes a
+deletion of the same object. FreeCAD performs exact native `Name` lookup.
 
-Suppression/visibility mutation state receives the required final recompute and
-supported post-mutation Body validity inspection. Each deletion performs native
+Metadata, suppression, and visibility mutation state receives the required
+final recompute and supported post-mutation Body validity inspection. Each deletion performs native
 removal, exact absence verification, recompute, and supported surviving-Body
 validity inspection. A deletion followed by later mutation state receives the
 required final recompute/validity pass; when deletion is the final effective
@@ -319,7 +357,22 @@ success or observation, and document closure is checked. Repeated runs agree on
 native state, validity, result, observation, and output names; the source
 fixture remains unchanged.
 
-This production-execute proof establishes the supported native capability
+Permanent real-FreeCAD metadata tests exercise the same production execute
+boundary with the committed `tests/fixtures/metadata_mutation/` bundle. Engine
+authored `prm.export-manifest.json` and `prm.verification.json`; the bundle
+contains the metadata source fixture, a derived coexistence fixture that adds
+native metadata, a `VarSet` parameter, a suppression target, a visibility
+target, and a deletion marker. Real FreeCAD proves existing-property metadata
+writes across all four value kinds coexisting with parameter assignment,
+suppression, visibility, and conservative deletion; persistence and independent
+reopen; raw post-mutation metadata observation of actual native values and
+value kinds; and deterministic missing-property, unsupported-type, read-only,
+and value-kind-mismatch failures with no metadata creation. The opt-in Engine
+acceptance proof runs Engine's normal CLI against the same bundle and accepts
+the raw evidence through Engine-owned verification and normalized records; it
+is skipped unless `PARAMETRON_RUN_METADATA_ENGINE_ACCEPTANCE_PROOF=1` is set.
+
+The production-execute proof establishes the supported native capability
 boundary beyond the focused tests above. It does not establish arbitrary-object
 deletion, a broader deletion policy, byte-identical `.FCStd` serialization, or
 the later live Engine-to-real-FreeCAD rehearsal. FreeCAD's observed state is raw
@@ -328,7 +381,8 @@ normalization.
 
 ## Ownership
 
-FreeCAD owns exact native object lookup, native CAD mutation including
+FreeCAD owns exact native object lookup, mutation of existing native metadata
+properties without creating metadata, native CAD mutation including
 conservative deletion, native dependent safety at the deletion boundary,
 post-delete supported Body validity inspection, raw native dependency evidence,
 and native runtime failures at the boundary described above. FreeCAD also owns
