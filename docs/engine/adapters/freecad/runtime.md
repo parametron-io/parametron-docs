@@ -12,13 +12,15 @@ attempt isolation, request materialization, evidence intake validation, and
 verification — see [Execution Runtime](../../runtime/execution-runtime.md).
 
 Normal `execute` consumes canonical schema `1.0` mutation sections and invokes
-the native suppression, visibility, and conservative deletion consumers.
-Mutation work follows parameter assignment and precedes persistence and
-downstream evidence. Recompute and validity behavior depends on the mutation
-sequence: mutation-free execution retains its established recompute behavior;
-suppression/visibility state receives a required final recompute and supported
-Body validity inspection; deletion performs removal, exact absence verification,
-recompute, and surviving-Body validity checks for each deletion. Later mutation
+the native metadata, suppression, visibility, and conservative deletion
+consumers. Metadata mutation writes only existing native properties and never
+creates metadata. Mutation work follows parameter assignment and precedes
+persistence and downstream evidence. Recompute and validity behavior depends on
+the mutation sequence: mutation-free execution retains its established
+recompute behavior; metadata, suppression, or visibility state receives a
+required final recompute and supported Body validity inspection; deletion
+performs removal, exact absence verification, recompute, and surviving-Body
+validity checks for each deletion. Later mutation
 state after deletion receives its required final pass, while a final deletion
 does not receive a redundant pass. See [Target
 Mutations](contracts/target-mutations.md) for the detailed composition.
@@ -213,7 +215,9 @@ For one `execute` call, in order:
     integrity baseline digest when both are enabled).
 12. Open the FreeCAD document.
 13. Apply parameter assignments in manifest order.
-14. Apply target mutations in deterministic section/family order when present.
+14. Apply target mutations in deterministic section/family order when present
+    (`metadata` → `suppression` → `visibility` → `deletion`, Assembly before
+    Part).
 15. Perform applicable recompute and native validity checks (see
     [contracts/target-mutations.md](contracts/target-mutations.md)).
 16. Persist the configured native working document with `document.save()`.

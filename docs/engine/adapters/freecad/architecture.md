@@ -27,6 +27,7 @@ owns CAD-native execution and raw evidence capture:
 | Planning, manifest projection, working-copy preparation | Owns | — |
 | Runtime invocation, evidence intake, verification decisions | Owns | — |
 | Document lifecycle (open, mutate, recompute, save, close) | — | Owns |
+| Native metadata mutation of existing properties and metadata observation | — | Owns |
 | Conservative native deletion and its dependent-safety boundary | — | Owns |
 | Native shape validity inspection and raw dependency evidence | — | Owns |
 | Requested observation and reference discovery | — | Owns |
@@ -107,13 +108,14 @@ behind the same launcher entry point:
 - **Launcher/CLI**: process bootstrap, host resolution, structured argument
   forwarding, and deterministic exit/stdout/stderr propagation.
 - **Execution**: manifest loading and validation, parameter assignment,
-  canonical schema 1.0 target mutations, applicable recompute and native
-  validity, persistence, and STEP/CSV/PDF export. See
+  canonical schema 1.0 target mutations including mutation of existing native
+  metadata properties, applicable recompute and native validity, persistence,
+  and STEP/CSV/PDF export. See
   [contracts/manifest.md](contracts/manifest.md) and
   [contracts/artifacts.md](contracts/artifacts.md).
-- **Observation**: requested parameter, metadata, and reference-existence
-  reads from the already-mutated, recomputed, and persisted document. See
-  [contracts/observation.md](contracts/observation.md).
+- **Observation**: requested parameter, exact-native metadata, and
+  reference-existence reads from the already-mutated, recomputed, and persisted
+  document. See [contracts/observation.md](contracts/observation.md).
 - **Reference traversal**: relationship-driven discovery of internal object
   references and Engine-mapped external targets, returned as raw dependency-
   graph evidence. See
@@ -130,11 +132,13 @@ behind the same launcher entry point:
   [contracts/integrity-evidence.md](contracts/integrity-evidence.md).
 
 Engine's canonical FreeCAD runtime manifest contract is schema `1.0`, with
-optional `assemblyMutations` and `partMutations` sections for suppression,
-visibility, and conservative deletion. Normal FreeCAD execute validates and
-consumes these sections directly. Native mutation and required validity work
-are integrated into the normal execution lifecycle, and requested target-state
-observation reads the live post-mutation document and returns raw evidence.
+optional `assemblyMutations` and `partMutations` sections for mutation of
+existing native metadata properties, suppression, visibility, and conservative
+deletion. Normal FreeCAD execute validates and consumes these sections directly.
+Native metadata mutation never creates properties. Native mutation and required
+validity work are integrated into the normal execution lifecycle, and requested
+metadata and target-state observation read the live post-mutation document and
+return raw evidence.
 Engine constructs requests and expected state, compares evidence, verifies
 outcomes, and normalizes records.
 See [contracts/target-mutations.md](contracts/target-mutations.md) for the exact

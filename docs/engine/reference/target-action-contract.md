@@ -335,8 +335,8 @@ Verification and observed evidence:
   metadata store.
 
 No metadata creation is defined. Native FreeCAD metadata mutation and
-observation are owned by the FreeCAD adapter (`parametron-freecad#45`); this
-contract defines the Engine-authored request and evidence shapes.
+observation are implemented by the FreeCAD adapter; this contract defines the
+Engine-authored request and evidence shapes.
 
 ## Canonical ordering and identity
 
