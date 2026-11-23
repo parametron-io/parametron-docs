@@ -58,7 +58,8 @@ Adapter documentation belongs to the Engine adapter domain. See the
 between planning and CAD-native execution. FreeCAD is the currently implemented
 Engine CAD adapter. The [FreeCAD handoff](adapters/freecad/handoff.md) states the
 remaining native implementation responsibilities for the observation and
-provenance phase.
+provenance phase, and [FreeCAD Capture Authoring](adapters/freecad/authoring-capture.md)
+documents the implemented capture workflow and its v0 limitations.
 
 Centralizing engineering documentation does not transfer implementation
 ownership. Implementation repositories remain authoritative for their source
