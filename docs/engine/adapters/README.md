@@ -78,7 +78,8 @@ capability areas, and [FreeCAD Runtime](freecad/runtime.md) for its headless
 invocation and execution lifecycle. Manifest, observation, reference-
 traversal, occurrence, bounded-fact, artifact, result/failure,
 target-mutation, integrity request/evidence, and in-process invocation contracts
-are documented under [freecad/contracts/](freecad/contracts/). The
-[FreeCAD handoff](freecad/handoff.md) states the remaining native
+are documented under [freecad/contracts/](freecad/contracts/). FreeCAD capture
+authoring is documented in [FreeCAD Capture Authoring](freecad/authoring-capture.md).
+The [FreeCAD handoff](freecad/handoff.md) states the remaining native
 implementation responsibilities and the Engine-owned semantics the adapter must
 not duplicate.

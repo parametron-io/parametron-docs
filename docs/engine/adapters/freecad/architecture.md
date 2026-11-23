@@ -102,8 +102,9 @@ working copy is. Failed runs leave the source document unchanged.
 
 ## Capability Areas
 
-FreeCAD's implementation is organized around four conceptual capability areas
-behind the same launcher entry point:
+FreeCAD's implementation is organized around these conceptual capability
+areas. Runtime capabilities use the installable launcher entry point; capture
+authoring is a separate GUI-free path.
 
 - **Launcher/CLI**: process bootstrap, host resolution, structured argument
   forwarding, and deterministic exit/stdout/stderr propagation.
@@ -130,6 +131,11 @@ behind the same launcher entry point:
   configured-result identity against the Engine integrity request. See
   [contracts/integrity-request.md](contracts/integrity-request.md) and
   [contracts/integrity-evidence.md](contracts/integrity-evidence.md).
+- **Capture authoring**: GUI-free project-context loading, read-only native
+  discovery, semantic-name and stable-ID policy, `prm.cad.json` generation,
+  versioned semantic-map generation/merge, drift detection, deterministic
+  previews, and atomic project-root writes, plus a four-tab FreeCAD workbench
+  frontend. See [authoring-capture.md](authoring-capture.md).
 
 Engine's canonical FreeCAD runtime manifest contract is schema `1.0`, with
 optional `assemblyMutations` and `partMutations` sections for mutation of
@@ -204,7 +210,13 @@ publishes a resource manifest of its own. See
 
 ## GUI and Capture Boundary
 
-GUI/capture functionality is not implemented in the current FreeCAD adapter.
+Capture authoring is implemented as a GUI-free core plus an optional FreeCAD
+workbench frontend; see [authoring-capture.md](authoring-capture.md). The
+workbench provides the four-tab capture panel, but it does not trigger Engine
+execution, capture technical drawings or relationships, process external linked
+documents, or bootstrap a project. Capture reads native state and writes only
+project-root capture files. Engine retains semantic validation, planning,
+verification, and normalized-record ownership.
 
 ## C++ Boundary
 
@@ -217,6 +229,8 @@ the current FreeCAD adapter.
   ownership rules.
 - [Execution Runtime](../../runtime/execution-runtime.md) — Engine's CAD
   runtime processing pipeline, attempt isolation, and verification.
+- [FreeCAD Capture Authoring](authoring-capture.md) — implemented capture
+  workflow, files, rules, and v0 limitations.
 - [Record Contracts](../../reference/record-contracts.md) — normalized record
   families and packaging.
 - [Target-Action Contract](../../reference/target-action-contract.md) —

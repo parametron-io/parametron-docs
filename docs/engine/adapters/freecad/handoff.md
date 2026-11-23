@@ -149,7 +149,8 @@ This handoff does not require or authorize:
 - physical mass, density, material inference, or a material database;
 - universal unit algebra or conversion;
 - metadata creation, property groups, templates, BOM semantics, metadata
-  deletion, or GUI authoring;
+  deletion, or a metadata-authoring GUI beyond selecting existing supported
+  properties;
 - technical drawing or derived export semantics;
 - PDM storage or query models;
 - a second schema for any semantic surface already owned by Engine.

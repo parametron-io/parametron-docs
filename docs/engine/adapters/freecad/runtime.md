@@ -37,6 +37,16 @@ Engine alone compares that evidence with expected state and normalizes records.
 See [Observation Contract](contracts/observation.md) for request and evidence
 shapes.
 
+## Capture authoring
+
+Capture authoring is a separate GUI-free path and does not use the `execute`
+runtime. It reads an already-open, saved project source, verifies it is the
+declared saved source, discovers top-down capture candidates, and writes
+`prm.cad.json` and `prm.semantic-map.json` to the directory containing
+`prm.project.json` through atomic, explicitly confirmed writes. It does not run
+Engine, mutate the source document, or create a project. See
+[authoring-capture.md](authoring-capture.md).
+
 ## Invocation
 
 For the separate in-process `run_engine_invocation` callable, its request
