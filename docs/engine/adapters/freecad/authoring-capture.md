@@ -19,7 +19,8 @@ capture files.
 | Semantic-map schema, capture schema, and their interpretation | Owns | — |
 | Project planning, verification decisions, normalized records | Owns | — |
 | `prm.project.json` selection semantics and project resource identity | Owns | Reads |
-| Native discovery of components, features, groups, parameters, metadata | — | Owns |
+| Native discovery of components, features, groups, parameters, metadata, and technical drawing pages | — | Owns |
+| Drawing grouping, sheet order, drawing component linkage, and drawing resource topology | — | Owns |
 | Semantic-name and stable-ID policy for captured entities | — | Owns |
 | `prm.cad.json` generation, canonical ordering, and writing | — | Owns |
 | `prm.semantic-map.json` generation, merge, and writing | — | Owns |
@@ -74,17 +75,29 @@ candidates without semantic names or stable IDs:
 - parameters from supported native scalar properties on captured groups;
 - metadata from existing properties grouped under `Metadata` with a supported
   native type;
+- technical drawing pages from active-document `TechDraw::DrawPage` objects,
+  with exact native page selectors, native `cadType`, descriptive page labels,
+  and a one-based page-order signal;
+- drawing targets: captured components and features resolved from supported
+  `Source` and `XSource` evidence on page views, traversing
+  `TechDraw::DrawProjGroup` and `TechDraw::DrawViewClip` containers;
 - captured targetability (suppress, unsuppress, hide, unhide, delete) from
   native property evidence, and conservative deletion dependency evidence from
   native `InList`/`OutList`.
 
+Only pages owned by the active document become drawing candidates. A page
+reached through a link from a separate `.FCStd` resource is diagnosed instead
+of captured, because active-document capture cannot prove its contents.
+
 Links, assembly members that are not direct supported objects, joints, object
-groups, spreadsheets, technical drawings, and unknown native types produce
-diagnostics. They are not silently represented as captured entities.
+groups, spreadsheets, unsupported TechDraw view subtypes, orphan TechDraw
+objects, linked or separate-document drawing resources, unresolvable drawing
+sources, and unknown native types produce diagnostics. They are not silently
+represented as captured entities.
 
-## Four-Tab Capture Model
+## Top-Down Capture Model
 
-The FreeCAD workbench presents capture as four top-down tabs. The same state
+The FreeCAD workbench presents capture as five top-down tabs. The same state
 model is available GUI-free for headless callers and tests.
 
 | Tab | Captured content |
@@ -93,9 +106,11 @@ model is available GUI-free for headless callers and tests.
 | Features | Features owned by captured components; captured target actions; authorized-action narrowing; capability and delete-dependency evidence. |
 | Parameters | Supported native properties on captured owners; explicit semantic names; semantic type and unit selection; observable/writable state. |
 | Metadata | Existing supported native properties on captured owners; supported-type filtering; read-only and unsupported states. Metadata is never created. |
+| Drawings | Discovered technical drawing pages grouped into user-authored logical drawings; sheet inclusion, grouping, and order; explicit semantic names; drawing and sheet ID previews; captured-target diagnostics. |
 
-The Features, Parameters, and Metadata tabs remain unavailable until a part or
-assembly is captured and named. Disabled rows carry a user-facing reason.
+The Features, Parameters, Metadata, and Drawings tabs remain unavailable until a
+part or assembly is captured and named. Disabled rows carry a user-facing
+reason.
 
 ## Semantic Names
 
@@ -108,8 +123,10 @@ Semantic names are user-authored and validated as DSL identifiers:
 
 Capture never derives a semantic name from a native object name, label, CAD
 type, geometry, or native reference. Names are unique across captured
-components and features, and separately unique across captured parameters. A
-collision is a hard failure; no automatic suffix is added.
+components and features, and separately unique across captured parameters.
+Drawing names are unique across captured drawings, and sheet names are unique
+within their drawing; the same sheet name may appear in different drawings. A
+collision in any namespace is a hard failure; no automatic suffix is added.
 
 ## Stable Identifiers
 
@@ -124,11 +141,72 @@ structural scope:
 | Component/feature parameter | `par.<ownerSlug>.<nameSlug>` |
 | Group-owned parameter | `par.<ownerSlug>.<groupSlug>.<nameSlug>` |
 | Metadata | `meta.<ownerSlug>.<keySlug>` |
+| Drawing | `drw.<nameSlug>` |
+| Drawing sheet | `sht.<drawingSlug>.<nameSlug>` |
+
+For a drawing sheet, `<drawingSlug>` is the final dot-delimited segment of the
+owning drawing ID, so `drw.manufacturing` gives
+`sht.manufacturing.<nameSlug>`.
 
 An explicit ID override is accepted instead of a generated ID. It must be exact
 and unique, but it need not follow the generation convention. Generated or
 explicit ID collisions are hard failures. IDs are never derived from native
 references.
+
+## Technical Drawings
+
+Technical drawings are captured as first-class `entities.drawings` entries. A
+drawing is a logical grouping, not a native object:
+
+- each drawing has an explicit semantic name, an optional display name, and a
+  stable ID;
+- each drawing carries an ordered `sheets` array, where one sheet represents
+  one captured native page with `name`, `displayName`, a positive unique
+  `order`, the native `cadType`, and a required `identitySource`;
+- `componentIds` is the deterministic union of captured components referenced
+  by the drawing's sheets. A feature view target resolves to its owning
+  captured component.
+
+Sheets bind to native evidence through `identitySource.kind: "native_ref"` and a
+nonblank `identitySource.nativeRef` that holds the exact native page selector.
+FreeCAD does not emit a drawing-level `identitySource`, and it does not emit
+drawing or sheet `annotations`, `targetability`, or `stabilityClass`.
+
+The Engine contract models storage topology with
+`resource.topology: "embedded" | "separate"`. `"embedded"` forbids a non-empty
+`resource.path`; `"separate"` requires a canonical project-relative `path`.
+
+FreeCAD v1.0 emits embedded drawings only:
+
+- every discovered page candidate is an active-document page, so a captured
+  drawing always declares `resource: {"topology": "embedded"}`;
+- selecting a page whose topology is not `embedded` is rejected;
+- pages linked from a separate `.FCStd` resource remain discovery diagnostics
+  and are never converted into candidates or invented into `prm.cad.json`.
+
+The native page label is descriptive only. It becomes the default sheet
+`displayName` and is never used as identity, a lookup key, or a `nativeRef`
+substitute. The native page-order signal only defaults the sheet `order`; the
+captured `order` is user-authored and must stay positive and unique within its
+drawing.
+
+Capture enforces these drawing invariants:
+
+- a discovered page is selected by at most one drawing;
+- every drawing selects at least one sheet and references at least one captured
+  component;
+- every referenced component target must be captured, and a feature target
+  requires its owning component to be captured;
+- unknown or stale page selectors, duplicate sheet selection, invalid or
+  duplicate order, and name or ID collisions fail deterministically;
+- canonical output sorts drawings by ID, `componentIds` lexicographically, and
+  sheets by `order` then `id`.
+
+Zero drawings are emitted as `"drawings": []`; the registry is required and is
+never omitted.
+
+Drawings remain capture and semantic relationship state. They are not DSL
+targets, planner inputs, execution targets, or reference-graph edges.
 
 ## Top-Down Scope and Uncaptured Objects
 
@@ -138,6 +216,9 @@ Capture is top-down and owner-closed:
 - a captured child component requires its captured parent;
 - a captured feature, parameter group, parameter, or metadata entry requires
   its captured owner;
+- a captured technical drawing requires every referenced component target to be
+  captured, and a feature view target requires its owning component to be
+  captured;
 - selecting an entity whose owner is not captured fails deterministically.
 
 Uncaptured native objects are simply absent from the capture. Capture does not
@@ -193,12 +274,21 @@ diff.
 
 Capture fails closed on drift against retained capture:
 
-- a retained native selector that no longer resolves;
-- a changed native type;
-- a changed ownership or hierarchy dependency;
-- a semantic-name change that alters a generated stable ID.
+- a retained native selector, including a drawing sheet page selector, that no
+  longer resolves;
+- a changed native type, including a changed page `cadType`;
+- a changed ownership or hierarchy dependency, including changed sheet grouping
+  or changed drawing component linkage;
+- a semantic-name change that alters a generated drawing or sheet stable ID.
 
-Drift requires rebind or review; it is never repaired silently.
+Drift requires rebind or review; it is never repaired silently. An intentional
+sheet re-order within the same drawing is an authored decision rather than
+drift: it appears as a structural diff in the preview and requires an explicit
+confirmation before writing. Moving a selected page to a different drawing is
+not an authored re-order: it changes the retained sheet's drawing-scoped
+dependency and, when the sheet ID is drawing-derived, its generated stable ID,
+so capture reports drift and fails closed instead of offering a confirming
+merge.
 
 `prm.cad.json` and `prm.semantic-map.json` are written to the project root.
 Each file is written atomically to a temporary file in the destination
@@ -214,19 +304,25 @@ ordering, deterministic IDs, and byte-stable repeated output.
 
 An opt-in real-FreeCAD proof runs the production capture path on temporary
 copies of representative projects and feeds the generated `prm.project.json`,
-`prm.cad.json`, and `prm.semantic-map.json` to the Engine CLI. Engine accepts
-the result through normal project-mode validation without structural repair,
-and repeated capture is byte-identical. Repository-local commands, fixture
-digests, and the accepted Engine outcome are recorded in
+`prm.cad.json`, and `prm.semantic-map.json` to the Engine CLI. The covered
+capture shapes include zero drawings, a single drawing with one sheet, a single
+drawing with multiple sheets, and multiple drawings, all produced from real
+`TechDraw::DrawPage` fixtures. Engine accepts every result through normal
+project-mode validation (`Validation succeeded`) without manual structural
+repair, and repeated capture produces byte-identical `prm.cad.json` and
+`prm.semantic-map.json` files. The proof also verifies that the source `.FCStd`
+document and `prm.project.json` are unchanged, and it operates on temporary
+copies so committed fixtures are never modified. Repository-local commands,
+fixture digests, and the accepted Engine outcome are recorded in
 `parametron-freecad`'s `docs/test-matrix.md`.
 
 ## Current v0 Limitations
 
 Not implemented:
 
-- technical drawings and drawing capture;
+- drawing layout automation and PDF/SVG/PNG drawing export;
+- separate `.FCStd` drawing resources and external linked documents;
 - relationships/mates;
-- external linked documents;
 - a GUI execution trigger for Engine runs;
 - project bootstrap or `prm.project.json` creation/modification;
 - the `parametron/` folder layout;

@@ -151,7 +151,7 @@ This handoff does not require or authorize:
 - metadata creation, property groups, templates, BOM semantics, metadata
   deletion, or a metadata-authoring GUI beyond selecting existing supported
   properties;
-- technical drawing or derived export semantics;
+- runtime technical drawing or derived export semantics;
 - PDM storage or query models;
 - a second schema for any semantic surface already owned by Engine.
 

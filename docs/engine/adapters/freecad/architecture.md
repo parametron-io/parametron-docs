@@ -132,10 +132,11 @@ authoring is a separate GUI-free path.
   [contracts/integrity-request.md](contracts/integrity-request.md) and
   [contracts/integrity-evidence.md](contracts/integrity-evidence.md).
 - **Capture authoring**: GUI-free project-context loading, read-only native
-  discovery, semantic-name and stable-ID policy, `prm.cad.json` generation,
-  versioned semantic-map generation/merge, drift detection, deterministic
-  previews, and atomic project-root writes, plus a four-tab FreeCAD workbench
-  frontend. See [authoring-capture.md](authoring-capture.md).
+  discovery including technical drawing pages, semantic-name and stable-ID
+  policy, `prm.cad.json` generation, versioned semantic-map generation/merge,
+  drift detection, deterministic previews, and atomic project-root writes, plus
+  a five-tab FreeCAD workbench frontend. See
+  [authoring-capture.md](authoring-capture.md).
 
 Engine's canonical FreeCAD runtime manifest contract is schema `1.0`, with
 optional `assemblyMutations` and `partMutations` sections for mutation of
@@ -212,11 +213,12 @@ publishes a resource manifest of its own. See
 
 Capture authoring is implemented as a GUI-free core plus an optional FreeCAD
 workbench frontend; see [authoring-capture.md](authoring-capture.md). The
-workbench provides the four-tab capture panel, but it does not trigger Engine
-execution, capture technical drawings or relationships, process external linked
-documents, or bootstrap a project. Capture reads native state and writes only
-project-root capture files. Engine retains semantic validation, planning,
-verification, and normalized-record ownership.
+workbench provides the five-tab capture panel, but it does not trigger Engine
+execution, capture relationships or separate `.FCStd` drawing resources,
+automate drawing layout or drawing export, process external linked documents,
+or bootstrap a project. Capture reads native state and writes only project-root
+capture files. Engine retains semantic validation, planning, verification, and
+normalized-record ownership.
 
 ## C++ Boundary
 
