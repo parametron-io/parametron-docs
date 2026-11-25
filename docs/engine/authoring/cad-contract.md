@@ -23,7 +23,7 @@ Unknown fields are rejected at every schema object level.
 | `sourceDocument` | Object with required nonempty strings `logicalId`, `path`, and `fingerprint`. |
 | `rootProduct` | Object with `id` referring to a captured component. |
 | `annotations` | Required `description`, `comment`, and `purpose` strings; empty strings are valid. |
-| `entities` | Six required entity arrays described below. |
+| `entities` | Seven required entity arrays described below. |
 | `structure` | Required `rootComponentId` and `nodes` describing component hierarchy. |
 
 Adapter and CAD-system names must be nonblank. Their versions may be empty, but
@@ -32,17 +32,21 @@ descriptive input strings; the schema validator does not impose a checksum
 algorithm or verify the source file's bytes.
 
 `entities` requires `components`, `features`, `relationships`,
-`parameterGroups`, `parameters`, and `metadata` arrays. Empty arrays are
-accepted structurally, but a valid complete document needs an assembly component
-for the root. `structure.nodes` must be nonempty. Required arrays cannot be
-omitted or replaced with `null`.
+`parameterGroups`, `parameters`, `metadata`, and `drawings` arrays. Empty arrays
+are accepted structurally, but a valid complete document needs an assembly
+component for the root. `structure.nodes` must be nonempty. Required arrays
+cannot be omitted or replaced with `null`; zero drawings serialize as
+`"drawings": []`.
 
 ## Entity fields
 
 All fields listed as required must be present, including booleans whose value
-is false. Every entity has nonblank `id` and `cadType` strings and a required
-`annotations` object with the same three string fields as root annotations.
-IDs are unique across all six registries, not just within each array.
+is false. Every entity has a nonblank `id`. The component, feature, relationship,
+parameter-group, parameter, and metadata registries also have a nonblank
+`cadType` and a required `annotations` object with the same three string fields
+as root annotations; drawings and drawing sheets do not. IDs are unique across
+all seven registries and across every nested drawing sheet ID, not just within
+each array.
 
 ### Components
 
@@ -125,6 +129,64 @@ The runtime owner selector comes from the semantic target's captured
 addresses. The `key` and native owner selector are shared by the runtime manifest
 metadata mutation, the verification request's expected metadata, and observed
 metadata correlation.
+
+### Drawings
+
+Required fields: `id`, `name`, `displayName`, `componentIds`, `resource`, and
+`sheets`. Drawing-level `identitySource` is optional.
+
+A drawing is a CAD-neutral logical relationship, not a native object. It has no
+`cadType`, `targetability`, `stabilityClass`, or `annotations` field. Capture may
+declare zero, one, or multiple drawings per part/assembly; zero drawings
+serialize as `"drawings": []`.
+
+- `name` is nonblank and unique across drawings; `displayName` may be empty.
+- `componentIds` is a nonempty array of unique nonblank captured component IDs.
+  Every ID must resolve to a component. Features are not accepted here; capture
+  resolves a feature target to its owning captured component. The array is the
+  deterministic union of component associations across the drawing's sheets.
+- `sheets` is nonempty and carries the native page bindings.
+
+Each sheet requires `id`, `name`, `displayName`, `order`, `cadType`, and
+`identitySource`:
+
+- `name` is nonblank and unique within its drawing; `displayName` may be empty.
+  The same sheet name may appear in different drawings.
+- `order` is a positive integer and is unique within its drawing.
+- `cadType` is the captured native page type, for example
+  `TechDraw::DrawPage`.
+- `identitySource.kind` must be exactly `"native_ref"` and `nativeRef` must be
+  nonblank. This is the required capture-backed page selector; there is no ID,
+  Name, or DisplayName fallback.
+
+Sheet IDs participate in global ID uniqueness across all seven registries and
+across drawings. v1.0 does not require cross-drawing `nativeRef` uniqueness.
+
+`resource` is CAD-neutral and describes where the drawing is stored:
+
+| `topology` | Meaning |
+| --- | --- |
+| `"embedded"` | The drawing lives in the captured document. `path` must be absent or empty and is omitted from canonical JSON. |
+| `"separate"` | The drawing lives in a separate project-relative document. `path` is required and must be a canonical project-relative coordinate. |
+
+`resource.path` is project-root-relative. It is not a declared resource in
+v1.0 and does not enter the declared-resource inventory, reference records, or
+integrity records. Absolute paths, backslashes, NUL, `.`, `..`, `../` prefixes,
+Windows drive forms, and non-`path.Clean`-stable coordinates are rejected.
+FreeCAD v1.0 capture emits `embedded` drawings because it promotes
+active-document pages only; the `separate` contract is validated by Engine
+fixtures.
+
+Drawing-level `identitySource` is optional for CAD systems that have a native
+drawing object. When present, `kind` is required and nonblank; when `kind` is
+`"native_ref"`, `nativeRef` is required and nonblank. It is not a substitute
+for the required sheet-level binding.
+
+Drawings are semantic capture relationships only. They are not DSL action
+targets, planner inputs, export semantics, or `ReferenceKindDrawing` reference
+edges. Engine adds no `captureToSemantic.drawings` mapping and no drawing
+operation-capability target in v1.0. Drawing layout automation and export
+behavior remain deferred to `parametron-io/parametron-strategy#7` and `#8`.
 
 ## Identity and names
 
@@ -211,11 +273,12 @@ missing required fields, invalid scalar types, duplicate IDs, and dangling
 references are rejected. The validator reports problems rather than repairing
 the capture.
 
-`cad.CanonicalJSON` validates and copies the contract, sorts all six entity
-registries by ID, sorts structure nodes by component ID, and sorts each child
-list lexicographically. It preserves relationship endpoint order and does not
-modify the input contract. Repeated equivalent serialization is covered by
-canonicalization tests.
+`cad.CanonicalJSON` validates and copies the contract, sorts all seven entity
+registries by ID, sorts each drawing's `componentIds` lexicographically and its
+`sheets` by `order` then `id`, sorts structure nodes by component ID, and sorts
+each child list lexicographically. It preserves relationship endpoint order and
+does not modify the input contract. Repeated equivalent serialization is covered
+by canonicalization tests.
 
 For project ingestion and model resource resolution, see
 [project mapping](project-mapping.md). Authoring-time value semantics belong to
