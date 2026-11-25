@@ -282,9 +282,13 @@ Capture fails closed on drift against retained capture:
 - a semantic-name change that alters a generated drawing or sheet stable ID.
 
 Drift requires rebind or review; it is never repaired silently. An intentional
-sheet regroup or re-order is an authored decision rather than drift: it appears
-as a structural diff in the preview and requires an explicit confirmation
-before writing.
+sheet re-order within the same drawing is an authored decision rather than
+drift: it appears as a structural diff in the preview and requires an explicit
+confirmation before writing. Moving a selected page to a different drawing is
+not an authored re-order: it changes the retained sheet's drawing-scoped
+dependency and, when the sheet ID is drawing-derived, its generated stable ID,
+so capture reports drift and fails closed instead of offering a confirming
+merge.
 
 `prm.cad.json` and `prm.semantic-map.json` are written to the project root.
 Each file is written atomically to a temporary file in the destination
