@@ -377,6 +377,11 @@ native relationships when accepted evidence proves the property distinction.
 | `document_internal_reference` | `component` |
 | `external_document_reference`, `external_file_reference` | `external` |
 
+No native traversal kind maps to `drawing`. `ReferenceKindDrawing` remains
+generic record vocabulary and is not derived from traversal evidence. Captured
+technical drawings in `prm.cad.json` and `semantic.Model` are separate
+capture/semantic relationships, not reference-record edges.
+
 `ReferenceEdge.Role` remains empty; property names do not imply domain roles.
 Internal relationships remain within one declared resource. External relationships
 cannot target the source resource; external-file relationships require an
